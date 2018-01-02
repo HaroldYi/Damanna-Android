@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TrevelMeetUp</string>
+    <string name="facebook_application_id" translatable="false">420547788359849</string>
+    <string name="fb_login_protocol_scheme" translatable="false">420547788359849</string>
+</resources>
