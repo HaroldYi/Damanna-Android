@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "629394807535",
+    "firebase_url": "https://mi-test-e22e5.firebaseio.com",
+    "project_id": "mi-test-e22e5",
+    "storage_bucket": "mi-test-e22e5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629394807535:android:20531f889565e8d6",
+        "android_client_info": {
+          "package_name": "devlight.io.navigationtabbar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPancg8F6b8oLuyt8pAJoZmwFAMY6G5HM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629394807535:android:1c218b44f8f35e95",
+        "android_client_info": {
+          "package_name": "com.hello.TrevelMeetUp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPancg8F6b8oLuyt8pAJoZmwFAMY6G5HM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
