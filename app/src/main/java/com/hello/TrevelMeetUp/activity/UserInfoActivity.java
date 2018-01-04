@@ -25,7 +25,7 @@ import devlight.io.library.ntb.NavigationTabBar;
  * Created by lji5317 on 13/12/2017.
  */
 
-public class UserInfoActivity extends AppCompatActivity {
+public class UserInfoActivity extends BaseActivity {
 
     private ExpandableHeightGridView gridView;
 

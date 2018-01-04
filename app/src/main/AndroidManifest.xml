@@ -27,6 +27,8 @@
 
         <activity android:name=".activity.UserInfoActivity" android:screenOrientation="portrait" />
 
+        <activity android:name=".activity.SelectCountryActivity" android:screenOrientation="portrait" />
+
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_application_id"/>
         <activity android:name=".activity.MainActivity" android:screenOrientation="portrait" >
             <intent-filter>

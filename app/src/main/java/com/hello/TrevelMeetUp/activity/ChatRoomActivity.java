@@ -33,7 +33,7 @@ import co.intentservice.chatui.models.ChatMessage;
  * Created by lji5317 on 11/12/2017.
  */
 
-public class ChatRoomActivity extends AppCompatActivity {
+public class ChatRoomActivity extends BaseActivity {
 
     private GroupChannel groupChannel;
     private FirebaseAuth mAuth;

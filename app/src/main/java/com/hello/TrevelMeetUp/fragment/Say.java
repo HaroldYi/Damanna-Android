@@ -245,7 +245,6 @@ public class Say extends BaseFragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-
     }
 
     // LocationListener 정의

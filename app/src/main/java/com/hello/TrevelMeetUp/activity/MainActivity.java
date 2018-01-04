@@ -1,6 +1,7 @@
 package com.hello.TrevelMeetUp.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.fragment.Chat;
 import com.hello.TrevelMeetUp.fragment.Profile;
 import com.hello.TrevelMeetUp.fragment.Say;
+import com.tsengvn.typekit.TypekitContextWrapper;
 
 import java.util.ArrayList;
 
@@ -24,6 +26,7 @@ import devlight.io.library.ntb.NavigationTabBar;
 public class MainActivity extends FragmentActivity {
 
     private FirebaseAuth mAuth;
+    private FirebaseUser fUser;
     private boolean fromFragmentYn = false;
 
     private long backKeyPressedTime = 0;
@@ -38,12 +41,29 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_horizontal_ntb);
 
         this.mAuth = FirebaseAuth.getInstance();
+        this.fUser = this.mAuth.getCurrentUser();
+
         this.activity = this;
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        initUI();
+        if (this.fUser != null) {
+            this.initUI();
+        } else {
+            startActivity(new Intent(MainActivity.this, SignActivity.class));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        /*this.initUI();*/
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
     }
 
     // 메인프레그먼트에서 호출되는 메소드
@@ -117,7 +137,7 @@ public class MainActivity extends FragmentActivity {
         this.navigationTabBar.setModelIndex(0, true);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.contentContainer, new Say(), "say").commit();
+        transaction.replace(R.id.contentContainer, new Say(), "say").commit();
 
         this.navigationTabBar.setOnTabBarSelectedIndexListener(new NavigationTabBar.OnTabBarSelectedIndexListener() {
             @Override
@@ -125,10 +145,10 @@ public class MainActivity extends FragmentActivity {
 
                 fromFragmentYn = false;
 
-                FirebaseUser fUser = mAuth.getCurrentUser();
-                FragmentManager fragmentManager = getSupportFragmentManager();
+                /*FragmentManager fragmentManager = getSupportFragmentManager();*/
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-                switch (index) {
+                /*switch (index) {
                     case 0 :
 
                         if(fragmentManager.findFragmentByTag("say") == null) {
@@ -191,6 +211,31 @@ public class MainActivity extends FragmentActivity {
                             startActivity(new Intent(MainActivity.this, SignActivity.class));
                         }
                         break;
+                }*/
+
+                switch (index) {
+                    case 0 :
+                        fragmentTransaction.addToBackStack(null);
+                        fragmentTransaction.replace(R.id.contentContainer, new Say()).commit();
+                        break;
+
+                    /*case 1 :
+                            *//*transaction.replace(R.id.contentContainer, new Main()).commit();*//*
+                        break;*/
+                }
+
+                fragmentTransaction.addToBackStack(null);
+                switch (index) {
+                    case 1 :
+                        fragmentTransaction.replace(R.id.contentContainer, new Chat()).commit();
+                        break;
+
+                    case 2 :
+                        fragmentTransaction.replace(R.id.contentContainer, new Profile()).commit();
+                        break;
+
+                    default:
+                        break;
                 }
             }
 
@@ -200,10 +245,10 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
-        navigationTabBar.postDelayed(() -> {
-            for (int i = 0; i < navigationTabBar.getModels().size(); i++) {
-                final NavigationTabBar.Model model = navigationTabBar.getModels().get(i);
-                navigationTabBar.postDelayed(() -> model.showBadge(), i * 100);
+        this.navigationTabBar.postDelayed(() -> {
+            for (int i = 0; i < this.navigationTabBar.getModels().size(); i++) {
+                final NavigationTabBar.Model model = this.navigationTabBar.getModels().get(i);
+                this.navigationTabBar.postDelayed(() -> model.showBadge(), i * 100);
             }
         }, 500);
     }
@@ -217,20 +262,20 @@ public class MainActivity extends FragmentActivity {
             getSupportFragmentManager().popBackStackImmediate("profile", FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } else {
             // 종료전 확인
-            if (System.currentTimeMillis() > backKeyPressedTime + 2000) {
+            if (System.currentTimeMillis() > this.backKeyPressedTime + 2000) {
                 this.backKeyPressedTime = System.currentTimeMillis();
-                showGuide();
+                this.showGuide();
                 return;
             }
 
-            if (System.currentTimeMillis() <= backKeyPressedTime + 2000) {
-                activity.finish();
+            if (System.currentTimeMillis() <= this.backKeyPressedTime + 2000) {
+                this.activity.finish();
                 this.toast.cancel();
             }
         }
     }
 
-    public void showGuide() {
+    private void showGuide() {
         this.toast = Toast.makeText(activity, "\'뒤로\'버튼을 한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT);
         this.toast.show();
     }

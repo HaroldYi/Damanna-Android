@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.hello.TrevelMeetUp.R;
 import com.sendbird.android.SendBird;
+import com.tsengvn.typekit.Typekit;
 
 /**
  * Created by TedPark on 2017. 3. 18..
@@ -29,9 +30,13 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        Typekit.getInstance()
+                .addNormal(Typekit.createFromAsset(this, "fonts/NotoSans-Regular.ttf"))
+                .addBold(Typekit.createFromAsset(this, "fonts/NotoSans-Bold.ttf"));
+
         SendBird.init(getResources().getString(R.string.app_id), getApplicationContext());
 
-        baseApplication = this;
+        this.baseApplication = this;
     }
 
     public void progressON(Activity activity, String message) {
@@ -40,15 +45,15 @@ public class BaseApplication extends Application {
             return;
         }
 
-        if (progressDialog != null && progressDialog.isShowing()) {
+        if (this.progressDialog != null && this.progressDialog.isShowing()) {
             progressSET(message);
         } else {
 
-            progressDialog = new AppCompatDialog(activity);
-            progressDialog.setCancelable(false);
-            progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-            progressDialog.setContentView(R.layout.progress_loading);
-            progressDialog.show();
+            this.progressDialog = new AppCompatDialog(activity);
+            this.progressDialog.setCancelable(false);
+            this.progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            this.progressDialog.setContentView(R.layout.progress_loading);
+            this.progressDialog.show();
 
         }
 
@@ -64,19 +69,19 @@ public class BaseApplication extends Application {
 
     public void progressSET(String message) {
 
-        if (progressDialog == null || !progressDialog.isShowing()) {
+        if (this.progressDialog == null || !this.progressDialog.isShowing()) {
             return;
         }
 
-        TextView tv_progress_message = (TextView) progressDialog.findViewById(R.id.tv_progress_message);
+        TextView tv_progress_message = (TextView) this.progressDialog.findViewById(R.id.tv_progress_message);
         if (!TextUtils.isEmpty(message)) {
             tv_progress_message.setText(message);
         }
     }
 
     public void progressOFF() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
+        if (this.progressDialog != null && this.progressDialog.isShowing()) {
+            this.progressDialog.dismiss();
         }
     }
 }

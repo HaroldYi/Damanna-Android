@@ -111,7 +111,7 @@ public class Profile extends BaseFragment implements View.OnClickListener {
         });
         TextView textView = (TextView) view.findViewById(R.id.user_profile_name);
 
-        this.profileBitmap = CommonFunction.getBitmapFromURL(user.getPhotoUrl().toString());
+        this.profileBitmap = CommonFunction.getBitmapFromURL(this.user.getPhotoUrl().toString());
 
         profileImageView.bringToFront();
         profileImageView.setImageBitmap(this.profileBitmap);
@@ -140,7 +140,7 @@ public class Profile extends BaseFragment implements View.OnClickListener {
         this.adapter = new GridViewAdapter(getActivity(), this.photoList, true);
         this.gridView.setAdapter(adapter);
 
-        db.collection("photo/")
+        this.db.collection("photo/")
                 /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
                 .whereEqualTo("member_id", this.user.getUid())
                 .get()
@@ -182,13 +182,13 @@ public class Profile extends BaseFragment implements View.OnClickListener {
                     }
                 });
 
-        db.collection("say/")
+        this.db.collection("say/")
                 .whereEqualTo("member_id", this.user.getUid())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        userSayListViewAdapter = new UserSayListViewAdapter(getActivity(), R.layout.chat_layout, this.sayVoList);
-                        this.listView.setAdapter(userSayListViewAdapter);
+                        this.userSayListViewAdapter = new UserSayListViewAdapter(getActivity(), R.layout.chat_layout, this.sayVoList);
+                        this.listView.setAdapter(this.userSayListViewAdapter);
 
                         if(task.getResult().size() > 0) {
                             for (DocumentSnapshot document : task.getResult()) {
@@ -224,7 +224,7 @@ public class Profile extends BaseFragment implements View.OnClickListener {
                     }
                 });
 
-        gridView.setOnItemClickListener((parent, v, position, id) -> {
+        this.gridView.setOnItemClickListener((parent, v, position, id) -> {
             this.kind = this.photoList.get(position).getKind();
             this.position = position;
 

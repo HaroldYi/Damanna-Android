@@ -3,4 +3,9 @@
     <string name="app_id">FA8D8716-6074-4693-BF63-C7662626DFB3</string>
     <string name="loading">Loading...</string>
     <string name="uploading">Uploading...</string>
+    <string-array name="country_list">
+        <item>United States</item>
+        <item>Canada</item>
+        <item>Australia</item>
+    </string-array>
 </resources>

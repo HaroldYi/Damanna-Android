@@ -24,13 +24,9 @@ import uk.co.senab.photoview.PhotoViewAttacher;
  * Created by lji5317 on 13/12/2017.
  */
 
-public class ViewPhotoActivity extends AppCompatActivity {
+public class ViewPhotoActivity extends BaseActivity {
 
     private ImageView imageView;
-
-    public ViewPhotoActivity() {
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

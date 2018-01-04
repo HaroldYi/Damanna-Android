@@ -1,10 +1,8 @@
 package com.hello.TrevelMeetUp.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,7 +13,7 @@ import com.hello.TrevelMeetUp.R;
  * Created by lji5317 on 15/12/2017.
  */
 
-public class PopupActivity extends Activity {
+public class PopupActivity extends BaseActivity {
 
     private EditText editText;
     private Button saveBtn;

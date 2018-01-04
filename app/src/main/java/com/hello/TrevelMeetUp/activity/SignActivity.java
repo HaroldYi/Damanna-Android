@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -21,14 +22,14 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.vo.Photo;
 import com.sendbird.android.SendBird;
-import com.sendbird.android.SendBirdException;
-import com.sendbird.android.User;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ import java.util.Map;
  * Created by lji5317 on 05/12/2017.
  */
 
-public class SignActivity extends Activity {
+public class SignActivity extends BaseActivity {
 
     private FirebaseAuth mAuth;
     private CallbackManager mCallbackManager;
@@ -51,6 +52,11 @@ public class SignActivity extends Activity {
 
     private Double latitude = 0.0;
     private Double longitude = 0.0;
+
+    private Activity activity;
+
+    private long backKeyPressedTime = 0;
+    private Toast toast;
 
     private static final String TAG = "FacebookLogin";
 
@@ -74,6 +80,8 @@ public class SignActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in);
 
+        this.activity = this;
+
         Button button = (Button) findViewById(R.id.signInBtn);
     }
 
@@ -84,9 +92,29 @@ public class SignActivity extends Activity {
         this.mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void onBackPressed() {
+        // 종료전 확인
+        if (System.currentTimeMillis() > this.backKeyPressedTime + 2000) {
+            this.backKeyPressedTime = System.currentTimeMillis();
+            this.showGuide();
+            return;
+        }
+
+        if (System.currentTimeMillis() <= this.backKeyPressedTime + 2000) {
+            this.activity.finish();
+            this.toast.cancel();
+        }
+    }
+
+    private void showGuide() {
+        this.toast = Toast.makeText(activity, "\'뒤로\'버튼을 한번 더 누르시면 종료됩니다.", Toast.LENGTH_SHORT);
+        this.toast.show();
+    }
+
     public void facebookLoginOnClick(View view) {
         this.loginManager.logInWithReadPermissions(SignActivity.this, Arrays.asList("public_profile", "email"));
-        this.loginManager.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+        this.loginManager.registerCallback(this.mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.d(TAG, "facebook:onSuccess:" + loginResult);
@@ -116,14 +144,14 @@ public class SignActivity extends Activity {
                     LocationManager.GPS_PROVIDER,
                     MIN_TIME_BW_UPDATES,
                     MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    gpsListener);
+                    this.gpsListener);
 
             // 네트워크를 이용한 위치 요청
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     MIN_TIME_BW_UPDATES,
                     MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    gpsListener);
+                    this.gpsListener);
 
             // 위치요청을 한 상태에서 위치추적되는 동안 먼저 최근 위치를 조회해서 set
             Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -136,18 +164,70 @@ public class SignActivity extends Activity {
             ex.printStackTrace();
         }
 
-        Map<String, Object> user = new HashMap<>();
-        user.put("id", currentUser.getUid());
-        user.put("email", currentUser.getEmail());
-        user.put("gender", "male");
-        user.put("name", currentUser.getDisplayName());
-        user.put("profileUrl", currentUser.getPhotoUrl().toString());
-        user.put("location", new GeoPoint(this.latitude, this.longitude));
+        DocumentReference docRef = this.db.collection("member").document(currentUser.getUid());
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document != null && document.exists()) {
+                    finish();
+                } else {
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("id", currentUser.getUid());
+                    userMap.put("email", currentUser.getEmail());
+                    userMap.put("gender", "male");
+                    userMap.put("name", currentUser.getDisplayName());
+                    userMap.put("profileUrl", currentUser.getPhotoUrl().toString());
+                    userMap.put("location", new GeoPoint(latitude, longitude));
 
-        this.db.collection("member").document(currentUser.getUid())
-                .set(user)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                    this.db.collection("member").document(currentUser.getUid())
+                            .set(userMap)
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d(TAG, "DocumentSnapshot successfully written!");
+
+                                List<String> userList = new ArrayList<>();
+                                userList.add(mAuth.getCurrentUser().getUid());
+
+                                SendBird.createUserListQuery(userList);
+                                try {
+                                    FirebaseInstanceId.getInstance().deleteInstanceId();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                String pushToken = FirebaseInstanceId.getInstance().getToken();
+
+                                SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
+                                    if (e != null) {
+                                        // Error.
+                                        return;
+                                    }
+
+                                    SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
+                                        if (e12 != null) {
+                                            // Error.
+                                            return;
+                                        }
+
+                                        SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
+                                            if (e1 != null) {
+                                                return;
+                                            }
+
+                                            if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
+                                                // Try registering the token after a connection has been successfully established.
+                                            } else {
+                                                /*finish();*/
+                                                startActivity(new Intent(this, SelectCountryActivity.class));
+                                            }
+                                        });
+                                    });
+                                });
+                            })
+                            .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                }
+            } else {
+                Log.d(TAG, "get failed with ", task.getException());
+            }
+        });
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
@@ -160,49 +240,7 @@ public class SignActivity extends Activity {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "signInWithCredential:success");
 
-                        List<String> userList = new ArrayList<>();
-                        userList.add(this.mAuth.getCurrentUser().getUid());
                         addUserDb(this.mAuth.getCurrentUser());
-
-                        SendBird.createUserListQuery(userList);
-                        try {
-                            FirebaseInstanceId.getInstance().deleteInstanceId();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        String pushToken = FirebaseInstanceId.getInstance().getToken();
-
-                        SendBird.connect(this.mAuth.getCurrentUser().getUid(), new SendBird.ConnectHandler() {
-                                    @Override
-                                    public void onConnected(User user, SendBirdException e) {
-                                        if (e != null) {
-                                            // Error.
-                                            return;
-                                        }
-
-                                        SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), new SendBird.UserInfoUpdateHandler() {
-                                            @Override
-                                            public void onUpdated(SendBirdException e) {
-                                                if (e != null) {
-                                                    // Error.
-                                                    return;
-                                                }
-
-                                                SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
-                                                    if (e1 != null) {
-                                                        return;
-                                                    }
-
-                                                    if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
-                                                        // Try registering the token after a connection has been successfully established.
-                                                    } else {
-                                                        finish();
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
