@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.TrevelMeetUp.R;
@@ -72,6 +73,7 @@ public class ChatRoomActivity extends BaseActivity {
                 this.groupChannel.sendUserMessage(chatMessage.getMessage(), (userMessage, e) -> {
                     if (e != null) {
                         // Error.
+                        Crashlytics.logException(e);
                         return;
                     }
                 });
@@ -92,7 +94,7 @@ public class ChatRoomActivity extends BaseActivity {
         SendBird.connect(this.fUser.getUid(), (user, e) -> {
             if (e != null) {
                 // Error.
-                Log.e("groupChannel1", e.getMessage());
+                Crashlytics.logException(e);
                 return;
             }
 
@@ -108,7 +110,7 @@ public class ChatRoomActivity extends BaseActivity {
 
                     if (e1 != null) {
                         // Error.
-                        Log.e("groupChannel", e1.getMessage());
+                        Crashlytics.logException(e1);
                         return;
                     }
 
@@ -119,6 +121,7 @@ public class ChatRoomActivity extends BaseActivity {
                     // public void onResult(GroupChannel groupChannel, SendBirdException e) {
                     if (e1 != null) {
                         // Error!
+                        Crashlytics.logException(e1);
                         return;
                     }
 
@@ -161,6 +164,7 @@ public class ChatRoomActivity extends BaseActivity {
         prevMessageListQuery.load(30, false, (messages, e1) -> {
             if (e1 != null) {
                 // Error.
+                Crashlytics.logException(e1);
                 return;
             }
 

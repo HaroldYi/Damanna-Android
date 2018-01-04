@@ -9,9 +9,12 @@ import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.hello.TrevelMeetUp.R;
 import com.sendbird.android.SendBird;
 import com.tsengvn.typekit.Typekit;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by TedPark on 2017. 3. 18..
@@ -35,6 +38,8 @@ public class BaseApplication extends Application {
                 .addBold(Typekit.createFromAsset(this, "fonts/NotoSans-Bold.ttf"));
 
         SendBird.init(getResources().getString(R.string.app_id), getApplicationContext());
+
+        Fabric.with(this, new Crashlytics());
 
         this.baseApplication = this;
     }

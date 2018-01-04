@@ -45,6 +45,7 @@ import com.meg7.widget.CircleImageView;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -113,8 +114,8 @@ public class Profile extends BaseFragment implements View.OnClickListener {
 
         this.profileBitmap = CommonFunction.getBitmapFromURL(this.user.getPhotoUrl().toString());
 
-        profileImageView.bringToFront();
-        profileImageView.setImageBitmap(this.profileBitmap);
+        this.profileImageView.bringToFront();
+        this.profileImageView.setImageBitmap(this.profileBitmap);
         textView.setText(this.user.getDisplayName());
 
         view.setVisibility(View.INVISIBLE);
@@ -139,6 +140,34 @@ public class Profile extends BaseFragment implements View.OnClickListener {
 
         this.adapter = new GridViewAdapter(getActivity(), this.photoList, true);
         this.gridView.setAdapter(adapter);
+
+        this.db.collection("member/")
+                /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
+                .document(this.user.getUid())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if(document.exists()) {
+                            long dateOfBirth = ((Date) document.getData().get("dateOfBirth")).getTime();
+                            long now = System.currentTimeMillis();
+
+                            Calendar birthCalendar = Calendar.getInstance();
+                            birthCalendar.setTimeInMillis(dateOfBirth);
+
+                            int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                            Calendar nowCalender = Calendar.getInstance();
+                            nowCalender.setTimeInMillis(now);
+
+                            int nowYear = nowCalender.get(Calendar.YEAR);
+
+                            int koreanAge = nowYear - yearOfBirth + 1;
+                        }
+                    } else {
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                    }
+                });
 
         this.db.collection("photo/")
                 /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
@@ -297,8 +326,6 @@ public class Profile extends BaseFragment implements View.OnClickListener {
                 Map<String, Object> stringMap = new HashMap<>();
 
                 stringMap.put("member_id", this.user.getUid());
-                stringMap.put("name", this.user.getDisplayName());
-                stringMap.put("profileUrl", this.user.getPhotoUrl().toString());
                 stringMap.put("content", sayContent);
                 stringMap.put("reg_dt", new Date());
 

@@ -94,14 +94,14 @@ public class Say extends BaseFragment implements View.OnClickListener {
                     LocationManager.GPS_PROVIDER,
                     MIN_TIME_BW_UPDATES,
                     MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    gpsListener);
+                    this.gpsListener);
 
             // 네트워크를 이용한 위치 요청
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     MIN_TIME_BW_UPDATES,
                     MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    gpsListener);
+                    this.gpsListener);
 
             // 위치요청을 한 상태에서 위치추적되는 동안 먼저 최근 위치를 조회해서 set
             Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -206,8 +206,6 @@ public class Say extends BaseFragment implements View.OnClickListener {
             Map<String, Object> stringMap = new HashMap<>();
 
             stringMap.put("member_id", this.user.getUid());
-            stringMap.put("name", this.user.getDisplayName());
-            stringMap.put("profileUrl", this.user.getPhotoUrl().toString());
             stringMap.put("content", sayContent);
             stringMap.put("reg_dt", new Date());
 
@@ -281,7 +279,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
         .addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
 
-                this.sayListViewAdapter = new SayListViewAdapter(getActivity(), R.id.conversation, this.sayVoList);
+                this.sayListViewAdapter = new SayListViewAdapter(getActivity(), this.sayVoList);
                 this.listView.setAdapter(this.sayListViewAdapter);
 
                 List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
@@ -299,37 +297,38 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
                     this.listView.setSelection(this.sayListViewAdapter.getCount() - 1);
 
-                    for (DocumentSnapshot document : documentSnapshotList) {
+                    for (DocumentSnapshot document : task.getResult()) {
 
-                        DocumentReference documentReference = (DocumentReference) document.getData().get("member");
+                        String memberId = document.getData().get("member_id").toString();
 
-                        Task<DocumentSnapshot> documentSnapshotTask = documentReference.get();
+                        this.db.collection("member/")
+                                .whereEqualTo("member_id", memberId)
+                                .get()
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        for (DocumentSnapshot document1 : task1.getResult()) {
+                                            SayVo sayVo = new SayVo();
 
-                        documentSnapshotTask.addOnCompleteListener(task1 -> {
-                            SayVo sayVo = new SayVo();
+                                            String nation = (document1.getData().get("nation") != null ? document1.getData().get("nation").toString() : "");
+                                            String identity = (document1.getData().get("identity") != null ? document1.getData().get("identity").toString() : "");
 
-                            sayVo.setUid(task1.getResult().getData().get("id").toString());
-                            sayVo.setUserName(task1.getResult().getData().get("name").toString());
-                            sayVo.setPhotoUrl(task1.getResult().getData().get("profileUrl").toString());
-                            sayVo.setMsg(document.getData().get("content").toString());
+                                            sayVo.setUid(document1.getData().get("id").toString());
+                                            sayVo.setUserName(document1.getData().get("name").toString());
+                                            sayVo.setNation(nation);
+                                            sayVo.setIdentity(identity);
+                                            sayVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
+                                            sayVo.setMsg(document.getData().get("content").toString());
 
-                            GeoPoint geoPoint = (GeoPoint) task1.getResult().getData().get("location");
+                                            this.sayVoList.add(sayVo);
+                                            Log.d("sayVoList", sayVoList.size()+"");
+                                            this.sayListViewAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("FIREERROR", e.getMessage());
+                                });
 
-                            Location loc = new Location("pointA");
-                            Location loc1 = new Location("pointB");
-
-                            loc.setLatitude(geoPoint.getLatitude());
-                            loc.setLongitude(geoPoint.getLongitude());
-
-                            loc1.setLatitude(this.latitude);
-                            loc1.setLongitude(this.longitude);
-
-                            float distance = loc.distanceTo(loc1);
-                            sayVo.setDistance(distance);
-
-                            this.sayVoList.add(sayVo);
-                            this.sayListViewAdapter.notifyDataSetChanged();
-                        });
                     }
 
                     if(size < this.limit) {
@@ -340,6 +339,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
                     this.listView.setVisibility(View.VISIBLE);
                 } else {
                     this.lastYn = true;
+                    this.progressOFF();
+                    this.listView.setVisibility(View.VISIBLE);
                 }
 
                 /*new Handler().postDelayed(() -> {

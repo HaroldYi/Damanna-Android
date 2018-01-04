@@ -56,7 +56,7 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
             params.setMargins(20, 20, 0, 20);
         }
 
-        bmImage.setImageBitmap(result);
+        this.bmImage.setImageBitmap(result);
     }
 
     private static byte[] convertInputStreamToByteArray(InputStream is) throws IOException {

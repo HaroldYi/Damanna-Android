@@ -10,6 +10,8 @@ public class SayVo {
 
     private String uid = "";
     private String userName = "";
+    private String nation = "";
+    private String identity = "";
 
     private String photoUrl = "";
     private String msg = "";
@@ -74,5 +76,21 @@ public class SayVo {
 
     public void setDistance(float distance) {
         this.distance = distance;
+    }
+
+    public String getNation() {
+        return nation;
+    }
+
+    public void setNation(String nation) {
+        this.nation = nation;
+    }
+
+    public String getIdentity() {
+        return identity;
+    }
+
+    public void setIdentity(String identity) {
+        this.identity = identity;
     }
 }

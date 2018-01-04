@@ -114,8 +114,8 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
             userProfilePhoto = (ImageView) view.findViewById(R.id.user_profile_photo);
             userName = (TextView) view.findViewById(R.id.user_name);
             lastMessage = (TextView) view.findViewById(R.id.content);
-            unreadMessageCount = (TextView) view.findViewById(R.id.unreadMessageCount);
-            dateOfSent = (TextView) view.findViewById(R.id.date_of_sent);
+            /*unreadMessageCount = (TextView) view.findViewById(R.id.unreadMessageCount);
+            distance = (TextView) view.findViewById(R.id.date_of_sent);*/
 
             view.setTag(this);
         }

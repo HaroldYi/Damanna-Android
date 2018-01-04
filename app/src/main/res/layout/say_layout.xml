@@ -9,7 +9,7 @@
         android:id="@+id/toolbar2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#423752"
+        android:background="@color/white"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:titleTextColor="#fff"
@@ -17,17 +17,19 @@
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/white">
 
         <android.support.design.widget.FloatingActionButton
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_add_black_48dp"
-            android:backgroundTint="#423752"
+            android:src="@drawable/pencil"
             android:clickable="true"
+            app:backgroundTint="#03c4c9"
             app:layout_anchorGravity="bottom|right" />
 
         <android.support.v4.widget.SwipeRefreshLayout
@@ -38,7 +40,8 @@
             <ListView
                 android:id="@+id/say_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:divider="#ffffff"/>
 
         </android.support.v4.widget.SwipeRefreshLayout>
     </RelativeLayout>

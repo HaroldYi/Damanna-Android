@@ -12,10 +12,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.firebase.auth.AuthCredential;
@@ -31,9 +34,13 @@ import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.vo.Photo;
 import com.sendbird.android.SendBird;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +56,8 @@ public class SignActivity extends BaseActivity {
 
     private LoginManager loginManager;
     private FirebaseFirestore db;
+
+    private JSONObject userInfo;
 
     private Double latitude = 0.0;
     private Double longitude = 0.0;
@@ -79,6 +88,8 @@ public class SignActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in);
+
+        super.actList.add(this);
 
         this.activity = this;
 
@@ -113,12 +124,24 @@ public class SignActivity extends BaseActivity {
     }
 
     public void facebookLoginOnClick(View view) {
-        this.loginManager.logInWithReadPermissions(SignActivity.this, Arrays.asList("public_profile", "email"));
+        this.loginManager.logInWithReadPermissions(SignActivity.this, Arrays.asList("public_profile", "email", "user_birthday"));
         this.loginManager.registerCallback(this.mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.d(TAG, "facebook:onSuccess:" + loginResult);
-                handleFacebookAccessToken(loginResult.getAccessToken());
+
+                GraphRequest request = GraphRequest.newMeRequest(
+                        loginResult.getAccessToken(),
+                        (object, response) -> {
+                            // Application code
+                            userInfo = response.getJSONObject();
+                            handleFacebookAccessToken(loginResult.getAccessToken());
+                        });
+
+                Bundle parameters = new Bundle();
+                parameters.putString("fields", "id, name, gender, birthday");
+                request.setParameters(parameters);
+                request.executeAsync();
             }
 
             @Override
@@ -172,9 +195,37 @@ public class SignActivity extends BaseActivity {
                     finish();
                 } else {
                     Map<String, Object> userMap = new HashMap<>();
+
+                    String facebookId = "";
+                    String dateOfBirth = "";
+                    String gender = "";
+
+                    try {
+                        facebookId = this.userInfo.get("id").toString();
+                    } catch (Exception e) {
+                        facebookId = "";
+                    }
+
+                    try {
+                        dateOfBirth = this.userInfo.get("birthday").toString();
+                    } catch (Exception e) {
+                        dateOfBirth = "";
+                    }
+
+                    try {
+                        gender = this.userInfo.get("gender").toString();
+                    } catch (Exception e) {
+                        gender = "";
+                    }
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
+
+                    userMap.put("facebookId", facebookId);
                     userMap.put("id", currentUser.getUid());
                     userMap.put("email", currentUser.getEmail());
-                    userMap.put("gender", "male");
+                    userMap.put("dateOfBirth", new Date(calendar.getTimeInMillis()));
+                    userMap.put("gender", gender);
                     userMap.put("name", currentUser.getDisplayName());
                     userMap.put("profileUrl", currentUser.getPhotoUrl().toString());
                     userMap.put("location", new GeoPoint(latitude, longitude));
@@ -198,34 +249,39 @@ public class SignActivity extends BaseActivity {
                                 SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
                                     if (e != null) {
                                         // Error.
+                                        Crashlytics.logException(e);
                                         return;
                                     }
 
                                     SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
                                         if (e12 != null) {
                                             // Error.
+                                            Crashlytics.logException(e12);
                                             return;
                                         }
 
                                         SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
                                             if (e1 != null) {
+                                                Crashlytics.logException(e1);
                                                 return;
                                             }
 
                                             if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
                                                 // Try registering the token after a connection has been successfully established.
                                             } else {
-                                                /*finish();*/
+                                            /*finish();*/
                                                 startActivity(new Intent(this, SelectCountryActivity.class));
                                             }
                                         });
                                     });
                                 });
                             })
-                            .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                            .addOnFailureListener(e -> {
+                                Crashlytics.logException(e);
+                            });
                 }
             } else {
-                Log.d(TAG, "get failed with ", task.getException());
+                Crashlytics.logException(task.getException());
             }
         });
     }
@@ -243,6 +299,7 @@ public class SignActivity extends BaseActivity {
                         addUserDb(this.mAuth.getCurrentUser());
                     } else {
                         // If sign in fails, display a message to the user.
+                        Crashlytics.logException(task.getException());
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
                     }
 

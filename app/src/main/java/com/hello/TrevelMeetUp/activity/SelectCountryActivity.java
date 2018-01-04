@@ -3,7 +3,6 @@ package com.hello.TrevelMeetUp.activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -29,12 +28,16 @@ public class SelectCountryActivity extends BaseActivity {
     private FirebaseUser user;
     private FirebaseFirestore db;
 
+    private String nation = "";
+
     private boolean selectYn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_country);
+
+        super.actList.add(this);
 
         this.mAuth = FirebaseAuth.getInstance();
         this.user = this.mAuth.getCurrentUser();
@@ -59,6 +62,7 @@ public class SelectCountryActivity extends BaseActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 selectYn = true;
+                nation = spinner.getSelectedItem().toString();
             }
 
             @Override
@@ -67,12 +71,11 @@ public class SelectCountryActivity extends BaseActivity {
             }
         });
 
-        String nation = spinner.getSelectedItem().toString();
         button.setOnClickListener(view -> {
 
             if(this.selectYn) {
                 this.db.collection("member").document(this.user.getUid())
-                        .update("nation", nation)
+                        .update("nation", this.nation)
                         .addOnSuccessListener(aVoid -> {
                             startActivity(new Intent(this, SelectRoleActivity.class));
                         });

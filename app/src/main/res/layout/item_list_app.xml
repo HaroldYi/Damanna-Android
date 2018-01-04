@@ -2,33 +2,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:id="@+id/say_layout"
+    android:background="@drawable/posts"
     android:padding="3dp" >
 
-    <ImageView
-        android:id="@+id/user_profile_photo"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        />
-
     <LinearLayout
-        android:id="@+id/conversation"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_alignLeft="@+id/user_profile_photo"
-        android:layout_marginLeft="5dp"
-        android:orientation="vertical">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp">
+
+        <com.meg7.widget.CircleImageView
+            android:id="@+id/user_profile_photo"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/user_name"
-                android:layout_width="304dp"
-                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_height="7dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
@@ -36,46 +35,31 @@
                 android:textColor="#423752" />
 
             <TextView
-                android:id="@+id/date_of_sent"
-                android:layout_width="203dp"
-                android:layout_height="wrap_content"
+                android:id="@+id/distance"
+                android:layout_width="wrap_content"
+                android:layout_height="3dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:text="TextView"
-                android:textColor="#423752" />
+                android:textColor="@color/dark_gray" />
         </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginLeft="20dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/content"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:text="TextView"
+            android:textColor="@color/dark_gray" />
 
-            <TextView
-                android:id="@+id/content"
-                android:layout_width="265dp"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_toRightOf="@+id/user_profile_photo"
-                android:text="name"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/unreadMessageCount"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_toRightOf="@+id/user_profile_photo"
-                android:background="@drawable/rounded_corner"
-                android:visibility="gone"
-                android:text="name"
-                android:textAlignment="center"
-                android:textColor="@android:color/white"
-                android:layout_marginBottom="50dp"
-                android:textSize="9sp" />
-        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

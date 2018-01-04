@@ -1,7 +1,6 @@
 package com.hello.TrevelMeetUp.adapter;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -63,7 +62,7 @@ public class UserSayListViewAdapter extends BaseAdapter {
         } else {
             holder.content.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         }
-        holder.dateOfSent.setText("");
+        holder.distance.setText("");
 
         return view;
     }
@@ -73,18 +72,15 @@ public class UserSayListViewAdapter extends BaseAdapter {
         ImageView img;
         TextView userName;
         TextView content;
-        TextView dateOfSent;
+        TextView distance;
 
         public ViewHolder(View view) {
             userName = (TextView) view.findViewById(R.id.user_name);
             content = (TextView) view.findViewById(R.id.content);
-            dateOfSent = (TextView) view.findViewById(R.id.date_of_sent);
+            distance = (TextView) view.findViewById(R.id.distance);
 
             img = (ImageView) view.findViewById(R.id.user_profile_photo);
             img.setVisibility(View.GONE);
-
-            layout = (LinearLayout) view.findViewById(R.id.conversation);
-            layout.setBackground(content.getResources().getDrawable(R.drawable.say));
 
             view.setTag(this);
         }

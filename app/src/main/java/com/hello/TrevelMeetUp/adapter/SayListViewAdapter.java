@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.common.DownloadImageTask;
 import com.hello.TrevelMeetUp.vo.SayVo;
+import com.meg7.widget.CircleImageView;
 
 import org.w3c.dom.Text;
 
@@ -29,14 +30,12 @@ import java.util.List;
 public class SayListViewAdapter extends BaseAdapter {
 
     private static Context context;
-    private int resource;
     private List<SayVo> sayVoList;
 
     private static String TAG = "cloudFireStore";
 
-    public SayListViewAdapter(Context context, int resource, List<SayVo> sayVoList) {
+    public SayListViewAdapter(Context context, List<SayVo> sayVoList) {
         this.context = context;
-        this.resource = resource;
         this.sayVoList = sayVoList;
     }
 
@@ -62,22 +61,22 @@ public class SayListViewAdapter extends BaseAdapter {
 
         if (view == null) {
             view = View.inflate(this.context.getApplicationContext(), R.layout.item_list_app, null);
-            if(this.resource == R.id.conversation) {
-                /*view = new SayListViewAdapter.ListItem(context, R.drawable.conversation);*/
-                resource = R.drawable.conversation;
-            }
+            /*view = new SayListViewAdapter.ListItem(context, R.drawable.conversation);*/
+            resource = R.drawable.conversation;
 
             new ViewHolder(view, resource);
         }
 
         ViewHolder holder = (ViewHolder) view.getTag();
 
-        holder.userName.setText(this.sayVoList.get(index).getUserName());
+        String userInfo = String.format("%s (%s, %s)", this.sayVoList.get(index).getUserName(), this.sayVoList.get(index).getNation(), this.sayVoList.get(index).getIdentity());
+
+        holder.userName.setText(userInfo);
         holder.content.setText(this.sayVoList.get(index).getMsg());
-        holder.dateOfSent.setText(String.format("%.2fm", this.sayVoList.get(index).getDistance()));
+        holder.distance.setText(String.format("%.2fm", this.sayVoList.get(index).getDistance()));
 
         DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img, "list");
-        downloadImageTask.execute(sayVoList.get(index).getPhotoUrl());
+        downloadImageTask.execute(this.sayVoList.get(index).getPhotoUrl());
 
         return view;
     }
@@ -85,24 +84,19 @@ public class SayListViewAdapter extends BaseAdapter {
     class ViewHolder {
         LinearLayout sayLayout;
         LinearLayout layout;
-        ImageView img;
+        CircleImageView img;
         TextView userName;
         TextView content;
-        TextView dateOfSent;
+        TextView distance;
 
         public ViewHolder(View view, Integer resource) {
-            sayLayout = (LinearLayout) view.findViewById(R.id.say_layout);
-            userName = (TextView) view.findViewById(R.id.user_name);
-            content = (TextView) view.findViewById(R.id.content);
-            img = (ImageView) view.findViewById(R.id.user_profile_photo);
-            dateOfSent = (TextView) view.findViewById(R.id.date_of_sent);
+            this.sayLayout = (LinearLayout) view.findViewById(R.id.say_layout);
+            this.userName = (TextView) view.findViewById(R.id.user_name);
+            this.content = (TextView) view.findViewById(R.id.content);
+            this.img = (CircleImageView) view.findViewById(R.id.user_profile_photo);
+            this.distance = (TextView) view.findViewById(R.id.distance);
 
-            if(resource != null) {
-                layout = (LinearLayout) view.findViewById(R.id.conversation);
-                layout.setBackground(content.getResources().getDrawable(R.drawable.conversation));
-            }
-
-            /*dateOfSent.setText("");*/
+            /*this.distance.setText("");*/
 
             view.setTag(this);
         }
