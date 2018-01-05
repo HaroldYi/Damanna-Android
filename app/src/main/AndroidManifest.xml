@@ -19,7 +19,7 @@
         >
 
         <!-- 팝업 Activity -->
-        <activity android:name=".activity.PopupActivity" android:theme="@android:style/Theme.Dialog" />
+        <activity android:name=".activity.PopupActivity" android:screenOrientation="portrait" />
 
         <activity android:name=".activity.SignActivity" android:screenOrientation="portrait" />
 

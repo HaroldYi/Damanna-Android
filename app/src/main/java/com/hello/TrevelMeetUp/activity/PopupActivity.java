@@ -1,12 +1,17 @@
 package com.hello.TrevelMeetUp.activity;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
-import android.view.Window;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.hello.TrevelMeetUp.R;
 
@@ -14,37 +19,43 @@ import com.hello.TrevelMeetUp.R;
  * Created by lji5317 on 15/12/2017.
  */
 
-public class PopupActivity extends Activity {
+public class PopupActivity extends AppCompatActivity {
 
-    private EditText editText;
-    private Button saveBtn;
-    private Button cancelBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //타이틀바 없애기
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.popup_activity);
 
         //UI 객체생성
-        this.editText = (EditText)findViewById(R.id.txtText);
+        EditText content = (EditText)findViewById(R.id.content);
 
-        this.saveBtn = (Button) findViewById(R.id.saveBtn);
-        this.cancelBtn = (Button) findViewById(R.id.cancelBtn);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
+        actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
+        actionBar.setDisplayShowTitleEnabled(false); //액션바에 표시되는 제목의 표시유무를 설정합니다.
+        actionBar.setDisplayShowHomeEnabled(false); //홈 아이콘을 숨김처리합니다.
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.argb(255,255,255,255)));
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
-        //확인 버튼 클릭
-        this.saveBtn.setOnClickListener(view -> {
-            //데이터 전달하기
-            Intent intent = new Intent();
-            intent.putExtra("sayContent", this.editText.getText().toString());
-            setResult(RESULT_OK, intent);
+        View view = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
+        actionBar.setCustomView(view);
 
-            //액티비티(팝업) 닫기
+        ImageButton backBtn = (ImageButton) view.findViewById(R.id.backBtn);
+
+        backBtn.setOnClickListener(view1 -> {
             finish();
         });
 
-        this.cancelBtn.setOnClickListener(view -> {
+        Button saveBtn = (Button) view.findViewById(R.id.saveBtn);
+
+        //확인 버튼 클릭
+        saveBtn.setOnClickListener(view1 -> {
+            //데이터 전달하기
+            Intent intent = new Intent();
+            intent.putExtra("sayContent", content.getText().toString());
+            setResult(RESULT_OK, intent);
+
             //액티비티(팝업) 닫기
             finish();
         });

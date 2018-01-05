@@ -1,5 +1,6 @@
 package com.hello.TrevelMeetUp.activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +10,10 @@ import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.content.res.AppCompatResources;
+import android.util.Log;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,6 +43,12 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_horizontal_ntb);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        this.setActionBar(toolbar);
+        ActionBar actionBar = this.getActionBar();
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
 
         this.mAuth = FirebaseAuth.getInstance();
         this.fUser = this.mAuth.getCurrentUser();
@@ -95,6 +105,7 @@ public class MainActivity extends FragmentActivity {
 
         this.navigationTabBar = (NavigationTabBar) findViewById(R.id.ntb_horizontal);
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
+
         /*models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_first),
@@ -112,27 +123,27 @@ public class MainActivity extends FragmentActivity {
         );*/
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_second),
-                        Color.parseColor(colors[1]))
-                        .title("Say")
+                        AppCompatResources.getDrawable(this.activity, R.drawable.ic_fa_list_ul),
+                        Color.parseColor(colors[0]))
+                        .title("")
                         .build()
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_fourth),
-                        Color.parseColor(colors[3]))
-                        .title("Chat")
+                        AppCompatResources.getDrawable(this.activity, R.drawable.ic_chat),
+                        Color.parseColor(colors[0]))
+                        .title("")
                         .build()
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_fifth),
-                        Color.parseColor(colors[4]))
-                        .selectedIcon(getResources().getDrawable(R.drawable.ic_eighth))
-                        .title("My")
+                        AppCompatResources.getDrawable(this.activity, R.drawable.ic_account),
+                        Color.parseColor(colors[0]))
+                        .title("")
                         .build()
         );
 
+        this.navigationTabBar.setIconSizeFraction(0.35f);
         this.navigationTabBar.setModels(models);
         this.navigationTabBar.setModelIndex(0, true);
 

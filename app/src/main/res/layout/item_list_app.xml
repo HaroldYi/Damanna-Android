@@ -32,17 +32,20 @@
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:text="TextView"
-                android:textColor="#423752" />
+                android:textColor="#423752"
+                android:textStyle="bold"
+                android:typeface="sans"/>
 
             <TextView
                 android:id="@+id/distance"
                 android:layout_width="wrap_content"
-                android:layout_height="3dp"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:layout_weight="1"
                 android:text="TextView"
-                android:textColor="@color/dark_gray" />
+                android:textColor="@color/dark_gray"
+                android:typeface="sans"/>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -59,7 +62,33 @@
             android:layout_marginTop="10dp"
             android:layout_weight="1"
             android:text="TextView"
-            android:textColor="@color/dark_gray" />
+            android:textColor="@color/dark_gray"
+            android:typeface="sans" />
 
     </LinearLayout>
+
+    <!--<LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="50dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="108dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Button"
+            android:textAlignment="viewEnd" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="106dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Button"
+            android:textAlignment="viewEnd" />
+    </LinearLayout>-->
+
 </LinearLayout>

@@ -42,6 +42,8 @@ import com.hello.TrevelMeetUp.vo.Photo;
 import com.hello.TrevelMeetUp.vo.SayVo;
 import com.meg7.widget.CircleImageView;
 
+import org.joda.time.DateTime;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -149,6 +151,8 @@ public class Profile extends BaseFragment implements View.OnClickListener {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if(document.exists()) {
+                            DateTime dateTime = new DateTime();
+
                             long dateOfBirth = ((Date) document.getData().get("dateOfBirth")).getTime();
                             long now = System.currentTimeMillis();
 

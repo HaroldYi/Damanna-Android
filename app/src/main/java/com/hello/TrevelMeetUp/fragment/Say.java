@@ -1,5 +1,6 @@
 package com.hello.TrevelMeetUp.fragment;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
+import android.widget.Toolbar;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,6 +34,7 @@ import com.hello.TrevelMeetUp.activity.SignActivity;
 import com.hello.TrevelMeetUp.activity.UserInfoActivity;
 import com.hello.TrevelMeetUp.adapter.SayListViewAdapter;
 import com.hello.TrevelMeetUp.vo.SayVo;
+import com.tsengvn.typekit.TypekitContextWrapper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,6 +90,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
         this.mAuth = FirebaseAuth.getInstance();
         this.user = this.mAuth.getCurrentUser();
 
+        View view = inflater.inflate(R.layout.say_layout, container, false);
+
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         try {
             // GPS를 이용한 위치 요청
@@ -115,8 +120,6 @@ public class Say extends BaseFragment implements View.OnClickListener {
         }
 
         this.mAuth = FirebaseAuth.getInstance();
-
-        View view = inflater.inflate(R.layout.say_layout, container, false);
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) view.findViewById(R.id.fab);
         floatingActionButton.bringToFront();
@@ -302,7 +305,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                         String memberId = document.getData().get("member_id").toString();
 
                         this.db.collection("member/")
-                                .whereEqualTo("member_id", memberId)
+                                .whereEqualTo("id", memberId)
                                 .get()
                                 .addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()) {
@@ -319,8 +322,21 @@ public class Say extends BaseFragment implements View.OnClickListener {
                                             sayVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
                                             sayVo.setMsg(document.getData().get("content").toString());
 
+                                            GeoPoint geoPoint = (GeoPoint) document1.getData().get("location");
+
+                                            Location loc = new Location("pointA");
+                                            Location loc1 = new Location("pointB");
+
+                                            loc.setLatitude(geoPoint.getLatitude());
+                                            loc.setLongitude(geoPoint.getLongitude());
+
+                                            loc1.setLatitude(this.latitude);
+                                            loc1.setLongitude(this.longitude);
+
+                                            float distance = loc.distanceTo(loc1);
+                                            sayVo.setDistance(distance);
+
                                             this.sayVoList.add(sayVo);
-                                            Log.d("sayVoList", sayVoList.size()+"");
                                             this.sayListViewAdapter.notifyDataSetChanged();
                                         }
                                     }

@@ -1,30 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#423752"
+    android:background="#ffffff"
     android:gravity="bottom"
     android:orientation="vertical"
     tools:context="com.hello.TrevelMeetUp.activity.MainActivity">
 
+    <android.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        >
+
+        <TextView
+            android:id="@+id/toolbar_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Say"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:typeface="sans" />
+
+    </android.widget.Toolbar>
+
     <FrameLayout
         android:id="@+id/contentContainer"
         android:layout_width="wrap_content"
-        android:layout_height="555dp" />
+        android:layout_height="555dp"
+        android:layout_above="@+id/ntb_horizontal"
+        android:layout_below="@+id/toolbar"
+        >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@drawable/upper_shadow_todo" />
+    </FrameLayout>
 
     <devlight.io.library.ntb.NavigationTabBar
         android:id="@+id/ntb_horizontal"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
         app:ntb_badge_gravity="top"
         app:ntb_badge_position="right"
+        app:ntb_bg_color="#ffffff"
+        app:ntb_active_color="#03c4c9"
+        app:ntb_inactive_color="#a0a0a0"
         app:ntb_badged="false"
-        app:ntb_scaled="true"
+        app:ntb_scaled="false"
         app:ntb_swiped="true"
         app:ntb_tinted="true"
         app:ntb_title_mode="all"
         app:ntb_titled="true" />
-
-</LinearLayout>
+</RelativeLayout>

@@ -7,10 +7,11 @@ android {
 
     defaultConfig {
         applicationId "devlight.io.navigationtabbar"
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -25,6 +26,7 @@ android {
 }
 
 dependencies {
+
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':navigationtabbar')
     //    compile 'com.github.devlight.navigationtabbar:navigationtabbar:1.2.3'
@@ -69,6 +71,13 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
     }
+
+    // https://mvnrepository.com/artifact/joda-time/joda-time
+    compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
+
+    compile 'com.github.markushi:android-ui:1.2'
+
+    compile 'com.jpardogo.materialtabstrip:library:1.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
