@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.Query;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.activity.ChatRoomActivity;
+import com.hello.TrevelMeetUp.activity.MainActivity;
 import com.hello.TrevelMeetUp.adapter.ChatListViewAdapter;
 import com.hello.TrevelMeetUp.common.Constant;
 import com.sendbird.android.AdminMessage;
@@ -68,6 +70,20 @@ public class Chat extends BaseFragment implements View.OnClickListener {
         this.progressON(getResources().getString(R.string.loading));
 
         View view = inflater.inflate(R.layout.chat_layout, container, false);
+
+        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+        actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
+        actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
+        actionBar.setDisplayShowTitleEnabled(false); //액션바에 표시되는 제목의 표시유무를 설정합니다.
+        actionBar.setDisplayShowHomeEnabled(false); //홈 아이콘을 숨김처리합니다.
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.argb(255,255,255,255)));
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+        View actionView = getLayoutInflater().inflate(R.layout.activity_action_bar, null);
+        TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
+        title.setText("Chat");
+
+        actionBar.setCustomView(actionView);
 
         SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.say_swipe_layout);
         swipeRefreshLayout.setOnRefreshListener(() -> {

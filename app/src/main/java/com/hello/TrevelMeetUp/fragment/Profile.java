@@ -273,13 +273,13 @@ public class Profile extends BaseFragment implements View.OnClickListener {
         return view;
     }
 
-    @Override
+    /*@Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         if(this.kind.equals("add_btn")) {
             menu.getItem(0).setVisible(false);
         }
-    }
+    }*/
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

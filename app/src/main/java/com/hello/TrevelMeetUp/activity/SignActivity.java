@@ -92,8 +92,6 @@ public class SignActivity extends BaseActivity {
         super.actList.add(this);
 
         this.activity = this;
-
-        Button button = (Button) findViewById(R.id.signInBtn);
     }
 
     @Override

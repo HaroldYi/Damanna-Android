@@ -1,9 +1,10 @@
 package com.hello.TrevelMeetUp.fragment;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -11,15 +12,15 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.Toolbar;
+import android.widget.TextView;
 
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -34,7 +35,6 @@ import com.hello.TrevelMeetUp.activity.SignActivity;
 import com.hello.TrevelMeetUp.activity.UserInfoActivity;
 import com.hello.TrevelMeetUp.adapter.SayListViewAdapter;
 import com.hello.TrevelMeetUp.vo.SayVo;
-import com.tsengvn.typekit.TypekitContextWrapper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -91,6 +91,20 @@ public class Say extends BaseFragment implements View.OnClickListener {
         this.user = this.mAuth.getCurrentUser();
 
         View view = inflater.inflate(R.layout.say_layout, container, false);
+
+        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+        actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
+        actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
+        actionBar.setDisplayShowTitleEnabled(false); //액션바에 표시되는 제목의 표시유무를 설정합니다.
+        actionBar.setDisplayShowHomeEnabled(false); //홈 아이콘을 숨김처리합니다.
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.argb(255,255,255,255)));
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+        View actionView = getLayoutInflater().inflate(R.layout.activity_action_bar, null);
+        TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
+        title.setText("Say");
+
+        actionBar.setCustomView(actionView);
 
         LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         try {

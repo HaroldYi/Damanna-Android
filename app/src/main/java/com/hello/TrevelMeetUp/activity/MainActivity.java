@@ -1,19 +1,19 @@
 package com.hello.TrevelMeetUp.activity;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.content.res.AppCompatResources;
-import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 import devlight.io.library.ntb.NavigationTabBar;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseUser fUser;
@@ -44,15 +44,6 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_horizontal_ntb);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        this.setActionBar(toolbar);
-        ActionBar actionBar = this.getActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-
-        this.mAuth = FirebaseAuth.getInstance();
-        this.fUser = this.mAuth.getCurrentUser();
-
         this.activity = this;
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -68,7 +59,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        /*this.initUI();*/
+        this.initUI();
     }
 
     @Override
