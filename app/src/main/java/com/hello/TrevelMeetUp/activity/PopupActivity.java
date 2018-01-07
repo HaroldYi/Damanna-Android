@@ -6,12 +6,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hello.TrevelMeetUp.R;
 
@@ -20,7 +22,6 @@ import com.hello.TrevelMeetUp.R;
  */
 
 public class PopupActivity extends AppCompatActivity {
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,9 @@ public class PopupActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
         actionBar.setCustomView(view);
 
+        Toolbar parent = (Toolbar)view.getParent();
+        parent.setContentInsetsAbsolute(0,0);
+
         ImageButton backBtn = (ImageButton) view.findViewById(R.id.backBtn);
 
         backBtn.setOnClickListener(view1 -> {
@@ -51,13 +55,20 @@ public class PopupActivity extends AppCompatActivity {
 
         //확인 버튼 클릭
         saveBtn.setOnClickListener(view1 -> {
-            //데이터 전달하기
-            Intent intent = new Intent();
-            intent.putExtra("sayContent", content.getText().toString());
-            setResult(RESULT_OK, intent);
 
-            //액티비티(팝업) 닫기
-            finish();
+            String contentStr = content.getText().toString();
+            if(contentStr != null && !contentStr.isEmpty()) {
+                //데이터 전달하기
+                Intent intent = new Intent();
+                intent.putExtra("sayContent", contentStr);
+                setResult(RESULT_OK, intent);
+
+                //액티비티(팝업) 닫기
+                finish();
+            } else {
+                Toast toast = Toast.makeText(this, "내용을 입력하여 주세요", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         });
     }
 
@@ -68,11 +79,5 @@ public class PopupActivity extends AppCompatActivity {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        //안드로이드 백버튼 막기
-        return;
     }
 }

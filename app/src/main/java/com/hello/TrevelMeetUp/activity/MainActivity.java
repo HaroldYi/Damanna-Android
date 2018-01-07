@@ -42,24 +42,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_horizontal_ntb);
 
         this.activity = this;
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        if (this.fUser != null) {
-            this.initUI();
-        } else {
-            startActivity(new Intent(MainActivity.this, SignActivity.class));
-        }
+        this.mAuth = FirebaseAuth.getInstance();
+        this.fUser = this.mAuth.getCurrentUser();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        this.initUI();
+
+        setContentView(R.layout.activity_horizontal_ntb);
+
+        if (this.fUser != null) {
+            this.initUI();
+        } else {
+            startActivity(new Intent(MainActivity.this, SignActivity.class));
+        }
     }
 
     @Override
@@ -134,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                         .build()
         );
 
-        this.navigationTabBar.setIconSizeFraction(0.35f);
+        this.navigationTabBar.setIconSizeFraction(0.40f);
         this.navigationTabBar.setModels(models);
         this.navigationTabBar.setModelIndex(0, true);
 
