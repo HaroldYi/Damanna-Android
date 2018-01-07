@@ -314,7 +314,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
                     this.listView.setSelection(this.sayListViewAdapter.getCount() - 1);
 
-                    for (DocumentSnapshot document : task.getResult()) {
+                    for (DocumentSnapshot document : documentSnapshotList) {
 
                         String memberId = document.getData().get("member_id").toString();
 

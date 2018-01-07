@@ -8,15 +8,16 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.content.res.AppCompatResources;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.fragment.Chat;
 import com.hello.TrevelMeetUp.fragment.Profile;
@@ -56,10 +57,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        setContentView(R.layout.activity_horizontal_ntb);
-
         if (this.fUser != null) {
-            this.initUI();
+
+            DocumentReference docRef = FirebaseFirestore.getInstance().collection("member").document(this.fUser.getUid());
+            docRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null && document.exists()) {
+
+                        Object nation = document.getData().get("nation");
+                        Object identity = document.getData().get("identity");
+
+                        if(nation == null) {
+                            startActivity(new Intent(this, SelectCountryActivity.class));
+                        } else if(identity == null) {
+                            startActivity(new Intent(this, SelectRoleActivity.class));
+                        } else if(nation != null && identity != null) {
+                            setContentView(R.layout.activity_horizontal_ntb);
+                            this.initUI();
+                        }
+                    } else {
+
+                    }
+                } else {
+                    Crashlytics.logException(task.getException());
+                }
+            });
         } else {
             startActivity(new Intent(MainActivity.this, SignActivity.class));
         }
