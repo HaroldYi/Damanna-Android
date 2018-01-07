@@ -48,14 +48,14 @@ public class MainActivity extends AppCompatActivity {
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
-        this.mAuth = FirebaseAuth.getInstance();
-        this.fUser = this.mAuth.getCurrentUser();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        this.mAuth = FirebaseAuth.getInstance();
+        this.fUser = this.mAuth.getCurrentUser();
 
         if (this.fUser != null) {
 
