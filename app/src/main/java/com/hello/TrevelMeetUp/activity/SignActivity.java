@@ -111,7 +111,10 @@ public class SignActivity extends BaseActivity {
         }
 
         if (System.currentTimeMillis() <= this.backKeyPressedTime + 2000) {
-            this.activity.finish();
+            moveTaskToBack(true);
+            finish();
+            android.os.Process.killProcess(android.os.Process.myPid());
+
             this.toast.cancel();
         }
     }
