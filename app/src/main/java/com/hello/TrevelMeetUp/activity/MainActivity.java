@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private Activity activity;
     private NavigationTabBar navigationTabBar;
 
+    public static int tabIndex = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,10 +164,23 @@ public class MainActivity extends AppCompatActivity {
 
         this.navigationTabBar.setIconSizeFraction(0.40f);
         this.navigationTabBar.setModels(models);
-        this.navigationTabBar.setModelIndex(0, true);
+        this.navigationTabBar.setModelIndex(this.tabIndex, true);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.contentContainer, new Say(), "say").commit();
+
+        switch (tabIndex) {
+            case 0:
+                transaction.replace(R.id.contentContainer, new Say(), "say").commit();
+                break;
+
+            case 1:
+                transaction.replace(R.id.contentContainer, new Chat(), "chat").commit();
+                break;
+
+            case 2:
+                transaction.replace(R.id.contentContainer, new Profile(), "profile").commit();
+                break;
+        }
 
         this.navigationTabBar.setOnTabBarSelectedIndexListener(new NavigationTabBar.OnTabBarSelectedIndexListener() {
             @Override
@@ -243,7 +258,6 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (index) {
                     case 0 :
-                        fragmentTransaction.addToBackStack(null);
                         fragmentTransaction.replace(R.id.contentContainer, new Say()).commit();
                         break;
 
@@ -252,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
                         break;*/
                 }
 
-                fragmentTransaction.addToBackStack(null);
                 switch (index) {
                     case 1 :
                         fragmentTransaction.replace(R.id.contentContainer, new Chat()).commit();

@@ -13,7 +13,6 @@
         android:id="@+id/actionBarTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"
         android:textAlignment="center"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/black" />
 </LinearLayout>

@@ -48,5 +48,4 @@
             android:textSize="14sp"
             android:typeface="sans" />
     </android.support.v7.widget.CardView>
-
 </LinearLayout>

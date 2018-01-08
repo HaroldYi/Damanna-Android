@@ -73,7 +73,7 @@ public class SayListViewAdapter extends BaseAdapter {
 
         holder.userName.setText(userInfo);
         holder.content.setText(this.sayVoList.get(index).getMsg());
-        holder.distance.setText(String.format("%.2fm", this.sayVoList.get(index).getDistance()));
+        holder.distance.setText(String.format("%.2fkm", this.sayVoList.get(index).getDistance()));
 
         DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img, "list");
         downloadImageTask.execute(this.sayVoList.get(index).getPhotoUrl());

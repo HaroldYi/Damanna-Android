@@ -5,12 +5,17 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,7 +36,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.hello.TrevelMeetUp.R;
+import com.hello.TrevelMeetUp.activity.MainActivity;
 import com.hello.TrevelMeetUp.activity.PopupActivity;
+import com.hello.TrevelMeetUp.activity.SettingActivity;
 import com.hello.TrevelMeetUp.activity.ViewPhotoActivity;
 import com.hello.TrevelMeetUp.adapter.GridViewAdapter;
 import com.hello.TrevelMeetUp.adapter.UserSayListViewAdapter;
@@ -70,7 +78,7 @@ public class Profile extends BaseFragment implements View.OnClickListener {
 
     private List<Photo> photoList;
     private GridViewAdapter adapter;
-    private CircleImageView profileImageView;
+    private ImageView profileImageView;
 
     private FirebaseFirestore db;
 
@@ -97,7 +105,7 @@ public class Profile extends BaseFragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        /*setHasOptionsMenu(true);*/
     }
 
     @Override
@@ -108,10 +116,33 @@ public class Profile extends BaseFragment implements View.OnClickListener {
         progressON(getResources().getString(R.string.loading));
 
         View view = inflater.inflate(R.layout.profile_layout, container, false);
-        this.profileImageView = (CircleImageView) view.findViewById(R.id.user_profile_photo);
+
+        ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
+        actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
+        actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
+        actionBar.setDisplayShowTitleEnabled(false); //액션바에 표시되는 제목의 표시유무를 설정합니다.
+        actionBar.setDisplayShowHomeEnabled(false); //홈 아이콘을 숨김처리합니다.
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.argb(255,255,255,255)));
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+        View actionView = getLayoutInflater().inflate(R.layout.activity_action_bar, null);
+        TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
+        title.setText("Profile");
+
+        actionBar.setCustomView(actionView);
+
+        Button settingBtn = (Button) actionView.findViewById(R.id.setting_btn);
+        settingBtn.setVisibility(View.VISIBLE);
+        settingBtn.setOnClickListener(view1 -> {
+            ((MainActivity)getActivity()).tabIndex = 2;
+            startActivity(new Intent(getActivity(), SettingActivity.class));
+        });
+
+        this.profileImageView = (ImageView) view.findViewById(R.id.user_profile_photo);
         this.profileImageView.setOnClickListener(view1 -> {
             viewPhoto(this.profileBitmap);
         });
+
         TextView textView = (TextView) view.findViewById(R.id.user_profile_name);
 
         this.profileBitmap = CommonFunction.getBitmapFromURL(this.user.getPhotoUrl().toString());

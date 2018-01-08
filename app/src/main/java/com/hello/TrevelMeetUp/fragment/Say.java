@@ -32,7 +32,6 @@ import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.activity.MainActivity;
 import com.hello.TrevelMeetUp.activity.PopupActivity;
 import com.hello.TrevelMeetUp.activity.SignActivity;
-import com.hello.TrevelMeetUp.activity.UserInfoActivity;
 import com.hello.TrevelMeetUp.adapter.SayListViewAdapter;
 import com.hello.TrevelMeetUp.vo.SayVo;
 
@@ -347,7 +346,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                                             loc1.setLatitude(this.latitude);
                                             loc1.setLongitude(this.longitude);
 
-                                            float distance = loc.distanceTo(loc1);
+                                            float distance = loc.distanceTo(loc1) / 1000;
                                             sayVo.setDistance(distance);
 
                                             this.sayVoList.add(sayVo);

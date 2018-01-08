@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="신분" >
+
+        <CheckBoxPreference
+            android:checked="false"
+            android:key="student"
+            android:title="유학생" />
+
+        <CheckBoxPreference
+            android:checked="false"
+            android:key="wh"
+            android:title="워킹홀리데이" />
+
+        <CheckBoxPreference
+            android:checked="false"
+            android:key="traveler"
+            android:title="여행자" />
+
+        <CheckBoxPreference
+            android:checked="false"
+            android:key="resident"
+            android:title="교포" />
+
+        <CheckBoxPreference
+            android:checked="false"
+            android:key="etc"
+            android:title="기타" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

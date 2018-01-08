@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="autoUpdate"
+        android:summary=""
+        android:switchTextOff="OFF"
+        android:switchTextOn="ON"
+        android:title="알림" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="autoUpdate"
+        android:summary=""
+        android:dependency="autoUpdate"
+        android:switchTextOff="OFF"
+        android:switchTextOn="ON"
+        android:title="소리" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="autoUpdate"
+        android:summary=""
+        android:dependency="autoUpdate"
+        android:switchTextOff="OFF"
+        android:switchTextOn="ON"
+        android:title="진동" />
+
+    <Preference
+        android:id="@+id/name"
+        android:defaultValue="Default value"
+        android:key="name"
+        android:enabled="true"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="이름"
+        android:summary="Harold"/>
+
+    <Preference
+        android:defaultValue="Default value"
+        android:key="age"
+        android:enabled="true"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="나이"
+        android:summary="Harold"/>
+
+    <Preference
+        android:defaultValue="Default value"
+        android:key="nation"
+        android:enabled="true"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="여행 또는 거주 국가"
+        android:summary="Harold"/>
+
+    <Preference
+        android:defaultValue="Default value"
+        android:key="identity"
+        android:enabled="true"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="신분"
+        android:summary="Harold"/>
+
+    <Preference
+        android:defaultValue="Default value"
+        android:key="question"
+        android:enabled="true"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="문의하기"
+        />
+
+    <Preference
+        android:defaultValue="Default value"
+        android:key="signOut"
+        android:enabled="true"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="로그아웃"
+        />
+
+</PreferenceScreen>
