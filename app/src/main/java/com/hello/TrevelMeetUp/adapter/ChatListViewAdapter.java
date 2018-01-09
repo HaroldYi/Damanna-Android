@@ -1,14 +1,26 @@
 package com.hello.TrevelMeetUp.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.common.BaseSwipListAdapter;
 import com.hello.TrevelMeetUp.common.DownloadImageTask;
+import com.hello.TrevelMeetUp.common.VolleySingleton;
 import com.meg7.widget.CircleImageView;
 import com.sendbird.android.BaseMessage;
 import com.sendbird.android.GroupChannel;
@@ -27,9 +39,10 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
 
     private static String TAG = "cloudFireStore";
 
-    private static Context context;
+    private Context context;
     private int resource;
     private List<GroupChannel> channelList;
+    private ImageLoader imageLoader;
 
     private String uid;
 
@@ -78,8 +91,8 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
             int unreadMessageCount = channelList.get(i).getUnreadMessageCount();
 
             if(unreadMessageCount < 1) {
-                holder.unreadMessageCount.setText("0");
-                holder.unreadMessageCount.setVisibility(View.VISIBLE);
+                holder.unreadMessageCount.setText("");
+                holder.unreadMessageCount.setVisibility(View.GONE);
             } else {
                 holder.unreadMessageCount.setText(String.valueOf(unreadMessageCount));
                 holder.unreadMessageCount.setVisibility(View.VISIBLE);
@@ -91,12 +104,27 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
                     String userName = user.getNickname();
                     holder.userName.setText(userName);
 
+                    GradientDrawable drawable = (GradientDrawable) holder.connectionStatus.getBackground();
+                    ColorDrawable colorDrawable = null;
+
+                    if(user.getConnectionStatus().equals(User.ConnectionStatus.ONLINE)) {
+                        colorDrawable = new ColorDrawable(Color.rgb(26,197,118));
+                    } else if(user.getConnectionStatus().equals(User.ConnectionStatus.OFFLINE)) {
+                        colorDrawable = new ColorDrawable(Color.rgb(204,204,204));
+                    }
+
+                    drawable.setColor(colorDrawable.getColor());
+
                     long dateOfSent = message.getCreatedAt();
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     holder.dateOfSent.setText(sdf.format(new Date(dateOfSent)));
 
-                    DownloadImageTask downloadImageTask = new DownloadImageTask(holder.userProfilePhoto, "list");
-                    downloadImageTask.execute(user.getProfileUrl());
+                    /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.userProfilePhoto, context, "list");
+                    downloadImageTask.execute(user.getProfileUrl());*/
+
+                    this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
+
+                    holder.userProfilePhoto.setImageUrl(user.getProfileUrl(), this.imageLoader);
                 }
             }
         }
@@ -105,18 +133,22 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
     }
 
     class ViewHolder {
-        CircleImageView userProfilePhoto;
+        NetworkImageView userProfilePhoto;
+        ImageView connectionStatus;
         TextView lastMessage;
         TextView unreadMessageCount;
         TextView userName;
         TextView dateOfSent;
 
         public ViewHolder(View view) {
-            userProfilePhoto = (CircleImageView) view.findViewById(R.id.user_profile_photo);
-            userName = (TextView) view.findViewById(R.id.user_name);
-            lastMessage = (TextView) view.findViewById(R.id.content);
-            unreadMessageCount = (TextView) view.findViewById(R.id.unreadMessageCount);
-            dateOfSent = (TextView) view.findViewById(R.id.date_of_sent);
+            this.userProfilePhoto = (NetworkImageView) view.findViewById(R.id.user_profile_photo);
+            this.userProfilePhoto.setBackground(new ShapeDrawable(new OvalShape()));
+            this.userProfilePhoto.setClipToOutline(true);
+            this.connectionStatus = (ImageView) view.findViewById(R.id.connectionStatus) ;
+            this.userName = (TextView) view.findViewById(R.id.user_name);
+            this.lastMessage = (TextView) view.findViewById(R.id.content);
+            this.unreadMessageCount = (TextView) view.findViewById(R.id.unreadMessageCount);
+            this.dateOfSent = (TextView) view.findViewById(R.id.date_of_sent);
 
             view.setTag(this);
         }

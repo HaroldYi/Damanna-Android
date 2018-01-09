@@ -6,10 +6,13 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.hello.TrevelMeetUp.R;
 import com.sendbird.android.SendBird;
 import com.tsengvn.typekit.Typekit;
@@ -24,6 +27,9 @@ public class BaseApplication extends Application {
 
     private static BaseApplication baseApplication;
     AppCompatDialog progressDialog;
+
+    private FirebaseAuth mAuth;
+    private FirebaseUser fUser;
 
     public static BaseApplication getInstance() {
         return baseApplication;
@@ -40,6 +46,19 @@ public class BaseApplication extends Application {
         SendBird.init(getResources().getString(R.string.app_id), getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
+
+        this.mAuth = FirebaseAuth.getInstance();
+        this.fUser = this.mAuth.getCurrentUser();
+
+        if(this.fUser != null) {
+            SendBird.connect(this.fUser.getUid(), (user, e) -> {
+                if (e != null) {
+                    // Error.
+                    Log.e("sendBirdErr", e.getMessage());
+                    return;
+                }
+            });
+        }
 
         this.baseApplication = this;
     }

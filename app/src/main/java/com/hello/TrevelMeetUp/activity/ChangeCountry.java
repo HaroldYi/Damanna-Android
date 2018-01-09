@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -52,6 +53,11 @@ public class ChangeCountry extends AppCompatActivity {
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
         View actionView = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
+        actionBar.setCustomView(actionView);
+
+        Toolbar parent = (Toolbar)actionView.getParent();
+        parent.setContentInsetsAbsolute(0,0);
+
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
         title.setText("국가 변경");
 
@@ -107,7 +113,5 @@ public class ChangeCountry extends AppCompatActivity {
                         });
             }
         });
-
-        actionBar.setCustomView(actionView);
     }
 }

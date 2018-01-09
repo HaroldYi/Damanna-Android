@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -55,6 +56,11 @@ public class ChangeDateOfBirth extends AppCompatActivity {
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
         View actionView = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
+        actionBar.setCustomView(actionView);
+
+        Toolbar parent = (Toolbar)actionView.getParent();
+        parent.setContentInsetsAbsolute(0,0);
+
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
         title.setText("생년월일 변경");
 
@@ -72,8 +78,6 @@ public class ChangeDateOfBirth extends AppCompatActivity {
                         finish();
                     });
         });
-
-        actionBar.setCustomView(actionView);
 
         String dateOfBirth = getIntent().getStringExtra("dateOfBirth");
         this.calendar.setTimeInMillis(Long.parseLong(dateOfBirth));

@@ -179,6 +179,8 @@ public class Chat extends BaseFragment implements View.OnClickListener {
             this.channels.get(position).markAsRead();
             this.chatListViewAdapter.notifyDataSetChanged();
 
+            ((MainActivity)getActivity()).tabIndex = 1;
+
             startActivity(intent);
         });
 

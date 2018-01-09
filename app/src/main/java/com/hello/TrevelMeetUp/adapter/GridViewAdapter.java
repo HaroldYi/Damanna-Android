@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.TrevelMeetUp.R;
@@ -81,8 +82,9 @@ public class GridViewAdapter extends BaseAdapter {
         if(photo.getBitmap() == null) {
             if (photo.getKind().equals("profile")) {
 
-                DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img, "grid");
-                downloadImageTask.execute(photo.getFileName());
+                /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
+                downloadImageTask.execute(photo.getFileName());*/
+
 
             } else if (photo.getKind().equals("photo")) {
                 StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("images/thumbnail/" + photo.getFileName() + "_thumbnail");

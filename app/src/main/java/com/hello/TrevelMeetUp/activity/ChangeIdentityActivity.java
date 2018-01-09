@@ -9,6 +9,7 @@ import android.preference.PreferenceFragment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -45,6 +46,11 @@ public class ChangeIdentityActivity extends AppCompatActivity {
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
         View actionView = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
+        actionBar.setCustomView(actionView);
+
+        Toolbar parent = (Toolbar)actionView.getParent();
+        parent.setContentInsetsAbsolute(0,0);
+
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
         title.setText("신분 변경");
 
@@ -53,8 +59,6 @@ public class ChangeIdentityActivity extends AppCompatActivity {
         backBtn.setOnClickListener(view1 -> {
             finish();
         });
-
-        actionBar.setCustomView(actionView);
 
         Intent intent = getIntent();
         this.identity = intent.getStringExtra("identity");

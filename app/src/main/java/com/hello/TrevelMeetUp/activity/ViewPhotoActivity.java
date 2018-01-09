@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.TrevelMeetUp.R;
@@ -26,7 +27,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class ViewPhotoActivity extends BaseActivity {
 
-    private ImageView imageView;
+    private NetworkImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,7 @@ public class ViewPhotoActivity extends BaseActivity {
         String userName = intent.getStringExtra("userName");
         textView.setText(userName);
 
-        this.imageView = (ImageView) findViewById(R.id.imageView);
+        this.imageView = (NetworkImageView) findViewById(R.id.imageView);
 
         PhotoViewAttacher attacher = new PhotoViewAttacher(this.imageView);
         attacher.setZoomable(true);

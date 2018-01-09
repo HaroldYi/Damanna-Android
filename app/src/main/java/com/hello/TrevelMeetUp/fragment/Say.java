@@ -92,6 +92,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
         View view = inflater.inflate(R.layout.say_layout, container, false);
 
+        ((MainActivity) getActivity()).getSupportActionBar().show();
+
         ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
         actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
@@ -139,6 +141,9 @@ public class Say extends BaseFragment implements View.OnClickListener {
         floatingActionButton.bringToFront();
 
         floatingActionButton.setOnClickListener(view1 -> {
+
+            ((MainActivity)getActivity()).tabIndex = 0;
+
             Intent intent = new Intent(getActivity(), PopupActivity.class);
             intent.putExtra("data", "Test Popup");
             startActivityForResult(intent, 1);
@@ -181,6 +186,9 @@ public class Say extends BaseFragment implements View.OnClickListener {
                 if (uid.equals(this.mAuth.getUid())) {
                     /*this.activity.onFragmentChange(2);*/
                 } else {
+
+                    ((MainActivity)getActivity()).tabIndex = 0;
+
                     Intent intent = new Intent(getActivity(), UserInfoActivity.class);
                     intent.putExtra("uid", uid);
                     intent.putExtra("userName", this.sayVoList.get(index).getUserName());

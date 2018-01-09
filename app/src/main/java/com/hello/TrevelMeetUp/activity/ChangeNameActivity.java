@@ -4,10 +4,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,15 +15,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.TrevelMeetUp.R;
+import com.sendbird.android.SendBird;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +52,11 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 
         View actionView = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
+        actionBar.setCustomView(actionView);
+
+        Toolbar parent = (Toolbar)actionView.getParent();
+        parent.setContentInsetsAbsolute(0,0);
+
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
         title.setText("이름 변경");
 
@@ -63,8 +66,6 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
         Button saveBtn = (Button) actionView.findViewById(R.id.saveBtn);
         saveBtn.setText("확인");
         saveBtn.setOnClickListener(this);
-
-        actionBar.setCustomView(actionView);
 
         Intent intent = getIntent();
         String name = intent.getStringExtra("name");
@@ -94,7 +95,16 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
                                         .update(userInfo)
                                         .addOnSuccessListener(aVoid -> {
                                             Log.d(TAG, "DocumentSnapshot successfully written!");
-                                            finish();
+
+                                            SendBird.updateCurrentUserInfo(userName, user.getPhotoUrl().toString(), e12 -> {
+                                                if (e12 != null) {
+                                                    // Error.
+                                                    Crashlytics.logException(e12);
+                                                    return;
+                                                }
+
+                                                finish();
+                                            });
                                         })
                                         .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
                             }

@@ -9,6 +9,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.hello.TrevelMeetUp.R;
 import com.sendbird.android.SendBird;
 
@@ -26,16 +27,17 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
-    private ImageView bmImage;
-    private static Context context;
+    private NetworkImageView bmImage;
+    private Context context;
     private String flag;
 
-    public DownloadImageTask(ImageView bmImage, String flag) {
+    public DownloadImageTask(NetworkImageView bmImage, Context context, String flag) {
         this.bmImage = bmImage;
+        this.context = context;
         this.flag = flag;
     }
 
-    public DownloadImageTask(ImageView bmImage) {
+    public DownloadImageTask(NetworkImageView bmImage) {
         this.bmImage = bmImage;
     }
 

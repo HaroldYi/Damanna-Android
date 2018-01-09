@@ -78,6 +78,9 @@ dependencies {
     compile 'com.github.markushi:android-ui:1.2'
 
     compile 'com.jpardogo.materialtabstrip:library:1.1.1'
+
+    // https://mvnrepository.com/artifact/com.android.volley/volley
+    compile group: 'com.android.volley', name: 'volley', version: '1.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
