@@ -51,11 +51,11 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
     @Override
     protected void onPostExecute(Bitmap result) {
-        if (this.flag != null && this.flag.equals("list")) {
+        /*if (this.flag != null && this.flag.equals("list")) {
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) bmImage.getLayoutParams();
             params.setMargins(20, 20, 0, 20);
         }
-
+*/
         this.bmImage.setImageBitmap(result);
     }
 

@@ -3,7 +3,7 @@
 
     <SwitchPreference
         android:defaultValue="false"
-        android:key="autoUpdate"
+        android:key="notification"
         android:summary=""
         android:switchTextOff="OFF"
         android:switchTextOn="ON"
@@ -11,18 +11,18 @@
 
     <SwitchPreference
         android:defaultValue="false"
-        android:key="autoUpdate"
+        android:key="bell"
         android:summary=""
-        android:dependency="autoUpdate"
+        android:dependency="notification"
         android:switchTextOff="OFF"
         android:switchTextOn="ON"
         android:title="소리" />
 
     <SwitchPreference
         android:defaultValue="false"
-        android:key="autoUpdate"
+        android:key="vibration"
         android:summary=""
-        android:dependency="autoUpdate"
+        android:dependency="notification"
         android:switchTextOff="OFF"
         android:switchTextOn="ON"
         android:title="진동" />

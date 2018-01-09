@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.common.BaseSwipListAdapter;
 import com.hello.TrevelMeetUp.common.DownloadImageTask;
+import com.meg7.widget.CircleImageView;
 import com.sendbird.android.BaseMessage;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.User;
@@ -64,7 +65,7 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
 
         if (view == null) {
             view = View.inflate(this.context.getApplicationContext(),
-                    R.layout.item_list_app, null);
+                    R.layout.chat_list_item, null);
             new ViewHolder(view);
         }
         ViewHolder holder = (ViewHolder) view.getTag();
@@ -77,8 +78,8 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
             int unreadMessageCount = channelList.get(i).getUnreadMessageCount();
 
             if(unreadMessageCount < 1) {
-                holder.unreadMessageCount.setText("");
-                holder.unreadMessageCount.setVisibility(View.GONE);
+                holder.unreadMessageCount.setText("0");
+                holder.unreadMessageCount.setVisibility(View.VISIBLE);
             } else {
                 holder.unreadMessageCount.setText(String.valueOf(unreadMessageCount));
                 holder.unreadMessageCount.setVisibility(View.VISIBLE);
@@ -104,18 +105,18 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
     }
 
     class ViewHolder {
-        ImageView userProfilePhoto;
+        CircleImageView userProfilePhoto;
         TextView lastMessage;
         TextView unreadMessageCount;
         TextView userName;
         TextView dateOfSent;
 
         public ViewHolder(View view) {
-            userProfilePhoto = (ImageView) view.findViewById(R.id.user_profile_photo);
+            userProfilePhoto = (CircleImageView) view.findViewById(R.id.user_profile_photo);
             userName = (TextView) view.findViewById(R.id.user_name);
             lastMessage = (TextView) view.findViewById(R.id.content);
-            /*unreadMessageCount = (TextView) view.findViewById(R.id.unreadMessageCount);
-            distance = (TextView) view.findViewById(R.id.date_of_sent);*/
+            unreadMessageCount = (TextView) view.findViewById(R.id.unreadMessageCount);
+            dateOfSent = (TextView) view.findViewById(R.id.date_of_sent);
 
             view.setTag(this);
         }

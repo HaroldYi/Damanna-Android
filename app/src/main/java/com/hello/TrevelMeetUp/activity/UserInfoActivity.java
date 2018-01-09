@@ -72,21 +72,21 @@ public class UserInfoActivity extends BaseActivity {
         /*models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_second),
-                        Color.parseColor(colors[1]))
+                        Color.parseColor(colors[0]))
                         .title("Fav")
                         .build()
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_fourth),
-                        Color.parseColor(colors[3]))
+                        Color.parseColor(colors[0]))
                         .title("Like")
                         .build()
         );*/
         models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_fifth),
-                        Color.parseColor(colors[4]))
+                        Color.parseColor(colors[0]))
                         .selectedIcon(getResources().getDrawable(R.drawable.ic_eighth))
                         .title("Chat")
                         .build()

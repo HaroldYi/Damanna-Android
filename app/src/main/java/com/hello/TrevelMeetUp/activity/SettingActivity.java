@@ -1,15 +1,18 @@
 package com.hello.TrevelMeetUp.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.SwitchPreference;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -86,12 +89,47 @@ public class SettingActivity extends AppCompatActivity {
             this.currentUser = this.mAuth.getCurrentUser();
             this.db = FirebaseFirestore.getInstance();
 
+            SwitchPreference notification = (SwitchPreference) findPreference("notification");
+            SwitchPreference bell = (SwitchPreference) findPreference("bell");
+            SwitchPreference vibration = (SwitchPreference) findPreference("vibration");
+
+            SharedPreferences pref = getActivity().getSharedPreferences("pref", MODE_PRIVATE);
+
+            notification.setChecked(pref.getBoolean("notification", true));
+            bell.setChecked(pref.getBoolean("bell", true));
+            vibration.setChecked(pref.getBoolean("vibration", true));
+
             Preference name = findPreference("name");
             Preference age = findPreference("age");
             Preference nation = findPreference("nation");
             Preference identity = findPreference("identity");
             Preference question = findPreference("question");
             Preference signOut = findPreference("signOut");
+
+            notification.setOnPreferenceClickListener(preference -> {
+
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean("notification", notification.isChecked());
+                editor.putBoolean("bell", bell.isChecked());
+                editor.putBoolean("vibration", vibration.isChecked());
+                editor.commit();
+
+                return false;
+            });
+
+            bell.setOnPreferenceClickListener(preference -> {
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean("bell", bell.isChecked());
+                editor.commit();
+                return false;
+            });
+
+            vibration.setOnPreferenceClickListener(preference -> {
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean("vibration", vibration.isChecked());
+                editor.commit();
+                return false;
+            });
 
             question.setOnPreferenceClickListener(preference -> {
                 Uri uri = Uri.parse("mailto:xxx@abc.com");

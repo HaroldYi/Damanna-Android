@@ -32,6 +32,7 @@ import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.activity.MainActivity;
 import com.hello.TrevelMeetUp.activity.PopupActivity;
 import com.hello.TrevelMeetUp.activity.SignActivity;
+import com.hello.TrevelMeetUp.activity.UserInfoActivity;
 import com.hello.TrevelMeetUp.adapter.SayListViewAdapter;
 import com.hello.TrevelMeetUp.vo.SayVo;
 
@@ -180,13 +181,13 @@ public class Say extends BaseFragment implements View.OnClickListener {
                 if (uid.equals(this.mAuth.getUid())) {
                     /*this.activity.onFragmentChange(2);*/
                 } else {
-                    /*Intent intent = new Intent(getActivity(), UserInfoActivity.class);
+                    Intent intent = new Intent(getActivity(), UserInfoActivity.class);
                     intent.putExtra("uid", uid);
                     intent.putExtra("userName", this.sayVoList.get(index).getUserName());
-                    intent.putExtra("profileUrl", this.sayVoList.get(index).getPhotoUrl());*/
+                    intent.putExtra("profileUrl", this.sayVoList.get(index).getPhotoUrl());
                 /*intent.putExtra("bitmapImage", this.sayVoList.get(index).getBitmap());*/
 
-                    /*startActivity(intent);*/
+                    startActivity(intent);
                 }
             } else {
                 startActivity(new Intent(getActivity(), SignActivity.class));
