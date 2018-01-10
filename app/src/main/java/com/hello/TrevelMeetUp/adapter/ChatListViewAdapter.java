@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.common.BaseSwipListAdapter;
 import com.hello.TrevelMeetUp.common.DownloadImageTask;
+import com.hello.TrevelMeetUp.common.RadiusImageView;
 import com.hello.TrevelMeetUp.common.VolleySingleton;
 import com.meg7.widget.CircleImageView;
 import com.sendbird.android.BaseMessage;
@@ -133,7 +135,7 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
     }
 
     class ViewHolder {
-        NetworkImageView userProfilePhoto;
+        RadiusImageView userProfilePhoto;
         ImageView connectionStatus;
         TextView lastMessage;
         TextView unreadMessageCount;
@@ -141,9 +143,8 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
         TextView dateOfSent;
 
         public ViewHolder(View view) {
-            this.userProfilePhoto = (NetworkImageView) view.findViewById(R.id.user_profile_photo);
-            this.userProfilePhoto.setBackground(new ShapeDrawable(new OvalShape()));
-            this.userProfilePhoto.setClipToOutline(true);
+            this.userProfilePhoto = (RadiusImageView) view.findViewById(R.id.user_profile_photo);
+            this.userProfilePhoto.setRadius(150f);
             this.connectionStatus = (ImageView) view.findViewById(R.id.connectionStatus) ;
             this.userName = (TextView) view.findViewById(R.id.user_name);
             this.lastMessage = (TextView) view.findViewById(R.id.content);

@@ -18,6 +18,8 @@
         android:theme="@style/AppTheme"
         >
 
+        <activity android:name=".activity.MainActivity" android:screenOrientation="portrait" />
+
         <!-- 팝업 Activity -->
         <activity android:name=".activity.PopupActivity" android:screenOrientation="portrait" />
 
@@ -55,13 +57,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.MainActivity" android:screenOrientation="portrait" >
+       <!-- <activity android:name=".activity.MainActivity" android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
+        </activity>-->
 
         <activity android:name=".activity.ChatRoomActivity"
             android:screenOrientation="portrait"

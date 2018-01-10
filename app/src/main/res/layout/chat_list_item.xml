@@ -17,10 +17,11 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp">
 
-        <com.android.volley.toolbox.NetworkImageView
+        <com.hello.TrevelMeetUp.common.RadiusImageView
             android:id="@+id/user_profile_photo"
             android:layout_width="70dp"
-            android:layout_height="70dp" />
+            android:layout_height="70dp"
+            android:scaleType="fitXY" />
 
         <ImageView
             android:id="@+id/connectionStatus"
@@ -38,15 +39,12 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/date_of_sent"
         android:layout_alignBottom="@+id/date_of_sent"
-        android:layout_marginStart="12dp"
         android:layout_toEndOf="@+id/user_profile_photo_layout"
         android:layout_weight="1"
         android:text="TextView"
-        android:textAlignment="center"
-        android:textAllCaps="true"
+        android:textAlignment="textEnd"
         android:textColor="@color/black"
-        android:fontFamily="sans-serif-medium"
-         />
+        android:typeface="sans" />
 
     <TextView
         android:id="@+id/date_of_sent"

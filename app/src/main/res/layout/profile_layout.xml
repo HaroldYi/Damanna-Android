@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:fillViewport="true"
@@ -13,25 +14,12 @@
         android:id="@+id/profile_layout_rl"
         >
 
-        <ImageView
-            android:id="@+id/user_profile_photo"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_below="@+id/header_cover_image"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="-60dp"
-            android:elevation="24dp"
-            android:padding="20dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/layer_4" />
-
         <RelativeLayout
             android:id="@+id/profile_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/header_cover_image"
-            android:background="#423752"
-            android:elevation="4dp"
+            android:background="@color/white"
             android:paddingBottom="24dp">
 
             <ImageView
@@ -54,29 +42,46 @@
                 android:id="@+id/user_profile_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/add_friend"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="30dp"
-                android:text="Viral Android"
-                android:textColor="#fff"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                android:layout_alignBottom="@+id/add_friend"
+                android:layout_marginStart="30dp"
+                android:layout_toEndOf="@+id/user_profile_photo"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:typeface="sans" />
 
             <TextView
                 android:id="@+id/user_profile_short_bio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/user_profile_name"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="12dp"
+                android:layout_alignStart="@+id/user_profile_name"
+                android:layout_marginTop="47.5dp"
                 android:text="Android free tutorials and example"
-                android:textColor="#fff"
+                android:textColor="@color/dark_gray"
                 android:textSize="14sp" />
 
+            <com.hello.TrevelMeetUp.common.RadiusImageView
+                android:id="@+id/user_profile_photo"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignTop="@+id/add_friend"
+                android:layout_marginStart="15dp"
+                />
         </RelativeLayout>
+
+        <it.neokree.materialtabs.MaterialTabHost
+            android:id="@+id/tabHost"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_below="@+id/profile_layout"
+            app:textColor="@color/black"
+            app:accentColor="#03c4c9"
+            app:primaryColor="@android:color/white" />
+
         <com.hello.TrevelMeetUp.view.ExpandableHeightGridView
             android:id="@+id/photo_list"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
@@ -86,8 +91,8 @@
             android:verticalSpacing="3dp"
             android:isScrollContainer="false"
             android:stretchMode="columnWidth"
-            android:numColumns="4"
-            android:layout_below="@+id/profile_layout"
+            android:numColumns="2"
+            android:layout_below="@+id/tabHost"
             >
         </com.hello.TrevelMeetUp.view.ExpandableHeightGridView>
 
@@ -97,7 +102,8 @@
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/photo_list">
+            android:layout_below="@+id/photo_list"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/textView"
@@ -129,7 +135,7 @@
         <com.hello.TrevelMeetUp.view.ExpandableHeightListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/list_hd"
+            android:layout_below="@+id/tabHost"
             android:background="@color/white"
             android:dividerHeight="0px"
             android:divider="#ffffff"

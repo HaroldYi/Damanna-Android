@@ -10,13 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="Say"
         android:gravity="center"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:typeface="sans"/>
+        android:typeface="sans"
+        android:fontFamily="sans-serif-medium" />
 
     <Button
         android:id="@+id/setting_btn"
@@ -24,7 +23,7 @@
         android:layout_height="20dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/pencil"
+        android:background="@drawable/ic_setings"
         android:visibility="gone" />
 
 </RelativeLayout>

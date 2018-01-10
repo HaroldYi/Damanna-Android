@@ -8,14 +8,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,9 +22,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -44,11 +42,12 @@ import com.hello.TrevelMeetUp.adapter.GridViewAdapter;
 import com.hello.TrevelMeetUp.adapter.UserSayListViewAdapter;
 import com.hello.TrevelMeetUp.common.CommonFunction;
 import com.hello.TrevelMeetUp.common.Constant;
+import com.hello.TrevelMeetUp.common.RadiusImageView;
+import com.hello.TrevelMeetUp.common.VolleySingleton;
 import com.hello.TrevelMeetUp.view.ExpandableHeightGridView;
 import com.hello.TrevelMeetUp.view.ExpandableHeightListView;
 import com.hello.TrevelMeetUp.vo.Photo;
 import com.hello.TrevelMeetUp.vo.SayVo;
-import com.meg7.widget.CircleImageView;
 
 import org.joda.time.DateTime;
 
@@ -61,11 +60,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.neokree.materialtabs.MaterialTab;
+import it.neokree.materialtabs.MaterialTabHost;
+import it.neokree.materialtabs.MaterialTabListener;
+
 /**
  * Created by lji5317 on 05/12/2017.
  */
 
-public class Profile extends BaseFragment implements View.OnClickListener {
+public class Profile extends BaseFragment implements View.OnClickListener, MaterialTabListener {
 
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -78,7 +81,7 @@ public class Profile extends BaseFragment implements View.OnClickListener {
 
     private List<Photo> photoList;
     private GridViewAdapter adapter;
-    private ImageView profileImageView;
+    private RadiusImageView profileImageView;
 
     private FirebaseFirestore db;
 
@@ -88,6 +91,13 @@ public class Profile extends BaseFragment implements View.OnClickListener {
 
     private Button button;
     private int lastIndex;
+
+    private ImageLoader imageLoader;
+
+    private MaterialTabHost tabHost;
+
+    private int selectedColour = Color.rgb(3, 196, 201);
+    private int unSelectedColour = Color.rgb(176, 176, 176);
 
     private static String TAG = "cloudFireStore";
 
@@ -117,6 +127,23 @@ public class Profile extends BaseFragment implements View.OnClickListener {
 
         View view = inflater.inflate(R.layout.profile_layout, container, false);
 
+        this.tabHost = (MaterialTabHost) view.findViewById(R.id.tabHost);
+
+        // init view pager
+        String[] tabList = getResources().getStringArray(R.array.tab_list);
+
+        // insert all tabs from pagerAdapter data
+        for (int i = 0; i < tabList.length ; i++) {
+
+            MaterialTab tab = this.tabHost.newTab()
+                            .setText(tabList[i])
+                            .setTabListener(this);
+
+                            tab.setTextColor((i == 0 ? this.selectedColour : this.unSelectedColour));
+
+            this.tabHost.addTab(tab);
+        }
+
         ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
         actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
@@ -138,7 +165,8 @@ public class Profile extends BaseFragment implements View.OnClickListener {
             startActivity(new Intent(getActivity(), SettingActivity.class));
         });
 
-        this.profileImageView = (ImageView) view.findViewById(R.id.user_profile_photo);
+        this.profileImageView = (RadiusImageView) view.findViewById(R.id.user_profile_photo);
+        this.profileImageView.setRadius(25f);
         this.profileImageView.setOnClickListener(view1 -> {
             viewPhoto(this.profileBitmap);
         });
@@ -147,19 +175,21 @@ public class Profile extends BaseFragment implements View.OnClickListener {
 
         this.profileBitmap = CommonFunction.getBitmapFromURL(this.user.getPhotoUrl().toString());
 
+        this.imageLoader = VolleySingleton.getInstance(getActivity()).getImageLoader();
+
         this.profileImageView.bringToFront();
-        this.profileImageView.setImageBitmap(this.profileBitmap);
+        this.profileImageView.setImageUrl(this.user.getPhotoUrl().toString(), this.imageLoader);
         textView.setText(this.user.getDisplayName());
 
-        view.setVisibility(View.INVISIBLE);
+        /*view.setVisibility(View.INVISIBLE);*/
 
         this.gridView = (ExpandableHeightGridView) view.findViewById(R.id.photo_list);
         this.gridView.setExpanded(true);
-        this.gridView.setVisibility(View.INVISIBLE);
+        /*this.gridView.setVisibility(View.INVISIBLE);*/
 
         this.listView = (ExpandableHeightListView) view.findViewById(R.id.say_list);
         this.listView.setExpanded(true);
-        this.listView.setVisibility(View.INVISIBLE);
+        /*this.listView.setVisibility(View.INVISIBLE);*/
 
         this.photoList = new ArrayList<>();
         this.sayVoList = new ArrayList<>();
@@ -211,11 +241,6 @@ public class Profile extends BaseFragment implements View.OnClickListener {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
 
-                        Photo photo = new Photo();
-                        photo.setFileName(this.user.getPhotoUrl().toString());
-                        photo.setKind("profile");
-                        this.photoList.add(photo);
-
                         if(task.getResult().size() > 0) {
                             for (DocumentSnapshot document : task.getResult()) {
                                 Photo p = new Photo();
@@ -225,9 +250,9 @@ public class Profile extends BaseFragment implements View.OnClickListener {
                             }
                         }
 
-                        Photo photo1 = new Photo();
-                        photo1.setKind("add_btn");
-                        this.photoList.add(photo1);
+                        Photo photo = new Photo();
+                        photo.setKind("add_btn");
+                        this.photoList.add(photo);
 
                         int size = this.photoList.size();
                         this.lastIndex = this.photoList.size() - 1;
@@ -274,7 +299,7 @@ public class Profile extends BaseFragment implements View.OnClickListener {
                         progressOFF();
                         view.setVisibility(View.VISIBLE);
                         this.gridView.setVisibility(View.VISIBLE);
-                        this.listView.setVisibility(View.VISIBLE);
+                        this.listView.setVisibility(View.GONE);
 
                         /*new Handler().postDelayed(() -> {
                             progressOFF();
@@ -389,6 +414,40 @@ public class Profile extends BaseFragment implements View.OnClickListener {
             }
         }
     }
+
+    @Override
+    public void onTabSelected(MaterialTab tab) {
+        // when the tab is clicked the pager swipe content to the tab position
+        this.tabHost.getCurrentTab().setTextColor(this.unSelectedColour);
+        this.tabHost.setSelectedNavigationItem(tab.getPosition());
+        this.tabHost.getCurrentTab().setTextColor(this.selectedColour);
+
+        switch (tab.getPosition()) {
+            case 0 :
+                this.listView.setVisibility(View.GONE);
+                this.gridView.setVisibility(View.VISIBLE);
+                break;
+
+            case 1 :
+                this.listView.setVisibility(View.VISIBLE);
+                this.gridView.setVisibility(View.GONE);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onTabReselected(MaterialTab tab) {
+
+    }
+
+    @Override
+    public void onTabUnselected(MaterialTab tab) {
+
+    }
+
 
     private void sendPicture(Intent data) {
 

@@ -8,4 +8,8 @@
         <item>Canada</item>
         <item>Australia</item>
     </string-array>
+    <string-array name="tab_list">
+        <item>Photo</item>
+        <item>Say</item>
+    </string-array>
 </resources>

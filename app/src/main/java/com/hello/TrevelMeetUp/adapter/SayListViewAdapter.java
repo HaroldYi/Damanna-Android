@@ -1,8 +1,6 @@
 package com.hello.TrevelMeetUp.adapter;
 
 import android.content.Context;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -10,8 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.hello.TrevelMeetUp.R;
+import com.hello.TrevelMeetUp.common.RadiusImageView;
 import com.hello.TrevelMeetUp.common.VolleySingleton;
 import com.hello.TrevelMeetUp.vo.SayVo;
 
@@ -82,8 +80,7 @@ public class SayListViewAdapter extends BaseAdapter {
 
     class ViewHolder {
         LinearLayout sayLayout;
-        LinearLayout layout;
-        NetworkImageView img;
+        RadiusImageView img;
         TextView userName;
         TextView content;
         TextView distance;
@@ -92,9 +89,8 @@ public class SayListViewAdapter extends BaseAdapter {
             this.sayLayout = (LinearLayout) view.findViewById(R.id.say_layout);
             this.userName = (TextView) view.findViewById(R.id.user_name);
             this.content = (TextView) view.findViewById(R.id.content);
-            this.img = (NetworkImageView) view.findViewById(R.id.user_profile_photo);
-            this.img.setBackground(new ShapeDrawable(new OvalShape()));
-            this.img.setClipToOutline(true);
+            this.img = (RadiusImageView) view.findViewById(R.id.user_profile_photo);
+            this.img.setRadius(100f);
             this.distance = (TextView) view.findViewById(R.id.distance);
 
             /*this.distance.setText("");*/

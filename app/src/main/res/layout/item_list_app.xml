@@ -6,26 +6,26 @@
     android:id="@+id/say_layout"
     android:padding="3dp" >
 
-    <android.support.v7.widget.CardView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <android.support.v7.widget.CardView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         app:cardBackgroundColor="@color/white"
         app:cardUseCompatPadding="true">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
 
-            <com.android.volley.toolbox.NetworkImageView
+            <com.hello.TrevelMeetUp.common.RadiusImageView
                 android:id="@+id/user_profile_photo"
                 android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_height="50dp"
+                android:scaleType="fitXY" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -37,31 +37,35 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_alignBaseline="@+id/date_of_sent"
+                    android:layout_alignBottom="@+id/date_of_sent"
+                    android:layout_toEndOf="@+id/user_profile_photo_layout"
                     android:layout_weight="1"
                     android:text="TextView"
+                    android:textAlignment="textEnd"
                     android:textColor="@color/black"
-                    android:fontFamily="sans-serif-medium" />
+                    android:typeface="sans" />
 
                 <TextView
                     android:id="@+id/distance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="2.5dp"
                     android:layout_weight="1"
                     android:text="TextView"
                     android:textColor="@color/dark_gray"
-                    android:typeface="sans"/>
+                    android:typeface="sans" />
             </LinearLayout>
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:layout_marginTop="80dp"
+            android:layout_marginBottom="30dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginBottom="30dp">
+            android:layout_marginTop="80dp"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/content"

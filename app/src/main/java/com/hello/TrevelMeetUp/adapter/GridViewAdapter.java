@@ -16,11 +16,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.common.DownloadImageTask;
+import com.hello.TrevelMeetUp.common.VolleySingleton;
 import com.hello.TrevelMeetUp.vo.Photo;
 
 import java.io.BufferedInputStream;
@@ -38,9 +40,10 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class GridViewAdapter extends BaseAdapter {
 
-    private static Context context;
+    private Context context;
     private List<Photo> list;
     private boolean flag = false;
+    private ImageLoader imageLoader;
 
     public GridViewAdapter(Context context, List<Photo> list) {
         this.context = context;
@@ -76,6 +79,8 @@ public class GridViewAdapter extends BaseAdapter {
             new ViewHolder(view);
         }
 
+        this.imageLoader = VolleySingleton.getInstance(this.context).getImageLoader();
+
         ViewHolder holder = (ViewHolder) view.getTag();
         Photo photo = list.get(index);
 
@@ -89,18 +94,20 @@ public class GridViewAdapter extends BaseAdapter {
             } else if (photo.getKind().equals("photo")) {
                 StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("images/thumbnail/" + photo.getFileName() + "_thumbnail");
 
-                final long ONE_MEGABYTE = 1024 * 1024;
+                holder.img.setImageUrl(islandRef.getDownloadUrl().toString(), this.imageLoader);
+
+                /*final long ONE_MEGABYTE = 1024 * 1024;
                 islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
                     // Data for "images/island.jpg" is returns, use this as needed
                     holder.img.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
                 }).addOnFailureListener(exception -> {
                     // Handle any errors
                     Log.e("bytess", exception.getMessage());
-                });
+                });*/
             } else if (photo.getKind().equals("add_btn")) {
-                holder.img.setImageResource(R.drawable.add_btn);
+                holder.img.setDefaultImageResId(R.drawable.add_btn);
             } else if (photo.getKind().equals("logo_t")) {
-                holder.img.setImageResource(R.drawable.logo_t);
+                holder.img.setDefaultImageResId(R.drawable.logo_t);
             }
         } else
             holder.img.setImageBitmap(photo.getBitmap());
@@ -109,9 +116,7 @@ public class GridViewAdapter extends BaseAdapter {
     }
 
     class ViewHolder {
-        private TextView distance;
-        private TextView updateTime;
-        private ImageView img;
+        private NetworkImageView img;
 
         private boolean flag;
 
@@ -140,7 +145,7 @@ public class GridViewAdapter extends BaseAdapter {
                 linearLayout.addView(updateTime);
             }
 
-            img = (ImageView) view.findViewById(R.id.img1);
+            this.img = (NetworkImageView) view.findViewById(R.id.img1);
             DisplayMetrics metrics = new DisplayMetrics();
             WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             windowManager.getDefaultDisplay().getMetrics(metrics);
@@ -154,89 +159,4 @@ public class GridViewAdapter extends BaseAdapter {
             view.setTag(this);
         }
     }
-
-
-    /*public class GridItem extends LinearLayout {
-        private TextView distance;
-        private TextView updateTime;
-        private ImageView img;
-
-        private boolean flag;
-
-        public GridItem(Context context, boolean flag) {
-            super(context);
-
-            this.flag = flag;
-            init(context);
-        }
-
-        public void init(Context context) {
-            LayoutInflater.from(context).inflate(R.layout.griditem,this);
-            if(!this.flag) {
-
-                LinearLayout linearLayout = new LinearLayout(getContext());
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
-                linearLayout.setLayoutParams(params);
-
-                LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                tvParams.setMargins(0, 10, 0, 0);
-                tvParams.weight = 1;
-
-                TextView distance = new TextView(getContext());
-                distance.setTextSize(20);
-                distance.setLayoutParams(params);
-
-                TextView updateTime = new TextView(getContext());
-                updateTime.setTextSize(20);
-                updateTime.setLayoutParams(params);
-
-                linearLayout.addView(distance);
-                linearLayout.addView(updateTime);
-            }
-
-            img = (ImageView)findViewById(R.id.img1);
-            DisplayMetrics metrics = new DisplayMetrics();
-            WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-            windowManager.getDefaultDisplay().getMetrics(metrics);
-
-            LayoutParams params = (LayoutParams) img.getLayoutParams();
-            params.width = metrics.widthPixels / 4;
-            params.height = metrics.widthPixels / 4;
-
-            img.setLayoutParams(params);
-        }
-
-        public void setData(Photo photo) {
-            if(!this.flag) {
-                distance.setText(String.format("%.2f", photo.getDistance()));
-                updateTime.setText("0000");
-            }
-
-            if(photo.getBitmap() == null) {
-                if (photo.getKind().equals("profile")) {
-
-                    DownloadImageTask downloadImageTask = new DownloadImageTask(img, "grid");
-                    downloadImageTask.execute(photo.getFileName());
-
-                } else if (photo.getKind().equals("photo")) {
-                    StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("images/thumbnail/" + photo.getFileName() + "_thumbnail");
-
-                    final long ONE_MEGABYTE = 1024 * 1024;
-                    islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
-                        // Data for "images/island.jpg" is returns, use this as needed
-                        img.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                    }).addOnFailureListener(exception -> {
-                        // Handle any errors
-                        Log.e("bytess", exception.getMessage());
-                    });
-                } else if (photo.getKind().equals("add_btn")) {
-                    img.setImageResource(R.drawable.add_btn);
-                } else if (photo.getKind().equals("logo_t")) {
-                    img.setImageResource(R.drawable.logo_t);
-                }
-            } else
-                img.setImageBitmap(photo.getBitmap());
-        }
-    }*/
 }
