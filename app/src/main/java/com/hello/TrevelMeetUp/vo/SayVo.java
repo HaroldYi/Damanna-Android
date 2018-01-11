@@ -20,7 +20,7 @@ public class SayVo {
 
     private Bitmap bitmap;
 
-    private float distance;
+    private String distance;
 
     public String getUid() {
         return uid;
@@ -70,11 +70,11 @@ public class SayVo {
         this.noMsg = noMsg;
     }
 
-    public float getDistance() {
+    public String getDistance() {
         return distance;
     }
 
-    public void setDistance(float distance) {
+    public void setDistance(String distance) {
         this.distance = distance;
     }
 

@@ -1,42 +1,173 @@
 package com.hello.TrevelMeetUp.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.TrevelMeetUp.R;
-import com.hello.TrevelMeetUp.common.Constant;
-import com.sendbird.android.AdminMessage;
-import com.sendbird.android.BaseChannel;
-import com.sendbird.android.BaseMessage;
-import com.sendbird.android.FileMessage;
+import com.hello.TrevelMeetUp.fragment.GroupChannelListFragment;
+import com.hello.TrevelMeetUp.fragment.GroupChatFragment;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.Member;
-import com.sendbird.android.PreviousMessageListQuery;
-import com.sendbird.android.SendBird;
-import com.sendbird.android.UserMessage;
+import com.sendbird.android.SendBirdException;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import co.intentservice.chatui.ChatView;
-import co.intentservice.chatui.models.ChatMessage;
 
 /**
  * Created by lji5317 on 11/12/2017.
  */
 
-public class ChatRoomActivity extends BaseActivity {
+public class ChatRoomActivity extends AppCompatActivity {
 
-    private GroupChannel groupChannel;
+    private FirebaseAuth mAuth;
+    private FirebaseUser fUser;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_group_channel);
+
+        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_group_channel);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_arrow);
+        }
+*/
+        this.mAuth = FirebaseAuth.getInstance();
+        this.fUser = mAuth.getCurrentUser();
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
+        actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
+        actionBar.setDisplayShowTitleEnabled(false); //액션바에 표시되는 제목의 표시유무를 설정합니다.
+        actionBar.setDisplayShowHomeEnabled(false); //홈 아이콘을 숨김처리합니다.
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.argb(255,255,255,255)));
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+        View actionView = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
+
+        TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
+        title.setText(getIntent().getStringExtra("userName"));
+
+        Typeface typeface = Typeface.createFromAsset(this.getAssets(), "fonts/NotoSans-Medium.ttf");
+        title.setTypeface(typeface);
+
+        actionBar.setCustomView(actionView);
+
+        Button saveBtn = (Button) findViewById(R.id.saveBtn);
+        saveBtn.setVisibility(View.GONE);
+
+        ImageButton backBtn = (ImageButton) actionView.findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(view1 -> finish());
+
+        /*if (savedInstanceState == null) {
+            // If started from launcher, load list of Open Channels
+            Fragment fragment = GroupChannelListFragment.newInstance();
+
+            FragmentManager manager = getSupportFragmentManager();
+            manager.popBackStack();
+
+            manager.beginTransaction()
+                    .replace(R.id.container_group_channel, fragment)
+                    .commit();
+        }*/
+
+        String channelUrl = getIntent().getStringExtra("channelUrl");
+        String uid = getIntent().getStringExtra("uid");
+
+        if(channelUrl != null) {
+            // If started from notification
+            Fragment fragment = GroupChatFragment.newInstance(channelUrl);
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction()
+                    .replace(R.id.container_group_channel, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+
+            List<String> userList = new ArrayList<>();
+            userList.add(this.fUser.getUid());
+            userList.add(uid);
+
+            GroupChannel.createChannelWithUserIds(userList, true, new GroupChannel.GroupChannelCreateHandler() {
+                @Override
+                public void onResult(GroupChannel groupChannel, SendBirdException e) {
+                    if (e != null) {
+                        // Error!
+                        return;
+                    }
+
+                    /*List<Member> memberList = groupChannel.getMembers();
+                    for (Member member : memberList) {
+                        if(!member.getUserId().equals(uid)) {
+                            title.setText(member.getNickname());
+                        }
+                    }*/
+
+                    Fragment fragment = GroupChatFragment.newInstance(groupChannel.getUrl());
+                    FragmentManager manager = getSupportFragmentManager();
+                    manager.beginTransaction()
+                            .replace(R.id.container_group_channel, fragment)
+                            .addToBackStack(null)
+                            .commit();
+                }
+            });
+        }
+    }
+
+    public interface onBackPressedListener {
+        boolean onBack();
+    }
+    private onBackPressedListener mOnBackPressedListener;
+
+    public void setOnBackPressedListener(onBackPressedListener listener) {
+        mOnBackPressedListener = listener;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mOnBackPressedListener != null && mOnBackPressedListener.onBack()) {
+            return;
+        }
+        super.onBackPressed();
+        finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void setActionBarTitle(String title) {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(title);
+        }
+    }
+
+    /*private GroupChannel groupChannel;
     private FirebaseAuth mAuth;
     private FirebaseUser fUser;
 
@@ -190,5 +321,5 @@ public class ChatRoomActivity extends BaseActivity {
                 }
             }
         });
-    }
+    }*/
 }

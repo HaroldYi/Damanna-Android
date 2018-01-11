@@ -22,6 +22,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.fragment.Chat;
+import com.hello.TrevelMeetUp.fragment.GroupChannelListFragment;
 import com.hello.TrevelMeetUp.fragment.Profile;
 import com.hello.TrevelMeetUp.fragment.Say;
 import com.tsengvn.typekit.TypekitContextWrapper;
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
             case 1 :
                 this.navigationTabBar.setModelIndex(1, true);
-                transaction.replace(R.id.contentContainer, new Chat()).addToBackStack("chat").commit();
+                transaction.replace(R.id.contentContainer, new GroupChannelListFragment()).addToBackStack("chat").commit();
                 break;
 
             case 2:

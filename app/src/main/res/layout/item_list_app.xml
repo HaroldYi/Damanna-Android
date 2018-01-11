@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
             <com.hello.TrevelMeetUp.common.RadiusImageView
@@ -36,14 +36,15 @@
                     android:id="@+id/user_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
                     android:layout_alignBaseline="@+id/date_of_sent"
                     android:layout_alignBottom="@+id/date_of_sent"
+                    android:layout_marginLeft="10dp"
                     android:layout_toEndOf="@+id/user_profile_photo_layout"
                     android:layout_weight="1"
                     android:text="TextView"
                     android:textAlignment="textEnd"
                     android:textColor="@color/black"
+                    android:textSize="16sp"
                     android:typeface="sans" />
 
                 <TextView
@@ -62,7 +63,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="20dp"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="80dp"
             android:orientation="horizontal">

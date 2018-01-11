@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:background="#423752"
+    android:background="@color/white"
     >
 
     <co.intentservice.chatui.ChatView
@@ -16,7 +16,8 @@
         android:layout_height="match_parent"
         chatview:backgroundColor="#00000000"
         chatview:bubbleBackgroundRcv="#00000000"
-        chatview:bubbleBackgroundSend="#00000000"
-        chatview:bubbleElevation="elevated" />
+        chatview:bubbleBackgroundSend="@color/blue"
+        chatview:bubbleElevation="elevated"
+        />
 
 </LinearLayout>

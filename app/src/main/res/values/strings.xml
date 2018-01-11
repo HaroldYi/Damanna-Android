@@ -3,6 +3,17 @@
     <string name="app_id">FA8D8716-6074-4693-BF63-C7662626DFB3</string>
     <string name="loading">Loading...</string>
     <string name="uploading">Uploading...</string>
+    <string name="group_channel_list_file_message_text">%1$s has uploaded a file.</string>
+    <string name="all_group_channels">Group Channels</string>
+    <string name="resend_message">Resend</string>
+    <string name="delete_message">Delete</string>
+    <string name="download">Download</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Message Status -->
+    <string name="message_sending">Sending</string>
+    <string name="message_failed">Failed</string>
+
     <string-array name="country_list">
         <item>United States</item>
         <item>Canada</item>

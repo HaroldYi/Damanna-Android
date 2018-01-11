@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,7 +37,9 @@ import com.hello.TrevelMeetUp.activity.UserInfoActivity;
 import com.hello.TrevelMeetUp.adapter.SayListViewAdapter;
 import com.hello.TrevelMeetUp.vo.SayVo;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -105,6 +108,9 @@ public class Say extends BaseFragment implements View.OnClickListener {
         View actionView = getLayoutInflater().inflate(R.layout.activity_action_bar, null);
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
         title.setText("Say");
+
+        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/NotoSans-Medium.ttf");
+        title.setTypeface(typeface);
 
         actionBar.setCustomView(actionView);
 
@@ -337,6 +343,20 @@ public class Say extends BaseFragment implements View.OnClickListener {
                                             String nation = (document1.getData().get("nation") != null ? document1.getData().get("nation").toString() : "");
                                             String identity = (document1.getData().get("identity") != null ? document1.getData().get("identity").toString() : "");
 
+                                            long regDt = ((Date) document.getData().get("reg_dt")).getTime();
+                                            long now = System.currentTimeMillis();
+
+                                            long regTime = (now - regDt) / 60000;
+
+                                            String regMin = "";
+                                            if(regTime < 60) {
+                                                regMin = String.format("%dmin", regTime);
+                                            } else if(regTime >= 60 && regTime < 1440) {
+                                                regMin = String.format("%dh", (int)(regTime / 60));
+                                            } else if(regTime > 1440) {
+                                                regMin = String.format("%dd", (int)(regTime / 1440));
+                                            }
+
                                             sayVo.setUid(document1.getData().get("id").toString());
                                             sayVo.setUserName(document1.getData().get("name").toString());
                                             sayVo.setNation(nation);
@@ -355,8 +375,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
                                             loc1.setLatitude(this.latitude);
                                             loc1.setLongitude(this.longitude);
 
-                                            float distance = loc.distanceTo(loc1) / 1000;
-                                            sayVo.setDistance(distance);
+                                            String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
+                                            sayVo.setDistance(String.format("%s / %s", regMin, distance));
 
                                             this.sayVoList.add(sayVo);
                                             this.sayListViewAdapter.notifyDataSetChanged();

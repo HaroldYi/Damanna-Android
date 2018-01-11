@@ -1,6 +1,7 @@
 package com.hello.TrevelMeetUp.adapter;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -66,12 +67,15 @@ public class SayListViewAdapter extends BaseAdapter {
 
         holder.userName.setText(userInfo);
         holder.content.setText(this.sayVoList.get(index).getMsg());
-        holder.distance.setText(String.format("%.2fkm", this.sayVoList.get(index).getDistance()));
+        holder.distance.setText(this.sayVoList.get(index).getDistance());
 
         /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
         downloadImageTask.execute(this.sayVoList.get(index).getPhotoUrl());*/
 
         this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
+
+        Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSans-Medium.ttf");
+        holder.userName.setTypeface(typeface);
 
         holder.img.setImageUrl(this.sayVoList.get(index).getPhotoUrl(), this.imageLoader);
 
