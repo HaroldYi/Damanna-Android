@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         );*/
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        AppCompatResources.getDrawable(this.activity, R.drawable.ic_fa_list_ul),
+                        AppCompatResources.getDrawable(this.activity, R.drawable.ic_feed),
                         Color.parseColor(colors[0]))
                         .title("")
                         .build()
