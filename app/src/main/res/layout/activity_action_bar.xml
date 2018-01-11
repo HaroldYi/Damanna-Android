@@ -23,7 +23,7 @@
         android:layout_height="20dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/ic_setings"
+        android:background="@drawable/ic_settings"
         android:visibility="gone" />
 
 </RelativeLayout>

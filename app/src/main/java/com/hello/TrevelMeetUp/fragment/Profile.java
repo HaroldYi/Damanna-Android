@@ -16,12 +16,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -110,6 +108,16 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     @Override
     public void onClick(View view) {
+
+        switch (view.getId()) {
+            case R.id.take:
+                takePhoto();
+                break;
+
+            case R.id.choose:
+                selectPhoto();
+                break;
+        }
     }
 
     @Override
@@ -123,9 +131,18 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         super.onCreate(savedInstanceState);
 
+        ((MainActivity)getActivity()).tabIndex = 2;
+
         progressON(getResources().getString(R.string.loading));
 
         View view = inflater.inflate(R.layout.profile_layout, container, false);
+        view.setVisibility(View.INVISIBLE);
+
+        TextView take = (TextView) view.findViewById(R.id.take);
+        TextView choose = (TextView) view.findViewById(R.id.choose);
+
+        take.setOnClickListener(this);
+        choose.setOnClickListener(this);
 
         this.tabHost = (MaterialTabHost) view.findViewById(R.id.tabHost);
 
@@ -214,6 +231,11 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                         if(document.exists()) {
                             DateTime dateTime = new DateTime();
 
+                            String gender = document.getData().get("gender").toString();
+                            gender = (gender.equals("male") ? "남자" : "여자");
+                            String identity = document.getData().get("identity").toString();
+                            String nation = document.getData().get("nation").toString();
+
                             long dateOfBirth = ((Date) document.getData().get("dateOfBirth")).getTime();
                             long now = System.currentTimeMillis();
 
@@ -228,6 +250,14 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                             int nowYear = nowCalender.get(Calendar.YEAR);
 
                             int koreanAge = nowYear - yearOfBirth + 1;
+
+                            String age = String.format("%d세, %s", koreanAge, gender);
+                            TextView ageView = (TextView) view.findViewById(R.id.age);
+                            ageView.setText(age);
+
+                            nation = String.format("%s, %s", nation, identity);
+                            TextView identityView = (TextView) view.findViewById(R.id.identity);
+                            identityView.setText(nation);
                         }
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
@@ -321,8 +351,16 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
                 if(this.kind.equals("photo") || this.kind.equals("profile")) {
                     viewPhoto(null);
-                } else
-                    getActivity().openOptionsMenu();
+                } else {
+                    LinearLayout cameraMenu = (LinearLayout) view.findViewById(R.id.camera_menu);
+
+
+                    if(cameraMenu.getVisibility() == View.VISIBLE) {
+                        cameraMenu.setVisibility(View.GONE);
+                    } else {
+                        cameraMenu.setVisibility(View.VISIBLE);
+                    }
+                }
             }
         });
 
@@ -332,32 +370,16 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     /*@Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        if(this.kind.equals("add_btn")) {
+        if(this.kind != null && this.kind.equals("add_btn")) {
             menu.getItem(0).setVisible(false);
         }
-    }*/
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.popupmenu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.take:
-                takePhoto();
-                break;
-
-            case R.id.choose:
-                selectPhoto();
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -448,7 +470,6 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     }
 
-
     private void sendPicture(Intent data) {
 
         Uri imgUri = data.getData();
@@ -478,7 +499,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         options.outHeight = 1000;
         options.outWidth = 1000;
         Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);//경로를 통해 비트맵으로 전환
-        /*bitmap = rotate(bitmap, exifDegree);*/
+        bitmap = rotate(bitmap, exifDegree);
 
         Bitmap thumbnail = Bitmap.createScaledBitmap(bitmap, bitmap.getHeight() / 10, bitmap.getHeight() / 10, false);
         ByteArrayOutputStream bitmapOps = new ByteArrayOutputStream();

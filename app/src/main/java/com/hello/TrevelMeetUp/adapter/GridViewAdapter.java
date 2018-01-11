@@ -3,6 +3,8 @@ package com.hello.TrevelMeetUp.adapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.TrevelMeetUp.R;
@@ -92,14 +95,21 @@ public class GridViewAdapter extends BaseAdapter {
 
 
             } else if (photo.getKind().equals("photo")) {
-                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("images/thumbnail/" + photo.getFileName() + "_thumbnail");
+                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("images/thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
 
-                holder.img.setImageUrl(islandRef.getDownloadUrl().toString(), this.imageLoader);
+                islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
+                    //do something with downloadurl
+                    holder.img.setImageUrl(downloadUrl.toString(), this.imageLoader);
+                });
 
                 /*final long ONE_MEGABYTE = 1024 * 1024;
                 islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
                     // Data for "images/island.jpg" is returns, use this as needed
-                    holder.img.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+
+                    Bitmap src = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    Bitmap resized = Bitmap.createScaledBitmap(src, src.getWidth(), src.getHeight() / 2, true);
+
+                    holder.img.setBackground(new BitmapDrawable(resized));
                 }).addOnFailureListener(exception -> {
                     // Handle any errors
                     Log.e("bytess", exception.getMessage());
