@@ -7,19 +7,25 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -28,16 +34,18 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.activity.MainActivity;
+import com.hello.TrevelMeetUp.activity.PhotoViewerActivity;
 import com.hello.TrevelMeetUp.activity.PopupActivity;
 import com.hello.TrevelMeetUp.activity.SettingActivity;
 import com.hello.TrevelMeetUp.activity.ViewPhotoActivity;
 import com.hello.TrevelMeetUp.adapter.GridViewAdapter;
-import com.hello.TrevelMeetUp.adapter.UserSayListViewAdapter;
+import com.hello.TrevelMeetUp.adapter.SayListViewAdapter;
 import com.hello.TrevelMeetUp.common.CommonFunction;
 import com.hello.TrevelMeetUp.common.Constant;
 import com.hello.TrevelMeetUp.common.RadiusImageView;
@@ -46,8 +54,6 @@ import com.hello.TrevelMeetUp.view.ExpandableHeightGridView;
 import com.hello.TrevelMeetUp.view.ExpandableHeightListView;
 import com.hello.TrevelMeetUp.vo.Photo;
 import com.hello.TrevelMeetUp.vo.SayVo;
-
-import org.joda.time.DateTime;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -85,7 +91,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     private ExpandableHeightListView listView;
     private List<SayVo> sayVoList;
-    private UserSayListViewAdapter userSayListViewAdapter;
+    private SayListViewAdapter userSayListViewAdapter;
 
     private Button button;
     private int lastIndex;
@@ -93,6 +99,19 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     private ImageLoader imageLoader;
 
     private MaterialTabHost tabHost;
+
+    private CardView photoListView;
+    private ScrollView sayListView;
+
+    private String regMin = "";
+
+    private int limit = 5;
+    private Query query;
+
+    private View view;
+
+    private boolean lastitemVisibleFlag = false;
+    private boolean lastYn = false;
 
     private int selectedColour = Color.rgb(3, 196, 201);
     private int unSelectedColour = Color.rgb(176, 176, 176);
@@ -133,10 +152,10 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         ((MainActivity)getActivity()).tabIndex = 2;
 
-        progressON(getResources().getString(R.string.loading));
+        /*progressON(getResources().getString(R.string.loading));*/
 
-        View view = inflater.inflate(R.layout.profile_layout, container, false);
-        view.setVisibility(View.INVISIBLE);
+        this.view = inflater.inflate(R.layout.profile_layout, container, false);
+        this.view.setVisibility(View.INVISIBLE);
 
         TextView take = (TextView) view.findViewById(R.id.take);
         TextView choose = (TextView) view.findViewById(R.id.choose);
@@ -145,6 +164,9 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         choose.setOnClickListener(this);
 
         this.tabHost = (MaterialTabHost) view.findViewById(R.id.tabHost);
+
+        this.photoListView = (CardView) view.findViewById(R.id.photo_list_view);
+        this.sayListView = (ScrollView) view.findViewById(R.id.say_list_view);
 
         // init view pager
         String[] tabList = getResources().getStringArray(R.array.tab_list);
@@ -156,10 +178,11 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                             .setText(tabList[i])
                             .setTabListener(this);
 
-                            tab.setTextColor((i == 0 ? this.selectedColour : this.unSelectedColour));
-
             this.tabHost.addTab(tab);
         }
+
+        this.tabHost.setSelectedNavigationItem(0);
+        this.tabHost.getCurrentTab().setTextColor(this.selectedColour);
 
         ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
@@ -173,9 +196,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
         title.setText("Profile");
 
+        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/NotoSans-Medium.ttf");
+        title.setTypeface(typeface);
+
         actionBar.setCustomView(actionView);
 
-        Button settingBtn = (Button) actionView.findViewById(R.id.setting_btn);
+        ImageButton settingBtn = (ImageButton) actionView.findViewById(R.id.setting_btn);
         settingBtn.setVisibility(View.VISIBLE);
         settingBtn.setOnClickListener(view1 -> {
             ((MainActivity)getActivity()).tabIndex = 2;
@@ -185,7 +211,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.profileImageView = (RadiusImageView) view.findViewById(R.id.user_profile_photo);
         this.profileImageView.setRadius(25f);
         this.profileImageView.setOnClickListener(view1 -> {
-            viewPhoto(this.profileBitmap);
+            viewPhoto(this.user.getPhotoUrl().toString(), "jpg");
         });
 
         TextView textView = (TextView) view.findViewById(R.id.user_profile_name);
@@ -222,46 +248,43 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.gridView.setAdapter(adapter);
 
         this.db.collection("member/")
-                /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
                 .document(this.user.getUid())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if(document.exists()) {
-                            DateTime dateTime = new DateTime();
-
-                            String gender = document.getData().get("gender").toString();
-                            gender = (gender.equals("male") ? "남자" : "여자");
-                            String identity = document.getData().get("identity").toString();
-                            String nation = document.getData().get("nation").toString();
-
-                            long dateOfBirth = ((Date) document.getData().get("dateOfBirth")).getTime();
-                            long now = System.currentTimeMillis();
-
-                            Calendar birthCalendar = Calendar.getInstance();
-                            birthCalendar.setTimeInMillis(dateOfBirth);
-
-                            int yearOfBirth = birthCalendar.get(Calendar.YEAR);
-
-                            Calendar nowCalender = Calendar.getInstance();
-                            nowCalender.setTimeInMillis(now);
-
-                            int nowYear = nowCalender.get(Calendar.YEAR);
-
-                            int koreanAge = nowYear - yearOfBirth + 1;
-
-                            String age = String.format("%d세, %s", koreanAge, gender);
-                            TextView ageView = (TextView) view.findViewById(R.id.age);
-                            ageView.setText(age);
-
-                            nation = String.format("%s, %s", nation, identity);
-                            TextView identityView = (TextView) view.findViewById(R.id.identity);
-                            identityView.setText(nation);
-                        }
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
+                .addSnapshotListener((documentSnapshot, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "listen:error", e);
+                        return;
                     }
+
+                    Date date = documentSnapshot.getDate("dateOfBirth");
+
+                    String identity = documentSnapshot.getString("identity");
+                    String nation = documentSnapshot.getString("nation");
+
+                    String gender = documentSnapshot.getString("gender");
+                    gender = (gender.equals("male") ? "남자" : "여자");
+
+                    long dateOfBirth = documentSnapshot.getDate("dateOfBirth").getTime();
+                    long now = System.currentTimeMillis();
+
+                    Calendar birthCalendar = Calendar.getInstance();
+                    birthCalendar.setTimeInMillis(dateOfBirth);
+
+                    int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                    Calendar nowCalender = Calendar.getInstance();
+                    nowCalender.setTimeInMillis(now);
+
+                    int nowYear = nowCalender.get(Calendar.YEAR);
+
+                    int koreanAge = nowYear - yearOfBirth + 1;
+
+                    String age = String.format("%d세, %s", koreanAge, gender);
+                    TextView ageView = (TextView) view.findViewById(R.id.age);
+                    ageView.setText(age);
+
+                    nation = String.format("%s, %s", nation, identity);
+                    TextView identityView = (TextView) view.findViewById(R.id.identity);
+                    identityView.setText(nation);
                 });
 
         this.db.collection("photo/")
@@ -273,10 +296,17 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
                         if(task.getResult().size() > 0) {
                             for (DocumentSnapshot document : task.getResult()) {
-                                Photo p = new Photo();
-                                p.setFileName(document.getData().get("fileName").toString());
-                                p.setKind("photo");
-                                this.photoList.add(p);
+                                Photo photo = new Photo();
+                                photo.setFileName(document.getData().get("fileName").toString());
+                                photo.setKind("photo");
+                                this.photoList.add(photo);
+
+                                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + photo.getFileName() + ".jpg");
+
+                                islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
+                                    //do something with downloadurl
+                                    photo.setFileUrl(downloadUrl.toString());
+                                });
                             }
                         }
 
@@ -301,47 +331,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     }
                 });
 
-        this.db.collection("say/")
+        this.query = this.db.collection("say/")
                 .whereEqualTo("member_id", this.user.getUid())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        this.userSayListViewAdapter = new UserSayListViewAdapter(getActivity(), R.layout.chat_layout, this.sayVoList);
-                        this.listView.setAdapter(this.userSayListViewAdapter);
+                /*.orderBy("reg_dt", Query.Direction.DESCENDING)*/
+                .limit(this.limit);
 
-                        if(task.getResult().size() > 0) {
-                            for (DocumentSnapshot document : task.getResult()) {
-
-                                SayVo sayVo = new SayVo();
-                                sayVo.setMsg(document.getData().get("content").toString());
-                                sayVo.setNoMsg(false);
-
-                                this.sayVoList.add(sayVo);
-                            }
-                        } else {
-                            SayVo sayVo = new SayVo();
-                            sayVo.setMsg("등록된 내용이 없습니다.");
-                            sayVo.setNoMsg(true);
-
-                            this.sayVoList.add(sayVo);
-                        }
-
-                        progressOFF();
-                        view.setVisibility(View.VISIBLE);
-                        this.gridView.setVisibility(View.VISIBLE);
-                        this.listView.setVisibility(View.GONE);
-
-                        /*new Handler().postDelayed(() -> {
-                            progressOFF();
-                            view.setVisibility(View.VISIBLE);
-                            this.gridView.setVisibility(View.VISIBLE);
-                            this.listView.setVisibility(View.VISIBLE);
-                        }, 100);*/
-                        this.userSayListViewAdapter.notifyDataSetChanged();
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
-                    }
-                });
+        loadingData(this.query);
 
         this.gridView.setOnItemClickListener((parent, v, position, id) -> {
             this.kind = this.photoList.get(position).getKind();
@@ -350,7 +345,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             if(!this.kind.equals("logo_t")) {
 
                 if(this.kind.equals("photo") || this.kind.equals("profile")) {
-                    viewPhoto(null);
+                    viewPhoto(this.photoList.get(position).getFileUrl(), "jpg");
                 } else {
                     LinearLayout cameraMenu = (LinearLayout) view.findViewById(R.id.camera_menu);
 
@@ -360,6 +355,22 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     } else {
                         cameraMenu.setVisibility(View.VISIBLE);
                     }
+                }
+            }
+        });
+
+        this.listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                //현재 화면에 보이는 첫번째 리스트 아이템의 번호(firstVisibleItem) + 현재 화면에 보이는 리스트 아이템의 갯수(visibleItemCount)가 리스트 전체의 갯수(totalItemCount) -1 보다 크거나 같을때
+                lastitemVisibleFlag = (totalItemCount > 0) && (firstVisibleItem + visibleItemCount >= totalItemCount);
+            }
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                //OnScrollListener.SCROLL_STATE_IDLE은 스크롤이 이동하다가 멈추었을때 발생되는 스크롤 상태입니다.
+                //즉 스크롤이 바닦에 닿아 멈춘 상태에 처리를 하겠다는 뜻
+                if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && lastitemVisibleFlag && !lastYn) {
+                    loadingData(query);
                 }
             }
         });
@@ -446,13 +457,13 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         switch (tab.getPosition()) {
             case 0 :
-                this.listView.setVisibility(View.GONE);
-                this.gridView.setVisibility(View.VISIBLE);
+                this.sayListView.setVisibility(View.GONE);
+                this.photoListView.setVisibility(View.VISIBLE);
                 break;
 
             case 1 :
-                this.listView.setVisibility(View.VISIBLE);
-                this.gridView.setVisibility(View.GONE);
+                this.sayListView.setVisibility(View.VISIBLE);
+                this.photoListView.setVisibility(View.GONE);
                 break;
 
             default:
@@ -478,8 +489,8 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         String fileName = imgUri.getLastPathSegment();
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference().child("images/" + fileName + ".jpg");
-        StorageReference storageThumRef = storage.getReference().child("images/thumbnail/" + fileName + "_thumbnail" + ".jpg");
+        StorageReference storageRef = storage.getReference().child("original/" + fileName + ".jpg");
+        StorageReference storageThumRef = storage.getReference().child("thumbnail/" + fileName + "_thumbnail" + ".jpg");
 
         ExifInterface exif = null;
         try {
@@ -497,7 +508,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         // Get the data from an ImageView as bytes
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.outHeight = 1000;
-        options.outWidth = 1000;
+        options.outWidth = 1500;
         Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);//경로를 통해 비트맵으로 전환
         bitmap = rotate(bitmap, exifDegree);
 
@@ -552,7 +563,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                 }*/
 
                 /*progressON(getResources().getString(R.string.uploading));*/
-                /*this.adapter.notifyDataSetChanged();*/
+                this.adapter.notifyDataSetChanged();
                 this.gridView.invalidate();
                 this.gridView.setAdapter(adapter);
 
@@ -623,6 +634,16 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         }
         intent.putExtra("photoUrl", photoList.get(this.position).getFileName());
         startActivityForResult(intent, 1);
+        getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
+
+    private void viewPhoto(String url, String type) {
+        //데이터 담아서 팝업(액티비티) 호출
+        Intent intent = new Intent(getActivity(), PhotoViewerActivity.class);
+        intent.putExtra("url", url);
+        intent.putExtra("type", type);
+        startActivityForResult(intent, 1);
+        getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
     private void takePhoto() {
@@ -641,4 +662,58 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         getActivity().openOptionsMenu();
         return false;
     };
+
+    private void loadingData(Query query) {
+    query
+        .whereEqualTo("member_id", this.user.getUid())
+        .get()
+        .addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                this.userSayListViewAdapter = new SayListViewAdapter(getActivity(), this.sayVoList);
+                this.listView.setAdapter(this.userSayListViewAdapter);
+
+                if(task.getResult().size() > 0) {
+                    for (DocumentSnapshot document : task.getResult()) {
+
+                        long now = System.currentTimeMillis();
+                        long regDt = ((Date)document.getData().get("reg_dt")).getTime();
+                        long regTime = (now - regDt) / 60000;
+
+                        if(regTime < 60) {
+                            this.regMin = String.format("%dmin", regTime);
+                        } else if(regTime >= 60 && regTime < 1440) {
+                            this.regMin = String.format("%dh", (int)(regTime / 60));
+                        } else if(regTime > 1440) {
+                            this.regMin = String.format("%dd", (int)(regTime / 1440));
+                        }
+
+                        SayVo sayVo = new SayVo();
+                        sayVo.setUserName(this.user.getDisplayName());
+                        sayVo.setMsg(document.getData().get("content").toString());
+                        sayVo.setPhotoUrl(this.user.getPhotoUrl().toString());
+                        sayVo.setDistance(this.regMin);
+                        sayVo.setNoMsg(false);
+
+                        this.sayVoList.add(sayVo);
+                    }
+                } else {
+                    SayVo sayVo = new SayVo();
+                    sayVo.setMsg("등록된 내용이 없습니다.");
+                    sayVo.setNoMsg(true);
+
+                    this.sayVoList.add(sayVo);
+                }
+
+                new Handler().postDelayed(() -> {
+                    /*progressOFF();*/
+                    this.view.setVisibility(View.VISIBLE);
+                    this.listView.setVisibility(View.VISIBLE);
+                    this.gridView.setVisibility(View.VISIBLE);
+                }, 150);
+                this.userSayListViewAdapter.notifyDataSetChanged();
+            } else {
+                Log.w(TAG, "Error getting documents.", task.getException());
+            }
+        });
+    }
 }

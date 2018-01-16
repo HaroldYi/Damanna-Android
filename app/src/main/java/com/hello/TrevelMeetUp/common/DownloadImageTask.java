@@ -25,6 +25,7 @@ import javax.net.ssl.HttpsURLConnection;
  * Created by lji5317 on 19/12/2017.
  */
 
+@Deprecated
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
     private NetworkImageView bmImage;

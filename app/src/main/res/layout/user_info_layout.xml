@@ -165,10 +165,12 @@
         </RelativeLayout>
 
         <ScrollView
+            android:id="@+id/say_list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/photo_list_view">
+            android:layout_below="@+id/photo_list_view"
+            android:visibility="gone" >
 
             <com.hello.TrevelMeetUp.view.ExpandableHeightListView
                 android:id="@+id/say_list"
@@ -179,7 +181,8 @@
                 android:layout_marginRight="-5dp"
                 android:background="@color/white"
                 android:divider="#ffffff"
-                android:dividerHeight="0px"></com.hello.TrevelMeetUp.view.ExpandableHeightListView>
+                android:dividerHeight="0px"
+                ></com.hello.TrevelMeetUp.view.ExpandableHeightListView>
         </ScrollView>
     </RelativeLayout>
 </RelativeLayout>

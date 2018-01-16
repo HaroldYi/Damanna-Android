@@ -95,7 +95,7 @@ public class GridViewAdapter extends BaseAdapter {
 
 
             } else if (photo.getKind().equals("photo")) {
-                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("images/thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
+                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
 
                 islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
                     //do something with downloadurl
@@ -156,15 +156,15 @@ public class GridViewAdapter extends BaseAdapter {
             }
 
             this.img = (NetworkImageView) view.findViewById(R.id.img1);
-            DisplayMetrics metrics = new DisplayMetrics();
+            /*DisplayMetrics metrics = new DisplayMetrics();
             WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             windowManager.getDefaultDisplay().getMetrics(metrics);
 
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) img.getLayoutParams();
             params.width = metrics.widthPixels / 4;
-            params.height = metrics.widthPixels / 4;
+            params.height = metrics.heightPixels / 4;
 
-            img.setLayoutParams(params);
+            img.setLayoutParams(params);*/
 
             view.setTag(this);
         }

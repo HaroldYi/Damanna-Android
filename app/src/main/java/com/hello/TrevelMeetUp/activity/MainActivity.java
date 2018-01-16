@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.FragmentManager;
@@ -12,9 +11,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.content.res.AppCompatResources;
+import android.util.Log;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -28,6 +27,10 @@ import com.hello.TrevelMeetUp.fragment.Say;
 import com.tsengvn.typekit.TypekitContextWrapper;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import devlight.io.library.ntb.NavigationTabBar;
 
@@ -88,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 } else {
-                    Crashlytics.logException(task.getException());
+                    /*Crashlytics.logException(task.getException());*/
                 }
             });
         } else {
@@ -180,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case 1:
-                transaction.replace(R.id.contentContainer, new Chat(), "chat").commit();
+                transaction.replace(R.id.contentContainer, new GroupChannelListFragment(), "chat").commit();
                 break;
 
             case 2:
@@ -274,7 +277,8 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (index) {
                     case 1 :
-                        fragmentTransaction.replace(R.id.contentContainer, new Chat()).commit();
+                        /*fragmentTransaction.replace(R.id.contentContainer, new Chat()).commit();*/
+                         fragmentTransaction.replace(R.id.contentContainer, new GroupChannelListFragment()).commit();
                         break;
 
                     case 2 :

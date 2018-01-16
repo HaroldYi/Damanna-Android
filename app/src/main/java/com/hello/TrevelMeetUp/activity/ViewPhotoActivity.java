@@ -3,6 +3,7 @@ package com.hello.TrevelMeetUp.activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,11 +14,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.common.DownloadImageTask;
+import com.hello.TrevelMeetUp.common.VolleySingleton;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -25,15 +28,17 @@ import uk.co.senab.photoview.PhotoViewAttacher;
  * Created by lji5317 on 13/12/2017.
  */
 
+@Deprecated
 public class ViewPhotoActivity extends BaseActivity {
 
     private NetworkImageView imageView;
+    private ImageLoader imageLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //타이틀바 없애기
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        /*requestWindowFeature(Window.FEATURE_NO_TITLE);*/
         setContentView(R.layout.view_photo_activity);
 
         ActionBar actionBar = getSupportActionBar();
@@ -63,13 +68,25 @@ public class ViewPhotoActivity extends BaseActivity {
 
         PhotoViewAttacher attacher = new PhotoViewAttacher(this.imageView);
         attacher.setZoomable(true);
-        /*attacher.setScaleType(ImageView.ScaleType.FIT_XY);*/
+        attacher.setScaleType(ImageView.ScaleType.FIT_XY);
 
-        if(bitmap == null)
-            getBitmapFromURL(photoUrl);
+        this.imageLoader = VolleySingleton.getInstance(this).getImageLoader();
+
+        if(bitmap == null) {
+            /*this.imageView.setImageUrl(photoUrl, this.imageLoader);*/
+            StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + photoUrl + ".jpg");
+
+            islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
+                //do something with downloadurl
+                this.imageView.setImageUrl(downloadUrl.toString(), this.imageLoader);
+            });
+
+        }
+            /*getBitmapFromURL(photoUrl);*/
 
         else
-            this.imageView.setImageBitmap(bitmap);
+            /*this.imageView.setImageBitmap(bitmap);*/
+            this.imageView.setBackground(new BitmapDrawable(getResources(), bitmap));
     }
 
     private void getBitmapFromURL(String fileName) {

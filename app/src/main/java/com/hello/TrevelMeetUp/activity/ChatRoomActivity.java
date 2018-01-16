@@ -1,6 +1,5 @@
 package com.hello.TrevelMeetUp.activity;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -19,10 +18,8 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.TrevelMeetUp.R;
-import com.hello.TrevelMeetUp.fragment.GroupChannelListFragment;
 import com.hello.TrevelMeetUp.fragment.GroupChatFragment;
 import com.sendbird.android.GroupChannel;
-import com.sendbird.android.Member;
 import com.sendbird.android.SendBirdException;
 
 import java.util.ArrayList;
@@ -145,8 +142,8 @@ public class ChatRoomActivity extends AppCompatActivity {
         if (mOnBackPressedListener != null && mOnBackPressedListener.onBack()) {
             return;
         }
-        super.onBackPressed();
         finish();
+        super.onBackPressed();
     }
 
     @Override

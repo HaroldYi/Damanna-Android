@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -99,7 +98,7 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
                                             SendBird.updateCurrentUserInfo(userName, user.getPhotoUrl().toString(), e12 -> {
                                                 if (e12 != null) {
                                                     // Error.
-                                                    Crashlytics.logException(e12);
+                                                    /*Crashlytics.logException(e12);*/
                                                     return;
                                                 }
 

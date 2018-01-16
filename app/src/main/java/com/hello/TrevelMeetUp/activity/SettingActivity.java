@@ -12,13 +12,11 @@ import android.preference.SwitchPreference;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -208,7 +206,7 @@ public class SettingActivity extends AppCompatActivity {
                         });
                     }
                 } else {
-                    Crashlytics.logException(task.getException());
+                    /*Crashlytics.logException(task.getException());*/
                 }
             });
         }

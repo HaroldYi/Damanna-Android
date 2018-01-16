@@ -38,6 +38,7 @@ import android.widget.Toast;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.activity.ChatRoomActivity;
 import com.hello.TrevelMeetUp.activity.InviteMemberActivity;
+import com.hello.TrevelMeetUp.activity.MainActivity;
 import com.hello.TrevelMeetUp.activity.MediaPlayerActivity;
 import com.hello.TrevelMeetUp.activity.MemberListActivity;
 import com.hello.TrevelMeetUp.activity.PhotoViewerActivity;
@@ -576,7 +577,7 @@ public class GroupChatFragment extends Fragment {
         }
     }
 
-    @Override
+    /*@Override
     public void onAttach(Context context) {
         super.onAttach(context);
         ((ChatRoomActivity)context).setOnBackPressedListener(new ChatRoomActivity.onBackPressedListener() {
@@ -589,7 +590,7 @@ public class GroupChatFragment extends Fragment {
                 return false;
             }
         });
-    }
+    }*/
 
     private void retryFailedMessage(final BaseMessage message) {
         new AlertDialog.Builder(getActivity())

@@ -17,8 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.hello.TrevelMeetUp.R;
+import com.hello.TrevelMeetUp.activity.ChatRoomActivity;
 import com.hello.TrevelMeetUp.activity.CreateGroupChannelActivity;
+import com.hello.TrevelMeetUp.activity.MainActivity;
 import com.hello.TrevelMeetUp.adapter.GroupChannelListAdapter;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
@@ -37,10 +41,13 @@ public class GroupChannelListFragment extends Fragment {
     public static final String EXTRA_GROUP_CHANNEL_URL = "GROUP_CHANNEL_URL";
     public static final int INTENT_REQUEST_NEW_GROUP_CHANNEL = 302;
 
+    private FirebaseAuth mAuth;
+    private FirebaseUser fUser;
+
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
     private GroupChannelListAdapter mChannelListAdapter;
-    private FloatingActionButton mCreateChannelFab;
+    /*private FloatingActionButton mCreateChannelFab;*/
     private GroupChannelListQuery mChannelListQuery;
     private SwipeRefreshLayout mSwipeRefresh;
 
@@ -54,6 +61,9 @@ public class GroupChannelListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mChannelListAdapter = new GroupChannelListAdapter(getActivity());
         mChannelListAdapter.load();
+
+        this.mAuth = FirebaseAuth.getInstance();
+        this.fUser = mAuth.getCurrentUser();
     }
 
     @Override
@@ -76,7 +86,7 @@ public class GroupChannelListFragment extends Fragment {
         /*((ChatRoomActivity) getActivity()).setActionBarTitle(getResources().getString(R.string.all_group_channels));*/
 
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_group_channel_list);
-        mCreateChannelFab = (FloatingActionButton) rootView.findViewById(R.id.fab_group_channel_list);
+        /*mCreateChannelFab = (FloatingActionButton) rootView.findViewById(R.id.fab_group_channel_list);*/
         mSwipeRefresh = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout_group_channel_list);
 
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -87,13 +97,13 @@ public class GroupChannelListFragment extends Fragment {
             }
         });
 
-        mCreateChannelFab.setOnClickListener(new View.OnClickListener() {
+        /*mCreateChannelFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), CreateGroupChannelActivity.class);
                 startActivityForResult(intent, INTENT_REQUEST_NEW_GROUP_CHANNEL);
             }
-        });
+        });*/
 
         setUpRecyclerView();
         setUpChannelListAdapter();
@@ -268,11 +278,22 @@ public class GroupChannelListFragment extends Fragment {
      * @param channelUrl The URL of the channel to enter.
      */
     void enterGroupChannel(String channelUrl) {
-        GroupChatFragment fragment = GroupChatFragment.newInstance(channelUrl);
+        /*GroupChatFragment fragment = GroupChatFragment.newInstance(channelUrl);
         getFragmentManager().beginTransaction()
                 .replace(R.id.container_group_channel, fragment)
                 .addToBackStack(null)
-                .commit();
+                .commit();*/
+
+        Intent intent = new Intent(getActivity(), ChatRoomActivity.class);
+        intent.putExtra("channelUrl", channelUrl);
+        intent.putExtra("uid", this.fUser.getUid());
+        intent.putExtra("userName", this.fUser.getDisplayName());
+        intent.putExtra("profileUrl", this.fUser.getPhotoUrl().toString());
+        startActivity(intent);
+
+        getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+
+        ((MainActivity)getActivity()).tabIndex = 1;
     }
 
     /**

@@ -9,19 +9,20 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
+import com.facebook.LoggingBehavior;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,6 +31,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.hello.TrevelMeetUp.BuildConfig;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.vo.Photo;
 import com.sendbird.android.SendBird;
@@ -88,6 +90,11 @@ public class SignActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_in);
+
+        if (BuildConfig.DEBUG) {
+            FacebookSdk.setIsDebugEnabled(true);
+            FacebookSdk.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
+        }
 
         super.actList.add(this);
 
@@ -250,20 +257,20 @@ public class SignActivity extends BaseActivity {
                                 SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
                                     if (e != null) {
                                         // Error.
-                                        Crashlytics.logException(e);
+                                        /*Crashlytics.logException(e);*/
                                         return;
                                     }
 
                                     SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
                                         if (e12 != null) {
                                             // Error.
-                                            Crashlytics.logException(e12);
+                                            /*Crashlytics.logException(e12);*/
                                             return;
                                         }
 
                                         SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
                                             if (e1 != null) {
-                                                Crashlytics.logException(e1);
+                                                /*Crashlytics.logException(e1);*/
                                                 return;
                                             }
 
@@ -278,11 +285,11 @@ public class SignActivity extends BaseActivity {
                                 });
                             })
                             .addOnFailureListener(e -> {
-                                Crashlytics.logException(e);
+                                /*Crashlytics.logException(e);*/
                             });
                 }
             } else {
-                Crashlytics.logException(task.getException());
+                /*Crashlytics.logException(task.getException());*/
             }
         });
     }
@@ -297,10 +304,10 @@ public class SignActivity extends BaseActivity {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "signInWithCredential:success");
 
-                        addUserDb(this.mAuth.getCurrentUser());
+
                     } else {
                         // If sign in fails, display a message to the user.
-                        Crashlytics.logException(task.getException());
+                        /*Crashlytics.logException(task.getException());*/
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
                     }
 

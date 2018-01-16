@@ -2,22 +2,21 @@ package com.hello.TrevelMeetUp.common;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.TrevelMeetUp.R;
 import com.sendbird.android.SendBird;
 import com.tsengvn.typekit.Typekit;
-
-import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by TedPark on 2017. 3. 18..
@@ -45,7 +44,7 @@ public class BaseApplication extends Application {
 
         SendBird.init(getResources().getString(R.string.app_id), getApplicationContext());
 
-        Fabric.with(this, new Crashlytics());
+        /*Fabric.with(this, new Crashlytics());*/
 
         this.mAuth = FirebaseAuth.getInstance();
         this.fUser = this.mAuth.getCurrentUser();
@@ -61,6 +60,12 @@ public class BaseApplication extends Application {
         }
 
         this.baseApplication = this;
+    }
+
+    @Override
+    protected void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
+        MultiDex.install(this);
     }
 
     public void progressON(Activity activity, String message) {

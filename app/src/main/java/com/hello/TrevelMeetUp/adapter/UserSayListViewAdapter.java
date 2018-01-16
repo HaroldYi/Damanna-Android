@@ -55,7 +55,7 @@ public class UserSayListViewAdapter extends BaseAdapter {
         ViewHolder holder = (ViewHolder) view.getTag();
 
         holder.userName.setText("");
-        holder.content.setText(sayVoList.get(index).getMsg());
+        holder.content.setText(this.sayVoList.get(index).getMsg());
 
         if(sayVoList.get(index).isNoMsg()) {
             holder.content.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -68,7 +68,6 @@ public class UserSayListViewAdapter extends BaseAdapter {
     }
 
     class ViewHolder {
-        LinearLayout layout;
         ImageView img;
         TextView userName;
         TextView content;

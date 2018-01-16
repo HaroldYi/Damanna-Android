@@ -14,16 +14,22 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.common.DateUtils;
 import com.hello.TrevelMeetUp.common.FileUtils;
+import com.hello.TrevelMeetUp.common.RadiusImageView;
 import com.hello.TrevelMeetUp.common.TextUtils;
 import com.hello.TrevelMeetUp.common.TypingIndicator;
+import com.hello.TrevelMeetUp.common.VolleySingleton;
 import com.sendbird.android.AdminMessage;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
@@ -57,6 +63,7 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     private OnItemClickListener mItemClickListener;
     private OnItemLongClickListener mItemLongClickListener;
+
 
     public interface OnItemClickListener {
         void onItemClick(GroupChannel channel);
@@ -219,8 +226,12 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
     private class ChannelHolder extends RecyclerView.ViewHolder {
 
         TextView topicText, lastMessageText, unreadCountText, dateText, memberCountText;
-        MultiImageView coverImage;
+        RadiusImageView coverImage;
         LinearLayout typingIndicatorContainer;
+
+        FirebaseAuth mAuth;
+        FirebaseUser fUser;
+        ImageLoader imageLoader;
 
         ChannelHolder(View itemView) {
             super(itemView);
@@ -230,10 +241,13 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
             unreadCountText = (TextView) itemView.findViewById(R.id.text_group_channel_list_unread_count);
             dateText = (TextView) itemView.findViewById(R.id.text_group_channel_list_date);
             memberCountText = (TextView) itemView.findViewById(R.id.text_group_channel_list_member_count);
-            coverImage = (MultiImageView) itemView.findViewById(R.id.image_group_channel_list_cover);
-            coverImage.setShape(MultiImageView.Shape.CIRCLE);
+            coverImage = (RadiusImageView) itemView.findViewById(R.id.image_group_channel_list_cover);
+            coverImage.setRadius(100f);
 
             typingIndicatorContainer = (LinearLayout) itemView.findViewById(R.id.container_group_channel_list_typing_indicator);
+
+            this.mAuth = FirebaseAuth.getInstance();
+            this.fUser = mAuth.getCurrentUser();
         }
 
         /**
@@ -249,8 +263,16 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
             topicText.setText(TextUtils.getGroupChannelTitle(channel));
             memberCountText.setText(String.valueOf(channel.getMemberCount()));
 
+            this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
+
             if (!mIsCacheLoading) {
-                setChannelImage(context, channel, coverImage);
+                List<Member> memberList = channel.getMembers();
+                for (Member member : memberList) {
+                    if(!member.getUserId().equals(this.fUser.getUid())) {
+                        this.coverImage.setImageUrl(member.getProfileUrl(), imageLoader);
+                    }
+                }
+                /*setChannelImage(context, channel, coverImage);*/
             }
 
             int unreadCount = channel.getUnreadMessageCount();
@@ -331,7 +353,7 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
             }
         }
 
-        private void setChannelImage(Context context, GroupChannel channel, MultiImageView multiImageView) {
+        /*private void setChannelImage(Context context, GroupChannel channel, MultiImageView multiImageView) {
             List<Member> members = channel.getMembers();
             if (members != null) {
                 int size = members.size();
@@ -394,6 +416,6 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
                     }
                 }
             }
-        }
+        }*/
     }
 }

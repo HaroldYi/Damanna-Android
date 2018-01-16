@@ -29,8 +29,7 @@
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:typeface="sans"/>
+            android:typeface="sans" />
 
         <Button
             android:id="@+id/saveBtn"

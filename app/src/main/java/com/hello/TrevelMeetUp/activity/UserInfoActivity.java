@@ -3,6 +3,7 @@ package com.hello.TrevelMeetUp.activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -11,12 +12,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -26,6 +29,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.TrevelMeetUp.R;
 import com.hello.TrevelMeetUp.adapter.GridViewAdapter;
+import com.hello.TrevelMeetUp.adapter.SayListViewAdapter;
 import com.hello.TrevelMeetUp.adapter.UserSayListViewAdapter;
 import com.hello.TrevelMeetUp.common.BaseApplication;
 import com.hello.TrevelMeetUp.common.CommonFunction;
@@ -60,11 +64,10 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
     private ExpandableHeightListView listView;
     private List<SayVo> sayVoList;
-
     private List<Photo> photoList;
 
     private ExpandableHeightGridView gridView;
-    private UserSayListViewAdapter userSayListViewAdapter;
+    private SayListViewAdapter userSayListViewAdapter;
 
     private ImageLoader imageLoader;
 
@@ -73,6 +76,9 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
     private View view;
 
     private MaterialTabHost tabHost;
+
+    private CardView photoListView;
+    private ScrollView sayListView;
 
     private int selectedColour = Color.rgb(3, 196, 201);
     private int unSelectedColour = Color.rgb(176, 176, 176);
@@ -105,6 +111,9 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
         title.setText("Profile");
 
+        Typeface typeface = Typeface.createFromAsset(this.getAssets(), "fonts/NotoSans-Medium.ttf");
+        title.setTypeface(typeface);
+
         actionBar.setCustomView(actionView);
 
         Button saveBtn = (Button) findViewById(R.id.saveBtn);
@@ -120,6 +129,9 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         this.uid = intent.getStringExtra("uid");
         this.userName = intent.getStringExtra("userName");
         String profileUrl = intent.getStringExtra("profileUrl");
+
+        this.photoListView = (CardView) view.findViewById(R.id.photo_list_view);
+        this.sayListView = (ScrollView) view.findViewById(R.id.say_list_view);
 
         this.gridView = (ExpandableHeightGridView) findViewById(R.id.photo_list);
         this.gridView.setExpanded(true);
@@ -162,6 +174,9 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
             this.tabHost.addTab(tab);
         }
 
+        this.tabHost.setSelectedNavigationItem(0);
+        this.tabHost.getCurrentTab().setTextColor(this.selectedColour);
+
         Button chatBtn = (Button) findViewById(R.id.chat_btn);
         chatBtn.setOnClickListener(view -> {
             Intent intent1 = new Intent(getApplicationContext(), ChatRoomActivity.class);
@@ -169,6 +184,8 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
             intent1.putExtra("userName", this.userName);
             intent1.putExtra("profileUrl", profileUrl);
             startActivity(intent1);
+
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         });
 
         this.listView = (ExpandableHeightListView) findViewById(R.id.say_list);
@@ -203,7 +220,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        this.userSayListViewAdapter = new UserSayListViewAdapter(this, R.layout.chat_layout, this.sayVoList);
+                        this.userSayListViewAdapter = new SayListViewAdapter(this, this.sayVoList);
                         this.listView.setAdapter(userSayListViewAdapter);
 
                         for (DocumentSnapshot document : task.getResult()) {
@@ -218,33 +235,13 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
                                                     DateTime dateTime = new DateTime();
 
-                                                    String gender = document1.getData().get("gender").toString();
-                                                    gender = (gender.equals("male") ? "남자" : "여자");
-                                                    String identity = document1.getData().get("identity").toString();
-                                                    String nation = document1.getData().get("nation").toString();
+                                                    String gender = "";
 
-                                                    long dateOfBirth = ((Date) document1.getData().get("dateOfBirth")).getTime();
-                                                    long now = System.currentTimeMillis();
-
-                                                    Calendar birthCalendar = Calendar.getInstance();
-                                                    birthCalendar.setTimeInMillis(dateOfBirth);
-
-                                                    int yearOfBirth = birthCalendar.get(Calendar.YEAR);
-
-                                                    Calendar nowCalender = Calendar.getInstance();
-                                                    nowCalender.setTimeInMillis(now);
-
-                                                    int nowYear = nowCalender.get(Calendar.YEAR);
-
-                                                    int koreanAge = nowYear - yearOfBirth + 1;
-
-                                                    String age = String.format("%d세, %s", koreanAge, gender);
-                                                    TextView ageView = (TextView) findViewById(R.id.age);
-                                                    ageView.setText(age);
-
-                                                    nation = String.format("%s, %s", nation, identity);
-                                                    TextView identityView = (TextView) findViewById(R.id.identity);
-                                                    identityView.setText(nation);
+                                                    if(document1.getData().get("gender") != null) {
+                                                        gender = (gender.equals("male") ? "남자" : "여자");
+                                                    } else {
+                                                        gender = "성별 미입력";
+                                                    }
 
                                                     SayVo sayVo = new SayVo();
 
@@ -252,6 +249,44 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                                                     sayVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
                                                     sayVo.setMsg(document.getData().get("content").toString());
                                                     sayVo.setNoMsg(false);
+
+                                                    TextView ageView = (TextView) findViewById(R.id.age);
+
+                                                    if(document1.getData().get("dateOfBirth") != null) {
+                                                        long dateOfBirth = ((Date) document1.getData().get("dateOfBirth")).getTime();
+                                                        long now = System.currentTimeMillis();
+
+                                                        Calendar birthCalendar = Calendar.getInstance();
+                                                        birthCalendar.setTimeInMillis(dateOfBirth);
+
+                                                        int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                                                        Calendar nowCalender = Calendar.getInstance();
+                                                        nowCalender.setTimeInMillis(now);
+
+                                                        int nowYear = nowCalender.get(Calendar.YEAR);
+
+                                                        int koreanAge = nowYear - yearOfBirth + 1;
+
+                                                        String age = String.format("%d세, %s", koreanAge, gender);
+                                                        ageView.setText(age);
+                                                    } else if(document1.getData().get("dateOfBirth") == null ) {
+                                                        String age = String.format("%s, %s", "나이 미입력", gender);
+                                                        ageView.setText(age);
+                                                    }
+
+                                                    if (document1.getData().get("identity") != null
+                                                            && document1.getData().get("nation") != null) {
+                                                        String identity = document1.getData().get("identity").toString();
+                                                        String nation = document1.getData().get("nation").toString();
+
+                                                        nation = String.format("%s, %s", nation, identity);
+                                                        TextView identityView = (TextView) findViewById(R.id.identity);
+                                                        identityView.setText(nation);
+
+                                                        sayVo.setIdentity(document1.getData().get("identity").toString());
+                                                        sayVo.setNation(document1.getData().get("nation").toString());
+                                                    }
 
                                                     this.sayVoList.add(sayVo);
 
@@ -272,7 +307,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                                             BaseApplication.getInstance().progressOFF();
                                             this.view.setVisibility(View.VISIBLE);
                                             this.gridView.setVisibility(View.VISIBLE);
-                                            this.listView.setVisibility(View.GONE);
+                                            this.listView.setVisibility(View.VISIBLE);
                                             this.userSayListViewAdapter.notifyDataSetChanged();
                                         } else {
                                             Log.w(TAG, "Error getting documents.", task1.getException());
@@ -302,13 +337,13 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
         switch (tab.getPosition()) {
             case 0 :
-                this.listView.setVisibility(View.GONE);
-                this.gridView.setVisibility(View.VISIBLE);
+                this.sayListView.setVisibility(View.GONE);
+                this.photoListView.setVisibility(View.VISIBLE);
                 break;
 
             case 1 :
-                this.listView.setVisibility(View.VISIBLE);
-                this.gridView.setVisibility(View.GONE);
+                this.sayListView.setVisibility(View.VISIBLE);
+                this.photoListView.setVisibility(View.GONE);
                 break;
 
             default:
@@ -335,5 +370,6 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         intent.putExtra("photoUrl", this.photoList.get(this.position).getFileName());
         intent.putExtra("userName", this.userName);
         startActivityForResult(intent, 1);
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 }

@@ -7,12 +7,19 @@
     android:background="?attr/selectableItemBackground"
     android:clickable="true">
 
-    <com.stfalcon.multiimageview.MultiImageView
+    <com.hello.TrevelMeetUp.common.RadiusImageView
         android:id="@+id/image_group_channel_list_cover"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:scaleType="centerCrop"
         android:layout_centerVertical="true"/>
+
+    <!--<com.stfalcon.multiimageview.MultiImageView
+        android:id="@+id/image_group_channel_list_cover"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:scaleType="centerCrop"
+        android:layout_centerVertical="true"/>-->
 
     <LinearLayout
         android:id="@+id/container_group_channel_list_topic"
@@ -48,6 +55,7 @@
             android:paddingRight="4dp"
             android:gravity="center"
             android:maxLines="1"
+            android:visibility="gone"
             android:text="3" />
 
     </LinearLayout>

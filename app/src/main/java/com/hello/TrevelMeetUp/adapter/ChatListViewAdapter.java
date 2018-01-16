@@ -2,6 +2,7 @@ package com.hello.TrevelMeetUp.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -84,6 +85,9 @@ public class ChatListViewAdapter extends BaseSwipListAdapter {
             new ViewHolder(view);
         }
         ViewHolder holder = (ViewHolder) view.getTag();
+
+        Typeface typeface = Typeface.createFromAsset(this.context.getAssets(), "fonts/NotoSans-Medium.ttf");
+        holder.userName.setTypeface(typeface);
 
         BaseMessage message = channelList.get(i).getLastMessage();
         if (message instanceof UserMessage) {

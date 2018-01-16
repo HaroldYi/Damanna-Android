@@ -2,6 +2,7 @@ package com.hello.TrevelMeetUp.adapter;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -63,11 +64,35 @@ public class SayListViewAdapter extends BaseAdapter {
 
         ViewHolder holder = (ViewHolder) view.getTag();
 
-        String userInfo = String.format("%s (%s, %s)", this.sayVoList.get(index).getUserName(), this.sayVoList.get(index).getNation(), this.sayVoList.get(index).getIdentity());
+        if(!this.sayVoList.get(index).isNoMsg()) {
 
-        holder.userName.setText(userInfo);
+            String nation = this.sayVoList.get(index).getNation();
+            String identity = this.sayVoList.get(index).getIdentity();
+
+            String userInfo = "";
+
+            if(nation != null && !nation.isEmpty()
+              && identity != null && !identity.isEmpty() ) {
+                userInfo = String.format("%s (%s, %s)", this.sayVoList.get(index).getUserName(), nation, identity);
+            } else if((nation == null || nation.isEmpty())
+                    && (identity != null && !identity.isEmpty()) ) {
+                userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), identity);
+            } else if((nation != null && !nation.isEmpty())
+                    && (identity == null || identity.isEmpty()) ) {
+                userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), nation);
+            } else {
+                userInfo = this.sayVoList.get(index).getUserName();
+            }
+
+            holder.userName.setText(userInfo);
+            holder.distance.setText(this.sayVoList.get(index).getDistance());
+        } else {
+            holder.content.setGravity(Gravity.CENTER);
+            holder.userName.setVisibility(View.GONE);
+            holder.distance.setVisibility(View.GONE);
+        }
+
         holder.content.setText(this.sayVoList.get(index).getMsg());
-        holder.distance.setText(this.sayVoList.get(index).getDistance());
 
         /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
         downloadImageTask.execute(this.sayVoList.get(index).getPhotoUrl());*/

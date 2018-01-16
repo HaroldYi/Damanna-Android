@@ -8,10 +8,11 @@
 
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/img1"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_marginLeft="6dp"
         android:layout_marginRight="6dp"
+        android:scaleType="fitXY"
         />
 
 </LinearLayout>

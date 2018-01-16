@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 
 public class Photo {
     private String fileName = "";
+    private String fileUrl = "";
     private double distance;
     private int updateTime;
 
@@ -53,5 +54,13 @@ public class Photo {
 
     public void setKind(String kind) {
         this.kind = kind;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 }

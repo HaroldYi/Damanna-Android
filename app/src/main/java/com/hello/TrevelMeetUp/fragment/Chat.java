@@ -2,6 +2,7 @@ package com.hello.TrevelMeetUp.fragment;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -82,6 +83,9 @@ public class Chat extends BaseFragment implements View.OnClickListener {
         View actionView = getLayoutInflater().inflate(R.layout.activity_action_bar, null);
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
         title.setText("Chat");
+
+        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/NotoSans-Medium.ttf");
+        title.setTypeface(typeface);
 
         actionBar.setCustomView(actionView);
 
@@ -182,6 +186,7 @@ public class Chat extends BaseFragment implements View.OnClickListener {
             ((MainActivity)getActivity()).tabIndex = 1;
 
             startActivity(intent);
+            getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         });
 
         this.listView.setOnMenuItemClickListener((position, menu, index) -> {
