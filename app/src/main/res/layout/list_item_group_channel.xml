@@ -7,7 +7,7 @@
     android:background="?attr/selectableItemBackground"
     android:clickable="true">
 
-    <com.hello.TrevelMeetUp.common.RadiusImageView
+    <com.hello.Damanna.common.RadiusNetworkImageView
         android:id="@+id/image_group_channel_list_cover"
         android:layout_width="56dp"
         android:layout_height="56dp"

@@ -56,7 +56,7 @@
                 android:textColor="@color/dark_gray"
                 android:textSize="14sp" />
 
-            <com.hello.TrevelMeetUp.common.RadiusImageView
+            <com.hello.Damanna.common.RadiusNetworkImageView
                 android:id="@+id/user_profile_photo"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
@@ -113,7 +113,7 @@
             app:cardBackgroundColor="@color/white"
             android:layout_below="@+id/tabHost"
             app:cardUseCompatPadding="true">
-            <com.hello.TrevelMeetUp.view.ExpandableHeightGridView
+            <com.hello.Damanna.view.ExpandableHeightGridView
                 android:id="@+id/photo_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -172,7 +172,7 @@
             android:layout_below="@+id/photo_list_view"
             android:visibility="gone" >
 
-            <com.hello.TrevelMeetUp.view.ExpandableHeightListView
+            <com.hello.Damanna.view.ExpandableHeightListView
                 android:id="@+id/say_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -182,7 +182,7 @@
                 android:background="@color/white"
                 android:divider="#ffffff"
                 android:dividerHeight="0px"
-                ></com.hello.TrevelMeetUp.view.ExpandableHeightListView>
+                ></com.hello.Damanna.view.ExpandableHeightListView>
         </ScrollView>
     </RelativeLayout>
 </RelativeLayout>

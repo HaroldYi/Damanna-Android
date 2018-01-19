@@ -21,7 +21,7 @@
             android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
-            <com.hello.TrevelMeetUp.common.RadiusImageView
+            <com.hello.Damanna.common.RadiusNetworkImageView
                 android:id="@+id/user_profile_photo"
                 android:layout_width="50dp"
                 android:layout_height="50dp"

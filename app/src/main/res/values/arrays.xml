@@ -35,4 +35,10 @@
         <item>#8c9f58</item>
     </string-array>
 
+    <integer-array name="google_colors">
+        <item>@color/blue</item>
+        <item>@color/blue</item>
+        <item>@color/blue</item>
+        <item>@color/blue</item>
+    </integer-array>
 </resources>

@@ -83,7 +83,7 @@
                 android:textSize="14sp" />
 
         </RelativeLayout>
-        <com.hello.TrevelMeetUp.view.ExpandableHeightGridView
+        <com.hello.Damanna.view.ExpandableHeightGridView
             android:id="@+id/photo_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -98,7 +98,7 @@
             android:numColumns="4"
             android:layout_below="@+id/profile_layout"
             />
-        <com.hello.TrevelMeetUp.view.ExpandableHeightListView
+        <com.hello.Damanna.view.ExpandableHeightListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/photo_list"

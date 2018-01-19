@@ -31,7 +31,7 @@
         android:layout_marginTop="10dp"
         >
 
-        <android.support.v4.widget.SwipeRefreshLayout
+        <!--<android.support.v4.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/say_swipe_layout">
@@ -42,6 +42,16 @@
                 android:layout_height="match_parent"
                 android:divider="#ffffff"/>
 
-        </android.support.v4.widget.SwipeRefreshLayout>
+        </android.support.v4.widget.SwipeRefreshLayout>-->
+
+        <com.marshalchen.ultimaterecyclerview.UltimateRecyclerView
+            android:id="@+id/say_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            app:recyclerviewClipToPadding="true"
+            app:recyclerviewDefaultSwipeColor="@array/google_colors"
+            app:recyclerviewFloatingActionView="@layout/floating_view"
+            app:recyclerviewEmptyView="@layout/empty_view"
+            app:recyclerviewScrollbars="vertical" />
     </RelativeLayout>
 </RelativeLayout>

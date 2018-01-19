@@ -19,4 +19,8 @@
     <style name="Toolbar" parent="ThemeOverlay.AppCompat.Dark">
         <item name="android:textColorPrimary">#ffffff</item>
     </style>
+
+    <style name="firebase_ui"  parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/sign_background</item>
+    </style>
 </resources>

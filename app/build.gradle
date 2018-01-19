@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion '26.0.2'
 
     defaultConfig {
-        applicationId "com.hello.TrevelMeetUp"
+        applicationId "com.hello.Damanna"
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
@@ -33,8 +33,15 @@ dependencies {
     //    compile 'com.github.devlight.navigationtabbar:navigationtabbar:1.2.3'
     compile 'com.baoyz.swipemenulistview:library:1.3.0'
 
-    compile 'com.android.support:appcompat-v7:25.4.0'
-    compile 'com.android.support:support-v4:25.4.0'
+    compile "com.android.support:appcompat-v7:${SUPPORT_LIBRARY}"
+
+    compile "com.android.support:cardview-v7:${SUPPORT_LIBRARY}"
+    compile 'com.marshalchen.ultimaterecyclerview:library:0.7.3'
+
+    compile "com.android.support:support-v13:${SUPPORT_LIBRARY}"
+
+    compile "com.android.support:design:${SUPPORT_LIBRARY}"
+
     compile 'com.mostafagazar:customshapeimageview:1.0.4'
 
     compile 'com.google.firebase:firebase-core:11.8.0'
@@ -42,6 +49,14 @@ dependencies {
     // Firebase Authentication
     compile 'com.google.firebase:firebase-auth:11.8.0'
     compile 'com.facebook.android:facebook-login:4.27.0'
+
+    // Google Sign In SDK (only required for Google Sign In)
+    compile 'com.google.android.gms:play-services-auth:11.8.0'
+
+    // Firebase UI
+    // Used in FirebaseUIActivity. The FirebaseUI-Android library has a minSdk level of 16
+    // so this library is only included in the minSdkJellybean variant.
+    compile 'com.firebaseui:firebase-ui-auth:3.1.0'
 
     // Firebase DB
     compile 'com.google.firebase:firebase-database:11.8.0'
@@ -65,9 +80,7 @@ dependencies {
 
     compile 'com.github.chrisbanes:PhotoView:1.3.0'
 
-    compile 'com.android.support:design:25.4.0'
-
-    compile 'com.tsengvn:Typekit:1.0.0'
+    /*compile 'com.tsengvn:typekit:1.0.1'*/
 
     /*compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
@@ -89,6 +102,12 @@ dependencies {
     compile 'org.jsoup:jsoup:1.10.2'
     compile 'com.dinuscxj:circleprogressbar:1.1.1'
     compile 'com.github.stfalcon:multiimageview:0.1'
+
+    // 권한체크
+    compile 'gun0912.ted:tedpermission:1.0.2'
+
+    // https://mvnrepository.com/artifact/commons-io/commons-io
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
 }
 
 apply plugin: 'com.google.gms.google-services'
