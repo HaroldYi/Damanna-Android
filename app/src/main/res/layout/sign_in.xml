@@ -35,16 +35,16 @@
         android:id="@+id/signInBtn"
         android:layout_width="match_parent"
         android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
         android:layout_marginBottom="40dp"
-        android:background="@drawable/facebook_btn"
+        android:background="@drawable/fb_login"
         android:clickable="true"
         android:onClick="facebookLoginOnClick"
         android:padding="16dp"
         android:textAllCaps="true"
         android:textColor="#fff"
-        android:textSize="18sp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"/>
+        android:textSize="18sp" />
 
     <!--<TextView
         android:layout_width="match_parent"

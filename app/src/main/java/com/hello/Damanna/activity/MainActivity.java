@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
-import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -25,7 +24,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
-import com.hello.Damanna.BuildConfig;
 import com.hello.Damanna.R;
 import com.hello.Damanna.fragment.GroupChannelListFragment;
 import com.hello.Damanna.fragment.Profile;
@@ -37,7 +35,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -227,18 +224,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
-            /*startActivity(new Intent(MainActivity.this, SignActivity.class));*/
+            startActivity(new Intent(MainActivity.this, SignActivity.class));
+
+            /*Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show();
+
             Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                     .setIsSmartLockEnabled(!BuildConfig.DEBUG)
                     .setAvailableProviders(Arrays.asList(
-                            new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
-                            /*new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()*/
+                            new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
+                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
                             ))
                     .setLogo(R.color.fui_transparent)
                     .setTheme(R.style.firebase_ui)
                     .build();
 
-            startActivityForResult(intent, RC_SIGN_IN);
+            startActivityForResult(intent, RC_SIGN_IN);*/
         }
     }
 
@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Sign in succeeded
                 /*updateUI(mAuth.getCurrentUser());*/
-                addUserDb(this.mAuth.getCurrentUser());
+                addUser(this.mAuth.getCurrentUser());
             } else {
                 // Sign in failed
                 Toast.makeText(this, "Sign In Failed", Toast.LENGTH_SHORT).show();
@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
         super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
     }*/
 
-    private void addUserDb(FirebaseUser currentUser) {
+    private void addUser(FirebaseUser currentUser) {
 
         List<Photo> photoList = new ArrayList<>();
 
@@ -300,110 +300,127 @@ public class MainActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document != null && document.exists()) {
-                    this.navigationTabBar.setModelIndex(0, true);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.contentContainer, new Say()).addToBackStack("say").commit();
+                    setContentView(R.layout.activity_horizontal_ntb);
+                    this.initUI();
+                    /*this.navigationTabBar.setModelIndex(0, true);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.contentContainer, new Say()).addToBackStack("say").commit();*/
                 } else {
 
-                    GraphRequest request = GraphRequest.newMeRequest(
-                            AccessToken.getCurrentAccessToken(),
-                            (object, response) -> {
-                                // Application code
-                                userInfo = response.getJSONObject();
-                                Map<String, Object> userMap = new HashMap<>();
+                    List<String> providers = this.mAuth.getCurrentUser().getProviders();
+                    String provider = providers.get(0);
 
-                                String facebookId = "";
-                                String dateOfBirth = "";
-                                String gender = "";
+                    if(provider.indexOf("facebook") != -1) {
+                        GraphRequest request = GraphRequest.newMeRequest(
+                                AccessToken.getCurrentAccessToken(),
+                                (object, response) -> {
+                                    // Application code
+                                    userInfo = response.getJSONObject();
 
-                                try {
-                                    facebookId = this.userInfo.get("id").toString();
-                                } catch (Exception e) {
-                                    facebookId = "";
-                                }
+                                    String facebookId = "";
+                                    String dateOfBirth = "";
+                                    String gender = "";
 
-                                try {
-                                    dateOfBirth = this.userInfo.get("birthday").toString();
-                                } catch (Exception e) {
-                                    dateOfBirth = "";
-                                }
+                                    try {
+                                        facebookId = this.userInfo.get("id").toString();
+                                    } catch (Exception e) {
+                                        facebookId = "";
+                                    }
 
-                                try {
-                                    gender = this.userInfo.get("gender").toString();
-                                } catch (Exception e) {
-                                    gender = "";
-                                }
+                                    try {
+                                        dateOfBirth = this.userInfo.get("birthday").toString();
+                                    } catch (Exception e) {
+                                        dateOfBirth = "";
+                                    }
 
-                                Calendar calendar = Calendar.getInstance();
-                                calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
-                                userMap.put("facebookId", facebookId);
-                                userMap.put("id", currentUser.getUid());
-                                userMap.put("email", currentUser.getEmail());
-                                userMap.put("dateOfBirth", new Date(calendar.getTimeInMillis()));
-                                userMap.put("gender", gender);
-                                userMap.put("name", currentUser.getDisplayName());
-                                userMap.put("profileUrl", currentUser.getPhotoUrl().toString());
-                                /*userMap.put("location", new GeoPoint(latitude, longitude));*/
+                                    try {
+                                        gender = this.userInfo.get("gender").toString();
+                                    } catch (Exception e) {
+                                        gender = "";
+                                    }
 
-                                this.db.collection("member").document(currentUser.getUid())
-                                        .set(userMap)
-                                        .addOnSuccessListener(aVoid -> {
-                                            Log.d(TAG, "DocumentSnapshot successfully written!");
+                                    addUserDB(facebookId, dateOfBirth, gender);
+                                });
 
-                                            List<String> userList = new ArrayList<>();
-                                            userList.add(mAuth.getCurrentUser().getUid());
+                        Bundle parameters = new Bundle();
+                        parameters.putString("fields", "id, name, gender, birthday");
+                        request.setParameters(parameters);
+                        request.executeAsync();
+                    } else if(provider.indexOf("google") != -1) {
+                        /*GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);*/
 
-                                            SendBird.createUserListQuery(userList);
-                                            try {
-                                                FirebaseInstanceId.getInstance().deleteInstanceId();
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            }
-                                            String pushToken = FirebaseInstanceId.getInstance().getToken();
-
-                                            SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
-                                                if (e != null) {
-                                                    // Error.
-                                                    /*Crashlytics.logException(e);*/
-                                                    return;
-                                                }
-
-                                                SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
-                                                    if (e12 != null) {
-                                                        // Error.
-                                                        /*Crashlytics.logException(e12);*/
-                                                        return;
-                                                    }
-
-                                                    SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
-                                                        if (e1 != null) {
-                                                            /*Crashlytics.logException(e1);*/
-                                                            return;
-                                                        }
-
-                                                        if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
-                                                            // Try registering the token after a connection has been successfully established.
-                                                        } else {
-                                                            /*finish();*/
-                                                            startActivity(new Intent(this, SelectCountryActivity.class));
-                                                        }
-                                                    });
-                                                });
-                                            });
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            /*Crashlytics.logException(e);*/
-                                        });
-                            });
-
-                    Bundle parameters = new Bundle();
-                    parameters.putString("fields", "id, name, gender, birthday");
-                    request.setParameters(parameters);
-                    request.executeAsync();
+                    }
                 }
             } else {
                 /*Crashlytics.logException(task.getException());*/
             }
         });
+    }
+
+
+    private void addUserDB(String facebookId, String dateOfBirth, String gender) {
+
+        Map<String, Object> userMap = new HashMap<>();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
+        userMap.put("facebookId", facebookId);
+        userMap.put("id", this.fUser.getUid());
+        userMap.put("email", this.fUser.getEmail());
+        userMap.put("dateOfBirth", new Date(calendar.getTimeInMillis()));
+        userMap.put("gender", gender);
+        userMap.put("name", this.fUser.getDisplayName());
+        userMap.put("profileUrl", this.fUser.getPhotoUrl().toString());
+                                    /*userMap.put("location", new GeoPoint(latitude, longitude));*/
+
+        this.db.collection("member").document(this.fUser.getUid())
+                .set(userMap)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "DocumentSnapshot successfully written!");
+
+                    List<String> userList = new ArrayList<>();
+                    userList.add(mAuth.getCurrentUser().getUid());
+
+                    SendBird.createUserListQuery(userList);
+                    try {
+                        FirebaseInstanceId.getInstance().deleteInstanceId();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    String pushToken = FirebaseInstanceId.getInstance().getToken();
+
+                    SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
+                        if (e != null) {
+                            // Error.
+                                                    /*Crashlytics.logException(e);*/
+                            return;
+                        }
+
+                        SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
+                            if (e12 != null) {
+                                // Error.
+                                                        /*Crashlytics.logException(e12);*/
+                                return;
+                            }
+
+                            SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
+                                if (e1 != null) {
+                                                            /*Crashlytics.logException(e1);*/
+                                    return;
+                                }
+
+                                if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
+                                    // Try registering the token after a connection has been successfully established.
+                                } else {
+                                                            /*finish();*/
+                                    startActivity(new Intent(this, SelectCountryActivity.class));
+                                }
+                            });
+                        });
+                    });
+                })
+                .addOnFailureListener(e -> {
+                                            /*Crashlytics.logException(e);*/
+                });
     }
 
     // 메인프레그먼트에서 호출되는 메소드

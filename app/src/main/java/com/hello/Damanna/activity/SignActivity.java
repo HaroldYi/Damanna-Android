@@ -22,6 +22,7 @@ import com.facebook.GraphRequest;
 import com.facebook.LoggingBehavior;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -69,6 +70,7 @@ public class SignActivity extends BaseActivity {
     private long backKeyPressedTime = 0;
     private Toast toast;
 
+    private static final int RC_SIGN_IN = 9001;
     private static final String TAG = "FacebookLogin";
 
     // 최소 GPS 정보 업데이트 거리 10미터
@@ -105,7 +107,19 @@ public class SignActivity extends BaseActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // Pass the activity result back to the Facebook SDK
-        this.mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        /*this.mCallbackManager.onActivityResult(requestCode, resultCode, data);*/
+
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
+                // Sign in succeeded
+                /*updateUI(mAuth.getCurrentUser());*/
+                addUserDb(this.mAuth.getCurrentUser());
+            } else {
+                // Sign in failed
+                Toast.makeText(this, "Sign In Failed", Toast.LENGTH_SHORT).show();
+                /*updateUI(null);*/
+            }
+        }
     }
 
     @Override
@@ -133,7 +147,7 @@ public class SignActivity extends BaseActivity {
 
     public void facebookLoginOnClick(View view) {
 
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        /*ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ninfo = cm.getActiveNetworkInfo();
 
         if(ninfo != null) {
@@ -169,7 +183,21 @@ public class SignActivity extends BaseActivity {
             });
         } else {
             Toast.makeText(this, "네트워크 연결을 확인하여 주십시오", Toast.LENGTH_SHORT).show();
-        }
+        }*/
+
+        /*Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show();*/
+
+        Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
+                .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                .setAvailableProviders(Arrays.asList(
+                        new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
+                        /*new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()*/
+                ))
+                .setLogo(R.color.fui_transparent)
+                .setTheme(R.style.firebase_ui)
+                .build();
+
+        startActivityForResult(intent, RC_SIGN_IN);
     }
 
     private void addUserDb(FirebaseUser currentUser) {
