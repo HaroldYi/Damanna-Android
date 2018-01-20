@@ -175,71 +175,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        this.mAuth = FirebaseAuth.getInstance();
-        this.fUser = this.mAuth.getCurrentUser();
-
-        if (this.fUser != null) {
-
-            SendBird.connect(this.fUser.getUid(), (user, e) -> {
-                if (e != null) {
-                    // Error.
-                    Log.e("sendBirdErr", e.getMessage());
-                    return;
-                } else {
-                    String token = FirebaseInstanceId.getInstance().getToken();
-                    SendBird.registerPushTokenForCurrentUser(token, (ptrs, e1) -> {
-                        if (e1 != null) {
-                            return;
-                        }
-
-                        if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
-                            // Try registering the token after a connection has been successfully established.
-                        }
-                    });
-                }
-            });
-
-            DocumentReference docRef = FirebaseFirestore.getInstance().collection("member").document(this.fUser.getUid());
-            docRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document != null && document.exists()) {
-
-                        Object nation = document.getData().get("nation");
-                        Object identity = document.getData().get("identity");
-
-                        if(nation == null) {
-                            startActivity(new Intent(this, SelectCountryActivity.class));
-                        } else if(identity == null) {
-                            startActivity(new Intent(this, SelectRoleActivity.class));
-                        } else if(nation != null && identity != null) {
-                            setContentView(R.layout.activity_horizontal_ntb);
-                            this.initUI();
-                        }
-                    } else {
-
-                    }
-                } else {
-                    /*Crashlytics.logException(task.getException());*/
-                }
-            });
-        } else {
-            startActivity(new Intent(MainActivity.this, SignActivity.class));
-
-            /*Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show();
-
-            Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
-                    .setIsSmartLockEnabled(!BuildConfig.DEBUG)
-                    .setAvailableProviders(Arrays.asList(
-                            new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
-                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
-                            ))
-                    .setLogo(R.color.fui_transparent)
-                    .setTheme(R.style.firebase_ui)
-                    .build();
-
-            startActivityForResult(intent, RC_SIGN_IN);*/
-        }
+        setContentView(R.layout.activity_horizontal_ntb);
+        this.initUI();
     }
 
     @Override

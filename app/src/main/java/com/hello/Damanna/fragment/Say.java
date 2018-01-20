@@ -71,6 +71,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
     private Query query;
 
+    private View view;
+
     // 최소 GPS 정보 업데이트 거리 10미터
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
 
@@ -78,6 +80,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
 
     private static String TAG = "cloudFireStore";
+
+    private boolean loadmoreYn = false;
 
     @Override
     public void onClick(View view) {
@@ -92,7 +96,12 @@ public class Say extends BaseFragment implements View.OnClickListener {
         this.mAuth = FirebaseAuth.getInstance();
         this.user = this.mAuth.getCurrentUser();
 
-        View view = inflater.inflate(R.layout.say_layout, container, false);
+        if(this.view == null) {
+            Log.d("tessss", (savedInstanceState == null) + "");
+            this.view = inflater.inflate(R.layout.say_layout, container, false);
+        } else {
+            return this.view;
+        }
 
         ((MainActivity) getActivity()).getSupportActionBar().show();
 
@@ -209,6 +218,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     public void run() {
+                        loadmoreYn = true;
                         loadingData(query);
                         // linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
                         //   linearLayoutManager.scrollToPosition(maxLastVisiblePosition);
@@ -407,8 +417,12 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
                             sayVo.setRegMin(regMin);
 
-                            this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
                             this.sayVoList.add(sayVo);
+
+                            if(!loadmoreYn) {
+                                this.sayListViewAdapter.clear();
+                            }
+                            this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
                         }
 
                         progressOFF();
@@ -431,7 +445,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                         String uid = doc.getString("id");
 
                         if(uid != null) {
-                            for (SayVo sayVo : sayVoList) {
+                            for (SayVo sayVo : this.sayVoList) {
                                 if (uid.equals(sayVo.getUid())) {
                                     sayVo.setUserName(doc.getString("name"));
                                     sayVo.setNation(doc.getString("nation"));

@@ -236,6 +236,7 @@ public class SignActivity extends BaseActivity {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document != null && document.exists()) {
+                    startActivity(new Intent(SignActivity.this, MainActivity.class));
                     finish();
                 } else {
                     Map<String, Object> userMap = new HashMap<>();

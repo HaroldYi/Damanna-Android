@@ -139,6 +139,7 @@ public class SettingActivity extends AppCompatActivity {
 
             signOut.setOnPreferenceClickListener(preference -> {
                 FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(getActivity(), SignActivity.class));
                 getActivity().finish();
                 return false;
             });
