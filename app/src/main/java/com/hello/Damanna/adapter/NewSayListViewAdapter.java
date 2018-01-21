@@ -1,6 +1,7 @@
 package com.hello.Damanna.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.hello.Damanna.R;
+import com.hello.Damanna.activity.UserInfoActivity;
 import com.hello.Damanna.common.RadiusNetworkImageView;
 import com.hello.Damanna.common.VolleySingleton;
 import com.hello.Damanna.vo.SayVo;
@@ -154,7 +156,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
 
             if(nation != null && !nation.isEmpty()
                     && identity != null && !identity.isEmpty() ) {
-                userInfo = String.format("%s (%s, %s)", this.sayVoList.get(index).getUserName(), nation, identity);
+                userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), identity);
             } else if((nation == null || nation.isEmpty())
                     && (identity != null && !identity.isEmpty()) ) {
                 userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), identity);
@@ -184,6 +186,14 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         ((ViewHolder) holder).userName.setTypeface(typeface);
 
         ((ViewHolder) holder).img.setImageUrl(this.sayVoList.get(index).getPhotoUrl(), this.imageLoader);
+
+        /*((ViewHolder) holder).sayLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(this.context, UserInfoActivity.class);
+            intent.putExtra("uid", this.sayVoList.get(index).getUid());
+            intent.putExtra("userName", this.sayVoList.get(index).getUserName());
+            intent.putExtra("profileUrl", this.sayVoList.get(index).getPhotoUrl());
+            *//*intent.putExtra("bitmapImage", this.sayVoList.get(index).getBitmap());*//*
+        });*/
     }
 
     @Override
@@ -213,6 +223,10 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
 
     public void insert(SayVo sayVo, int position) {
         insertInternal(this.sayVoList, sayVo, position);
+    }
+
+    public void insert(List<SayVo> sayVoList) {
+        insertInternal(sayVoList, this.sayVoList);
     }
 
     public void remove(int position) {
@@ -293,20 +307,6 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
 
         public ViewHolder(View itemView) {
             super(itemView);
-//            itemView.setOnTouchListener(new SwipeDismissTouchListener(itemView, null, new SwipeDismissTouchListener.DismissCallbacks() {
-//                @Override
-//                public boolean canDismiss(Object token) {
-//                    Logs.d("can dismiss");
-//                    return true;
-//                }
-//
-//                @Override
-//                public void onDismiss(View view, Object token) {
-//                   // Logs.d("dismiss");
-//                    remove(getPosition());
-//
-//                }
-//            }));
             this.sayLayout = (LinearLayout) itemView.findViewById(R.id.say_layout);
             this.userName = (TextView) itemView.findViewById(R.id.user_name);
             this.content = (TextView) itemView.findViewById(R.id.content);

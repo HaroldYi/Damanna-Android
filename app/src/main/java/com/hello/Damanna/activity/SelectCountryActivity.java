@@ -37,7 +37,7 @@ public class SelectCountryActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_country);
 
-        super.actList.add(this);
+        /*super.actList.add(this);*/
 
         this.mAuth = FirebaseAuth.getInstance();
         this.user = this.mAuth.getCurrentUser();
@@ -78,6 +78,7 @@ public class SelectCountryActivity extends BaseActivity {
                         .update("nation", this.nation)
                         .addOnSuccessListener(aVoid -> {
                             startActivity(new Intent(this, SelectRoleActivity.class));
+                            finish();
                         });
             }
         });

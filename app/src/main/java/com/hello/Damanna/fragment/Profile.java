@@ -18,12 +18,15 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,8 +48,12 @@ import com.hello.Damanna.activity.MainActivity;
 import com.hello.Damanna.activity.PhotoViewerActivity;
 import com.hello.Damanna.activity.PopupActivity;
 import com.hello.Damanna.activity.SettingActivity;
+import com.hello.Damanna.activity.UserInfoActivity;
 import com.hello.Damanna.activity.ViewPhotoActivity;
 import com.hello.Damanna.adapter.GridViewAdapter;
+import com.hello.Damanna.adapter.NewGridViewAdapter;
+import com.hello.Damanna.adapter.NewSayListViewAdapter;
+import com.hello.Damanna.adapter.RecyclerGridViewAdapter;
 import com.hello.Damanna.adapter.SayListViewAdapter;
 import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.common.Constant;
@@ -56,6 +63,9 @@ import com.hello.Damanna.view.ExpandableHeightGridView;
 import com.hello.Damanna.view.ExpandableHeightListView;
 import com.hello.Damanna.vo.Photo;
 import com.hello.Damanna.vo.SayVo;
+import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
+import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
+import com.marshalchen.ultimaterecyclerview.grid.BasicGridLayoutManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -82,20 +92,20 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     private Bitmap profileBitmap;
 
-    private ExpandableHeightGridView gridView;
+    private RecyclerView gridView;
     private String kind;
     private int position;
 
-    public static List<Photo> photoList;
-    private GridViewAdapter adapter;
+    public List<Photo> photoList;
+    private RecyclerGridViewAdapter adapter;
     private ImageView profileCameraBtn;
     private RadiusNetworkImageView profileImageView;
 
     private FirebaseFirestore db;
 
-    private ExpandableHeightListView listView;
+    private UltimateRecyclerView listView;
     private List<SayVo> sayVoList;
-    private SayListViewAdapter userSayListViewAdapter;
+    private NewSayListViewAdapter userSayListViewAdapter;
 
     private Button button;
     private int lastIndex;
@@ -105,23 +115,26 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     private MaterialTabHost tabHost;
 
     private ScrollView photoListView;
-    private ScrollView sayListView;
 
     private String regMin = "";
     private Uri mImageCaptureUri;
     private String imgPath = "";
 
-    private int limit = 5;
+    private final int limit = 5;
     private Query query;
 
     private View view;
     private LinearLayout cameraMenu;
+    private LinearLayoutManager linearLayoutManager;
+    private BasicGridLayoutManager basicGridLayoutManager;
 
     private boolean lastitemVisibleFlag = false;
     private boolean lastYn = false;
 
     private int selectedColour = Color.rgb(3, 196, 201);
     private int unSelectedColour = Color.rgb(176, 176, 176);
+
+    private int moreNum = 2, columns = 2;
 
     private static String TAG = "cloudFireStore";
 
@@ -176,7 +189,6 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.tabHost = (MaterialTabHost) view.findViewById(R.id.tabHost);
 
         this.photoListView = (ScrollView) view.findViewById(R.id.photo_list_view);
-        this.sayListView = (ScrollView) view.findViewById(R.id.say_list_view);
 
         // init view pager
         String[] tabList = getResources().getStringArray(R.array.tab_list);
@@ -240,16 +252,44 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         /*view.setVisibility(View.INVISIBLE);*/
 
-        this.gridView = (ExpandableHeightGridView) view.findViewById(R.id.photo_list);
-        this.gridView.setExpanded(true);
+        this.gridView = (RecyclerView) view.findViewById(R.id.photo_list);
         /*this.gridView.setVisibility(View.INVISIBLE);*/
+        /*this.gridView.setExpanded(true);*/
 
-        this.listView = (ExpandableHeightListView) view.findViewById(R.id.say_list);
-        this.listView.setExpanded(true);
+        this.listView = (UltimateRecyclerView) view.findViewById(R.id.say_list);
         /*this.listView.setVisibility(View.INVISIBLE);*/
+        this.linearLayoutManager = new LinearLayoutManager(getActivity());
+        this.listView.setLayoutManager(this.linearLayoutManager);
+
+        this.listView.setLoadMoreView(LayoutInflater.from(getActivity())
+                .inflate(R.layout.custom_bottom_progressbar, null));
 
         this.photoList = new ArrayList<>();
         this.sayVoList = new ArrayList<>();
+
+        this.userSayListViewAdapter = new NewSayListViewAdapter(getActivity(), this.sayVoList);
+        this.listView.setAdapter(this.userSayListViewAdapter);
+        this.listView.setHasFixedSize(false);
+
+        this.listView.reenableLoadmore();
+
+        this.listView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
+            @Override
+            public void loadMore(int itemsCount, final int maxLastVisiblePosition) {
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+
+                        progressON(getResources().getString(R.string.loading));
+
+                        loadingData(query);
+                        // linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
+                        //   linearLayoutManager.scrollToPosition(maxLastVisiblePosition);
+
+                    }
+                }, 1000);
+            }
+        });
 
         this.button = (Button) view.findViewById(R.id.newSayBtn);
         this.button.setOnClickListener(view1 -> {
@@ -258,8 +298,37 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             startActivityForResult(intent, 1);
         });
 
-        this.adapter = new GridViewAdapter(getActivity(), this.photoList, true);
+        this.adapter = new RecyclerGridViewAdapter(getActivity(), this.photoList);
         this.gridView.setAdapter(this.adapter);
+        this.gridView.setSaveEnabled(true);
+        this.gridView.setClipToPadding(false);
+
+        this.gridView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int index) {
+                        kind = photoList.get(index).getKind();
+                        position = position;
+
+                        if(!kind.equals("logo_t")) {
+
+                            if(kind.equals("photo") || kind.equals("profile")) {
+                                viewPhoto(photoList.get(position).getFileUrl(), "jpg");
+                            } else {
+
+                                if(cameraMenu.getVisibility() == View.VISIBLE) {
+                                    cameraMenu.setVisibility(View.GONE);
+                                } else {
+                                    cameraMenu.setVisibility(View.VISIBLE);
+                                }
+                            }
+                        }
+                    }
+                })
+        );
+
+        /*this.basicGridLayoutManager = new BasicGridLayoutManager(getActivity(), this.columns, this.adapter);
+        this.gridView.setLayoutManager(this.basicGridLayoutManager);*/
 
         this.db.collection("member/")
                 .document(this.user.getUid())
@@ -301,51 +370,48 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     identityView.setText(nation);
                 });
 
-        if(this.photoList != null && this.photoList.isEmpty()) {
-            this.db.collection("photo/")
-                    .whereEqualTo("member_id", this.user.getUid())
-                    .orderBy("reg_dt", Query.Direction.ASCENDING)
-                    .addSnapshotListener((value, e) -> {
-                        if (e != null) {
-                            Log.w(TAG, "Listen failed.", e);
-                            return;
-                        }
+        this.db.collection("photo/")
+                .whereEqualTo("member_id", this.user.getUid())
+                /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
+                .addSnapshotListener((value, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
 
-                        if (this.photoList != null && !this.photoList.isEmpty()) {
-                            this.photoList.clear();
-                        }
+                    if (this.photoList != null && !this.photoList.isEmpty()) {
+                        this.photoList.clear();
+                    }
 
-                        for (DocumentSnapshot document : value) {
-                            Photo photo = new Photo();
-                            photo.setFileName(document.getString("fileName").toString());
-                            photo.setKind("photo");
-                            this.photoList.add(photo);
-
-                            StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getString("fileName") + ".jpg");
-
-                            islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
-                                //do something with downloadurl
-                                photo.setFileUrl(downloadUrl.toString());
-                            }).addOnFailureListener(e1 -> {
-                                Log.d("에러~", e1.getMessage());
-                            });
-                        }
-
+                    for (DocumentSnapshot document : value) {
                         Photo photo = new Photo();
-                        photo.setKind("add_btn");
+                        photo.setFileName(document.getString("fileName").toString());
+                        photo.setKind("photo");
                         this.photoList.add(photo);
 
-                    /*this.adapter.clearAdapter();
-                    this.adapter.addNewValues(this.photoList);*/
-                        this.adapter.notifyDataSetChanged();
+                        StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getString("fileName") + ".jpg");
 
-                    /*this.adapter.notifyDataSetChanged();
-                    this.gridView.invalidateViews();
-                    this.gridView.setAdapter(this.adapter);*/
-                    });
-        } else if(this.photoList != null && !this.photoList.isEmpty()) {
-            this.adapter.notifyDataSetChanged();
-        }
+                        islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
+                            //do something with downloadurl
+                            photo.setFileUrl(downloadUrl.toString());
+                        }).addOnFailureListener(e1 -> {
+                            Log.d("에러~", e1.getMessage());
+                        });
+                    }
+
+                    Photo photo = new Photo();
+                    photo.setKind("add_btn");
+                    this.photoList.add(photo);
+
+                /*this.adapter.clearAdapter();
+                this.adapter.addNewValues(this.photoList);*/
+                    this.adapter.notifyDataSetChanged();
+
+                /*this.adapter.notifyDataSetChanged();
+                this.gridView.invalidateViews();
+                this.gridView.setAdapter(this.adapter);*/
+                });
+
         /*this.db.collection("photo/")
             *//*.orderBy("reg_dt", Query.Direction.ASCENDING)*//*
                 .whereEqualTo("member_id", this.user.getUid())
@@ -400,7 +466,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         loadingData(this.query);
 
-        this.gridView.setOnItemClickListener((parent, v, position, id) -> {
+        /*this.gridView.setOnItemClickListener((parent, v, position, id) -> {
             this.kind = this.photoList.get(position).getKind();
             this.position = position;
 
@@ -417,9 +483,9 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     }
                 }
             }
-        });
+        });*/
 
-        this.listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+       /* this.listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 //현재 화면에 보이는 첫번째 리스트 아이템의 번호(firstVisibleItem) + 현재 화면에 보이는 리스트 아이템의 갯수(visibleItemCount)가 리스트 전체의 갯수(totalItemCount) -1 보다 크거나 같을때
@@ -433,7 +499,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     loadingData(query);
                 }
             }
-        });
+        });*/
 
         return view;
     }
@@ -518,12 +584,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         switch (tab.getPosition()) {
 
             case 0 :
-                this.sayListView.setVisibility(View.VISIBLE);
+                this.listView.setVisibility(View.VISIBLE);
                 this.photoListView.setVisibility(View.GONE);
                 break;
 
             case 1 :
-                this.sayListView.setVisibility(View.GONE);
+                this.listView.setVisibility(View.GONE);
                 this.photoListView.setVisibility(View.VISIBLE);
                 break;
 
@@ -549,7 +615,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         }
         File file = new File( dir, System.currentTimeMillis() + "");
         this.imgPath = file.getAbsolutePath();
-        return FileProvider.getUriForFile( getActivity(), "com.hello.TravelMeetUp.provider", file );
+        return FileProvider.getUriForFile( getActivity(), "com.hello.Damanna.provider", file );
     }
 
     private void sendPicture(Intent data) {
@@ -659,7 +725,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                             Log.w(TAG, "Error adding document", e);
                         });
 
-                this.adapter = new GridViewAdapter(getActivity(), this.photoList, true);
+                this.adapter = new RecyclerGridViewAdapter(getActivity(), this.photoList);
                 this.gridView.setAdapter(adapter);
                 this.adapter.notifyDataSetChanged();
 
@@ -790,16 +856,30 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         return false;
     };
 
-    private void loadingData(Query query) {
-    query
+    private void loadingData(Query queryParam) {
+        queryParam
         .whereEqualTo("member_id", this.user.getUid())
         .get()
         .addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                this.userSayListViewAdapter = new SayListViewAdapter(getActivity(), this.sayVoList);
-                this.listView.setAdapter(this.userSayListViewAdapter);
 
-                if(task.getResult().size() > 0) {
+                int size = task.getResult().size();
+                DocumentSnapshot last = null;
+
+                if(size > 0) {
+
+                    last = task.getResult().getDocuments().get(size - 1);
+
+                    query = db.collection("say/")
+                            .orderBy("reg_dt", Query.Direction.DESCENDING)
+                            .startAfter(last)
+                            .limit(limit);
+
+                    if(size < limit) {
+                        lastYn = true;
+                        this.listView.disableLoadmore();
+                    }
+
                     for (DocumentSnapshot document : task.getResult()) {
 
                         long now = System.currentTimeMillis();
@@ -821,23 +901,22 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                         sayVo.setDistance(this.regMin);
                         sayVo.setNoMsg(false);
 
-                        this.sayVoList.add(sayVo);
+                        this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
                     }
+
                 } else {
                     SayVo sayVo = new SayVo();
                     sayVo.setMsg("등록된 내용이 없습니다.");
                     sayVo.setNoMsg(true);
 
-                    this.sayVoList.add(sayVo);
+                    this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
                 }
 
                 new Handler().postDelayed(() -> {
                     progressOFF();
                     this.view.setVisibility(View.VISIBLE);
                     this.listView.setVisibility(View.VISIBLE);
-                    this.gridView.setVisibility(View.VISIBLE);
                 }, 150);
-                this.userSayListViewAdapter.notifyDataSetChanged();
             } else {
                 Log.w(TAG, "Error getting documents.", task.getException());
             }

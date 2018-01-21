@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -22,7 +23,9 @@ import com.hello.Damanna.R;
 import com.hello.Damanna.fragment.GroupChatFragment;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.Member;
+import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
+import com.sendbird.android.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,31 +109,42 @@ public class ChatRoomActivity extends AppCompatActivity {
                     .commit();
         } else {
 
-            List<String> userList = new ArrayList<>();
-            userList.add(this.fUser.getUid());
-            userList.add(uid);
-
-            GroupChannel.createChannelWithUserIds(userList, true, new GroupChannel.GroupChannelCreateHandler() {
+            SendBird.connect(uid, new SendBird.ConnectHandler() {
                 @Override
-                public void onResult(GroupChannel groupChannel, SendBirdException e) {
+                public void onConnected(User user, SendBirdException e) {
                     if (e != null) {
-                        // Error!
+                        e.printStackTrace();
                         return;
                     }
 
-                    List<Member> memberList = groupChannel.getMembers();
-                    for (Member member : memberList) {
-                        if(!member.getUserId().equals(uid)) {
-                            title.setText(member.getNickname());
-                        }
-                    }
+                    List<String> userList = new ArrayList<>();
+                    userList.add(fUser.getUid());
+                    userList.add(uid);
 
-                    Fragment fragment = GroupChatFragment.newInstance(groupChannel.getUrl());
-                    FragmentManager manager = getSupportFragmentManager();
-                    manager.beginTransaction()
-                            .replace(R.id.container_group_channel, fragment)
-                            .addToBackStack(null)
-                            .commit();
+                    GroupChannel.createChannelWithUserIds(userList, true, new GroupChannel.GroupChannelCreateHandler() {
+                        @Override
+                        public void onResult(GroupChannel groupChannel, SendBirdException e) {
+                            if (e != null) {
+                                // Error!
+                                Log.d("errrr", e.getMessage());
+                                return;
+                            }
+
+                            List<Member> memberList = groupChannel.getMembers();
+                            for (Member member : memberList) {
+                                if(!member.getUserId().equals(uid)) {
+                                    title.setText(member.getNickname());
+                                }
+                            }
+
+                            Fragment fragment = GroupChatFragment.newInstance(groupChannel.getUrl());
+                            FragmentManager manager = getSupportFragmentManager();
+                            manager.beginTransaction()
+                                    .replace(R.id.container_group_channel, fragment)
+                                    .addToBackStack(null)
+                                    .commit();
+                        }
+                    });
                 }
             });
         }
@@ -150,9 +164,9 @@ public class ChatRoomActivity extends AppCompatActivity {
         if (mOnBackPressedListener != null && mOnBackPressedListener.onBack()) {
             return;
         }
-        /*finish();*/
-        MainActivity.tabIndex = 1;
-        startActivity(new Intent(this, MainActivity.class));
+        finish();
+        /*MainActivity.tabIndex = 1;
+        startActivity(new Intent(this, MainActivity.class));*/
         super.onBackPressed();
     }
 

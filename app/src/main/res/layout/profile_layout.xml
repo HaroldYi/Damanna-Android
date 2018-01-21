@@ -76,27 +76,20 @@
             app:accentColor="#03c4c9"
             app:primaryColor="@android:color/white" />
 
-        <ScrollView
-            android:id="@+id/say_list_view"
+        <com.marshalchen.ultimaterecyclerview.UltimateRecyclerView
+            android:id="@+id/say_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/photo_list_view"
+            android:layout_below="@+id/tabHost"
+            android:layout_marginLeft="-5dp"
+            android:layout_marginRight="-5dp"
+            android:background="@color/white"
+            android:divider="#ffffff"
+            android:dividerHeight="0px"
+            app:recyclerviewEmptyView="@layout/empty_view"
+            app:recyclerviewScrollbars="vertical"
             >
-
-            <com.hello.Damanna.view.ExpandableHeightListView
-                android:id="@+id/say_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/tabHost"
-                android:layout_marginLeft="-5dp"
-                android:layout_marginRight="-5dp"
-                android:background="@color/white"
-                android:divider="#ffffff"
-                android:dividerHeight="0px"
-                >
-            </com.hello.Damanna.view.ExpandableHeightListView>
-        </ScrollView>
+        </com.marshalchen.ultimaterecyclerview.UltimateRecyclerView>
 
         <ScrollView
             android:id="@+id/photo_list_view"
@@ -115,7 +108,7 @@
                 android:layout_marginRight="8dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardUseCompatPadding="true">
-            <com.hello.Damanna.view.ExpandableHeightGridView
+            <android.support.v7.widget.RecyclerView
                     android:id="@+id/photo_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -125,9 +118,8 @@
                     android:horizontalSpacing="3dp"
                     android:verticalSpacing="3dp"
                     android:isScrollContainer="false"
-                    android:stretchMode="columnWidth"
-                    android:numColumns="2"
-                    android:columnWidth="150dp"
+                    app:layoutManager="GridLayoutManager"
+                    app:spanCount="2"
                 />
             </android.support.v7.widget.CardView>
         </ScrollView>

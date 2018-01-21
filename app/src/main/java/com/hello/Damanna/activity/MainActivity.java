@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private JSONObject userInfo;
 
     public static int tabIndex = 0;
+
     private static final int RC_SIGN_IN = 9001;
     private static final String TAG = "FacebookLogin";
 
@@ -154,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
                     });
         }*/
 
+        setContentView(R.layout.activity_main);
+        this.initUI();
+
         new TedPermission(this)
                 .setPermissionListener(new PermissionListener() {
                     @Override
@@ -174,9 +178,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        setContentView(R.layout.activity_horizontal_ntb);
-        this.initUI();
     }
 
     @Override
@@ -237,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document != null && document.exists()) {
-                    setContentView(R.layout.activity_horizontal_ntb);
+                    setContentView(R.layout.activity_main);
                     this.initUI();
                     /*this.navigationTabBar.setModelIndex(0, true);
                     getSupportFragmentManager().beginTransaction().replace(R.id.contentContainer, new Say()).addToBackStack("say").commit();*/
@@ -308,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
         userMap.put("name", this.fUser.getDisplayName());
         userMap.put("profileUrl", this.fUser.getPhotoUrl().toString());
                                     /*userMap.put("location", new GeoPoint(latitude, longitude));*/
-
         this.db.collection("member").document(this.fUser.getUid())
                 .set(userMap)
                 .addOnSuccessListener(aVoid -> {
@@ -435,12 +435,10 @@ public class MainActivity extends AppCompatActivity {
 
         switch (tabIndex) {
             case 0:
-                Profile.photoList = new ArrayList<>();
                 transaction.replace(R.id.contentContainer, new Say(), "say").commitAllowingStateLoss();
                 break;
 
             case 1:
-                Profile.photoList = new ArrayList<>();
                 transaction.replace(R.id.contentContainer, new GroupChannelListFragment(), "chat").commitAllowingStateLoss();
                 break;
 
@@ -525,8 +523,7 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (index) {
                     case 0 :
-                        Profile.photoList = new ArrayList<>();
-                        fragmentTransaction.replace(R.id.contentContainer, new Say(), "say").commitAllowingStateLoss();
+                        fragmentTransaction.replace(R.id.contentContainer, new Say(), "say").commit();
                         break;
 
                     /*case 1 :
@@ -536,7 +533,6 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (index) {
                     case 1 :
-                        Profile.photoList = new ArrayList<>();
                         /*fragmentTransaction.replace(R.id.contentContainer, new Chat()).commit();*/
                         fragmentTransaction.replace(R.id.contentContainer, new GroupChannelListFragment(), "chat").commitAllowingStateLoss();
                         break;

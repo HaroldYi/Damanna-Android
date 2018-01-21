@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
@@ -32,8 +31,10 @@ import com.google.firebase.firestore.Query;
 import com.hello.Damanna.R;
 import com.hello.Damanna.activity.MainActivity;
 import com.hello.Damanna.activity.PopupActivity;
+import com.hello.Damanna.activity.UserInfoActivity;
 import com.hello.Damanna.adapter.NewSayListViewAdapter;
 import com.hello.Damanna.vo.SayVo;
+import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
     private UltimateRecyclerView listView;
     private List<SayVo> sayVoList;
+    private List<SayVo> tempSayVoList;
     private FirebaseFirestore db;
 
     private MainActivity activity;
@@ -97,7 +99,6 @@ public class Say extends BaseFragment implements View.OnClickListener {
         this.user = this.mAuth.getCurrentUser();
 
         if(this.view == null) {
-            Log.d("tessss", (savedInstanceState == null) + "");
             this.view = inflater.inflate(R.layout.say_layout, container, false);
         } else {
             return this.view;
@@ -178,6 +179,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
         });*/
 
         this.sayVoList = new ArrayList<>();
+        this.tempSayVoList = new ArrayList<>();
         this.sayListViewAdapter = new NewSayListViewAdapter(getActivity(), this.sayVoList);
         /*this.sayListViewAdapter.setCustomLoadMoreView(
                 LayoutInflater.from(getActivity()).inflate(R.layout.custom_bottom_progressbar, null));*/
@@ -187,30 +189,18 @@ public class Say extends BaseFragment implements View.OnClickListener {
         this.listView.setVisibility(View.INVISIBLE);
         this.listView.setLoadMoreView(LayoutInflater.from(getActivity())
                 .inflate(R.layout.custom_bottom_progressbar, null));
-        this.listView.setDefaultOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                /*new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        sayVoList.clear();
-                        sayListViewAdapter.clear();
-                        query = db.collection("say/")
-                                .orderBy("reg_dt", Query.Direction.DESCENDING)
-                                .limit(limit);
+        this.listView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
 
-                        loadingData(query);
-                    }
-                }, 1000);*/
-            }
-        });
+            tempSayVoList.clear();
+            sayListViewAdapter.clear();
+            query = db.collection("say/")
+                    .orderBy("reg_dt", Query.Direction.DESCENDING)
+                    .limit(limit);
+
+            loadingData(query);
+        }, 1000));
 
         this.listView.reenableLoadmore();
-
-        this.linearLayoutManager = new LinearLayoutManager(getActivity());
-        this.listView.setLayoutManager(this.linearLayoutManager);
-        this.listView.setAdapter(this.sayListViewAdapter);
-        this.listView.setHasFixedSize(false);
 
         this.listView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
             @Override
@@ -218,7 +208,9 @@ public class Say extends BaseFragment implements View.OnClickListener {
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     public void run() {
-                        loadmoreYn = true;
+
+                        progressON(getResources().getString(R.string.loading));
+
                         loadingData(query);
                         // linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
                         //   linearLayoutManager.scrollToPosition(maxLastVisiblePosition);
@@ -228,17 +220,41 @@ public class Say extends BaseFragment implements View.OnClickListener {
             }
         });
 
+        this.linearLayoutManager = new LinearLayoutManager(getActivity());
+        this.listView.setLayoutManager(this.linearLayoutManager);
+        this.listView.setAdapter(this.sayListViewAdapter);
+        this.listView.setHasFixedSize(false);
+
+        this.listView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int index) {
+                        Intent intent = new Intent(getActivity(), UserInfoActivity.class);
+                        intent.putExtra("uid", sayVoList.get(index).getUid());
+                        intent.putExtra("userName", sayVoList.get(index).getUserName());
+                        intent.putExtra("profileUrl", sayVoList.get(index).getPhotoUrl());
+                        intent.putExtra("bitmapImage", sayVoList.get(index).getBitmap());
+
+                        startActivity(intent);
+                    }
+                })
+        );
+
         this.activity = (MainActivity) getActivity();
 
         this.query = this.db.collection("say/")
                 .orderBy("reg_dt", Query.Direction.DESCENDING)
                 .limit(this.limit);
 
+        this.progressON(getResources().getString(R.string.loading));
+
         this.db.collection("member").document(this.user.getUid())
                 .update("location", new GeoPoint(this.latitude, this.longitude))
                 .addOnSuccessListener(aVoid -> {
-                    /*this.progressON(getResources().getString(R.string.loading));*/
                     this.loadingData(this.query);
+                })
+                .addOnFailureListener(command -> {
+                    Log.d("ERRRR", command.getMessage());
                 });
 
         /*this.listView.setOnItemClickListener((adapterView, view1, index, l) -> {
@@ -417,12 +433,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
                             sayVo.setRegMin(regMin);
 
-                            this.sayVoList.add(sayVo);
-
-                            if(!loadmoreYn) {
-                                this.sayListViewAdapter.clear();
-                            }
-                            this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
+                            this.tempSayVoList.add(sayVo);
                         }
 
                         progressOFF();
@@ -445,7 +456,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                         String uid = doc.getString("id");
 
                         if(uid != null) {
-                            for (SayVo sayVo : this.sayVoList) {
+                            for (SayVo sayVo : this.tempSayVoList) {
                                 if (uid.equals(sayVo.getUid())) {
                                     sayVo.setUserName(doc.getString("name"));
                                     sayVo.setNation(doc.getString("nation"));
@@ -464,6 +475,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
                                     String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
                                     sayVo.setDistance(String.format("%s / %s", sayVo.getRegMin(), distance));
+
+                                    this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
                                 }
                             }
                         }

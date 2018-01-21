@@ -77,6 +77,8 @@ public class SplashActivity extends AppCompatActivity {
                 } else {
                     /*Crashlytics.logException(task.getException());*/
                 }
+            }).addOnFailureListener(command -> {
+                Log.d("ERRRR", command.getMessage());
             });
         } else {
             startActivity(new Intent(SplashActivity.this, SignActivity.class));

@@ -1,16 +1,20 @@
 package com.hello.Damanna.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -21,8 +25,10 @@ import com.android.volley.toolbox.ImageLoader;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.hello.Damanna.R;
 import com.hello.Damanna.adapter.GridViewAdapter;
+import com.hello.Damanna.adapter.NewSayListViewAdapter;
 import com.hello.Damanna.adapter.SayListViewAdapter;
 import com.hello.Damanna.common.BaseApplication;
 import com.hello.Damanna.common.RadiusNetworkImageView;
@@ -31,6 +37,7 @@ import com.hello.Damanna.view.ExpandableHeightListView;
 import com.hello.Damanna.vo.Photo;
 import com.hello.Damanna.view.ExpandableHeightGridView;
 import com.hello.Damanna.vo.SayVo;
+import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 
 import org.joda.time.DateTime;
 
@@ -51,12 +58,13 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
     private static String TAG = "cloudFireStore";
 
-    private ExpandableHeightListView listView;
+    private UltimateRecyclerView listView;
+    private LinearLayoutManager linearLayoutManager;
     private List<SayVo> sayVoList;
     private List<Photo> photoList;
 
     private ExpandableHeightGridView gridView;
-    private SayListViewAdapter userSayListViewAdapter;
+    private NewSayListViewAdapter userSayListViewAdapter;
 
     private ImageLoader imageLoader;
 
@@ -67,7 +75,6 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
     private MaterialTabHost tabHost;
 
     private CardView photoListView;
-    private ScrollView sayListView;
 
     private int selectedColour = Color.rgb(3, 196, 201);
     private int unSelectedColour = Color.rgb(176, 176, 176);
@@ -76,9 +83,18 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
     private String userName;
     private String uid;
 
+    private final int limit = 5;
+    private Query query;
+
+    private FirebaseFirestore db;
+
+    private Activity activity;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.activity = this;
 
         this.mAuth = FirebaseAuth.getInstance();
         BaseApplication.getInstance().progressON(this, getResources().getString(R.string.loading));
@@ -111,7 +127,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         ImageButton backBtn = (ImageButton) actionView.findViewById(R.id.backBtn);
         backBtn.setOnClickListener(view1 -> finish());
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        this.db = FirebaseFirestore.getInstance();
 
         Intent intent = getIntent();
 
@@ -120,7 +136,6 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         String profileUrl = intent.getStringExtra("profileUrl");
 
         this.photoListView = (CardView) view.findViewById(R.id.photo_list_view);
-        this.sayListView = (ScrollView) view.findViewById(R.id.say_list_view);
 
         this.gridView = (ExpandableHeightGridView) findViewById(R.id.photo_list);
         this.gridView.setExpanded(true);
@@ -177,14 +192,50 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
             overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         });
 
-        this.listView = (ExpandableHeightListView) findViewById(R.id.say_list);
-        this.listView.setExpanded(true);
-        this.listView.setVisibility(View.INVISIBLE);
-
         this.photoList = new ArrayList<>();
         this.sayVoList = new ArrayList<>();
 
-        db.collection("photo/")
+        this.listView = (UltimateRecyclerView) findViewById(R.id.say_list);
+        this.linearLayoutManager = new LinearLayoutManager(this);
+        this.listView.setLayoutManager(this.linearLayoutManager);
+        this.userSayListViewAdapter = new NewSayListViewAdapter(this, this.sayVoList);
+        this.listView.setAdapter(this.userSayListViewAdapter);
+        this.listView.setHasFixedSize(false);
+
+        this.listView.reenableLoadmore();
+        this.listView.setLoadMoreView(LayoutInflater.from(this)
+                .inflate(R.layout.custom_bottom_progressbar, null));
+
+        this.listView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
+            @Override
+            public void loadMore(int itemsCount, final int maxLastVisiblePosition) {
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+
+                        BaseApplication.getInstance().progressON(activity, getResources().getString(R.string.loading));
+
+                        loadingData(query);
+                        // linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
+                        //   linearLayoutManager.scrollToPosition(maxLastVisiblePosition);
+
+                    }
+                }, 1000);
+            }
+        });
+        this.listView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
+
+            userSayListViewAdapter.clear();
+            sayVoList.clear();
+            this.query = db.collection("say/")
+                    .whereEqualTo("member_id", this.uid)
+                /*.orderBy("reg_dt", Query.Direction.DESCENDING)*/
+                    .limit(this.limit);
+
+            loadingData(query);
+        }, 1000));
+
+        this.db.collection("photo/")
                 .whereEqualTo("member_id", this.uid)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -204,13 +255,88 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                     }
                 });
 
-        db.collection("say/")
+        this.query = db.collection("say/")
                 .whereEqualTo("member_id", this.uid)
+                /*.orderBy("reg_dt", Query.Direction.DESCENDING)*/
+                .limit(this.limit);
+
+        loadingData(this.query);
+
+        this.gridView.setOnItemClickListener((parent, v, position, id) -> {
+            /*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
+            viewIntent.putExtra("photoUrl", photoList.get(position).getFileName());
+            startActivityForResult(viewIntent, 1);*/
+            this.position = position;
+            viewPhoto(null);
+        });
+    }
+
+    @Override
+    public void onTabSelected(MaterialTab tab) {
+        // when the tab is clicked the pager swipe content to the tab position
+        this.tabHost.getCurrentTab().setTextColor(this.unSelectedColour);
+        this.tabHost.setSelectedNavigationItem(tab.getPosition());
+        this.tabHost.getCurrentTab().setTextColor(this.selectedColour);
+
+        switch (tab.getPosition()) {
+
+            case 0 :
+                this.listView.setVisibility(View.VISIBLE);
+                this.photoListView.setVisibility(View.GONE);
+                break;
+
+            case 1 :
+                this.listView.setVisibility(View.GONE);
+                this.photoListView.setVisibility(View.VISIBLE);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onTabReselected(MaterialTab tab) {
+
+    }
+
+    @Override
+    public void onTabUnselected(MaterialTab tab) {
+
+    }
+
+    private void viewPhoto(Bitmap bitmap) {
+        //데이터 담아서 팝업(액티비티) 호출
+        Intent intent = new Intent(this, ViewPhotoActivity.class);
+        if(bitmap != null) {
+            intent.putExtra("bitmap", bitmap);
+        }
+        intent.putExtra("photoUrl", this.photoList.get(this.position).getFileName());
+        intent.putExtra("userName", this.userName);
+        startActivityForResult(intent, 1);
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
+
+    private void loadingData(Query queryParam) {
+
+        queryParam
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        this.userSayListViewAdapter = new SayListViewAdapter(this, this.sayVoList);
-                        this.listView.setAdapter(userSayListViewAdapter);
+
+                        int size = task.getResult().size();
+                        DocumentSnapshot last = null;
+
+                        last = task.getResult().getDocuments().get(size - 1);
+
+                        query = db.collection("say/")
+                                .orderBy("reg_dt", Query.Direction.DESCENDING)
+                                .startAfter(last)
+                                .limit(limit);
+
+                        if(size < limit) {
+                            this.listView.disableLoadmore();
+                        }
 
                         for (DocumentSnapshot document : task.getResult()) {
 
@@ -277,27 +403,26 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                                                         sayVo.setNation(document1.getData().get("nation").toString());
                                                     }
 
-                                                    this.sayVoList.add(sayVo);
+                                                    this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
 
-                                                    /*new Handler().postDelayed(() -> {
-                                                        progressOFF();
+                                                    new Handler().postDelayed(() -> {
+                                                        BaseApplication.getInstance().progressOFF();
                                                         view.setVisibility(View.VISIBLE);
                                                         this.gridView.setVisibility(View.VISIBLE);
                                                         this.listView.setVisibility(View.VISIBLE);
-                                                    }, 100);*/
+                                                    }, 100);
                                                 }
                                             } else {
                                                 SayVo sayVo = new SayVo();
                                                 sayVo.setMsg("등록된 내용이 없습니다.");
                                                 sayVo.setNoMsg(true);
-                                                this.sayVoList.add(sayVo);
+                                                this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
                                             }
 
                                             BaseApplication.getInstance().progressOFF();
                                             this.view.setVisibility(View.VISIBLE);
                                             this.gridView.setVisibility(View.VISIBLE);
                                             this.listView.setVisibility(View.VISIBLE);
-                                            this.userSayListViewAdapter.notifyDataSetChanged();
                                         } else {
                                             Log.w(TAG, "Error getting documents.", task1.getException());
                                         }
@@ -308,57 +433,69 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                     }
                 });
 
-        this.gridView.setOnItemClickListener((parent, v, position, id) -> {
-            /*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
-            viewIntent.putExtra("photoUrl", photoList.get(position).getFileName());
-            startActivityForResult(viewIntent, 1);*/
-            this.position = position;
-            viewPhoto(null);
-        });
-    }
+        /*queryParam
+                .whereEqualTo("member_id", this.uid)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
 
-    @Override
-    public void onTabSelected(MaterialTab tab) {
-        // when the tab is clicked the pager swipe content to the tab position
-        this.tabHost.getCurrentTab().setTextColor(this.unSelectedColour);
-        this.tabHost.setSelectedNavigationItem(tab.getPosition());
-        this.tabHost.getCurrentTab().setTextColor(this.selectedColour);
+                        int size = task.getResult().size();
+                        DocumentSnapshot last = null;
 
-        switch (tab.getPosition()) {
-            case 0 :
-                this.sayListView.setVisibility(View.GONE);
-                this.photoListView.setVisibility(View.VISIBLE);
-                break;
+                        if(size > 0) {
 
-            case 1 :
-                this.sayListView.setVisibility(View.VISIBLE);
-                this.photoListView.setVisibility(View.GONE);
-                break;
+                            last = task.getResult().getDocuments().get(size - 1);
 
-            default:
-                break;
-        }
-    }
+                            query = db.collection("say/")
+                                    .orderBy("reg_dt", Query.Direction.DESCENDING)
+                                    .startAfter(last)
+                                    .limit(limit);
 
-    @Override
-    public void onTabReselected(MaterialTab tab) {
+                            if(size < limit) {
+                                this.listView.disableLoadmore();
+                            }
 
-    }
+                            for (DocumentSnapshot document : task.getResult()) {
 
-    @Override
-    public void onTabUnselected(MaterialTab tab) {
+                                long now = System.currentTimeMillis();
+                                long regDt = ((Date)document.getData().get("reg_dt")).getTime();
+                                long regTime = (now - regDt) / 60000;
 
-    }
+                                if(regTime < 60) {
+                                    this.regMin = String.format("%dmin", regTime);
+                                } else if(regTime >= 60 && regTime < 1440) {
+                                    this.regMin = String.format("%dh", (int)(regTime / 60));
+                                } else if(regTime > 1440) {
+                                    this.regMin = String.format("%dd", (int)(regTime / 1440));
+                                }
 
-    private void viewPhoto(Bitmap bitmap) {
-        //데이터 담아서 팝업(액티비티) 호출
-        Intent intent = new Intent(this, ViewPhotoActivity.class);
-        if(bitmap != null) {
-            intent.putExtra("bitmap", bitmap);
-        }
-        intent.putExtra("photoUrl", this.photoList.get(this.position).getFileName());
-        intent.putExtra("userName", this.userName);
-        startActivityForResult(intent, 1);
-        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+                                SayVo sayVo = new SayVo();
+                                sayVo.setUserName(this.user.getDisplayName());
+                                sayVo.setMsg(document.getData().get("content").toString());
+                                sayVo.setPhotoUrl(this.user.getPhotoUrl().toString());
+                                sayVo.setDistance(this.regMin);
+                                sayVo.setNoMsg(false);
+
+                                this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
+                            }
+
+                        } else {
+                            SayVo sayVo = new SayVo();
+                            sayVo.setMsg("등록된 내용이 없습니다.");
+                            sayVo.setNoMsg(true);
+
+                            this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
+                        }
+
+                        new Handler().postDelayed(() -> {
+                            progressOFF();
+                            this.view.setVisibility(View.VISIBLE);
+                            this.listView.setVisibility(View.VISIBLE);
+                            this.gridView.setVisibility(View.VISIBLE);
+                        }, 150);
+                    } else {
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                    }
+                });*/
     }
 }

@@ -89,9 +89,9 @@ public class SelectRoleActivity extends BaseActivity implements View.OnClickList
         this.db.collection("member").document(this.user.getUid())
                 .update("identity", identity)
                 .addOnSuccessListener(aVoid -> {
-                    for(Activity activity : super.actList) {
+                    /*for(Activity activity : super.actList) {
                         activity.finish();
-                    }
+                    }*/
 
                     startActivity(new Intent(this, MainActivity.class));
                     finish();

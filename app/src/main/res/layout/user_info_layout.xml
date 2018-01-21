@@ -75,6 +75,7 @@
                 android:background="@drawable/shadow_rect_blu"
                 android:layout_marginTop="80dp"
                 android:textColor="@color/white"
+                android:visibility="gone"
                 android:text="Follow" />
 
             <Button
@@ -112,6 +113,7 @@
             android:layout_marginRight="8dp"
             app:cardBackgroundColor="@color/white"
             android:layout_below="@+id/tabHost"
+            android:visibility="gone"
             app:cardUseCompatPadding="true">
             <com.hello.Damanna.view.ExpandableHeightGridView
                 android:id="@+id/photo_list"
@@ -164,25 +166,18 @@
                 android:textColor="#423752" />
         </RelativeLayout>
 
-        <ScrollView
-            android:id="@+id/say_list_view"
+        <com.marshalchen.ultimaterecyclerview.UltimateRecyclerView
+            android:id="@+id/say_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/photo_list_view"
-            android:visibility="gone" >
-
-            <com.hello.Damanna.view.ExpandableHeightListView
-                android:id="@+id/say_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/tabHost"
-                android:layout_marginLeft="-5dp"
-                android:layout_marginRight="-5dp"
-                android:background="@color/white"
-                android:divider="#ffffff"
-                android:dividerHeight="0px"
-                ></com.hello.Damanna.view.ExpandableHeightListView>
-        </ScrollView>
+            android:layout_below="@+id/tabHost"
+            android:layout_marginLeft="-5dp"
+            android:layout_marginRight="-5dp"
+            android:background="@color/white"
+            android:divider="#ffffff"
+            android:dividerHeight="0px"
+            app:recyclerviewEmptyView="@layout/empty_view"
+            app:recyclerviewScrollbars="vertical"
+            ></com.marshalchen.ultimaterecyclerview.UltimateRecyclerView>
     </RelativeLayout>
 </RelativeLayout>
