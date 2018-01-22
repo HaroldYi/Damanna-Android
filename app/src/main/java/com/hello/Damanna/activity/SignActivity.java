@@ -240,90 +240,101 @@ public class SignActivity extends BaseActivity {
                     finish();
                 } else {
                     Map<String, Object> userMap = new HashMap<>();
+                    GraphRequest request = GraphRequest.newMeRequest(
+                            AccessToken.getCurrentAccessToken(),
+                            (object, response) -> {
+                                // Application code
+                                userInfo = response.getJSONObject();
 
-                    String facebookId = "";
-                    String dateOfBirth = "";
-                    String gender = "";
+                                String facebookId = "";
+                                String dateOfBirth = "";
+                                String gender = "";
 
-                    try {
-                        facebookId = this.userInfo.get("id").toString();
-                    } catch (Exception e) {
-                        facebookId = "";
-                    }
+                                Calendar calendar = Calendar.getInstance();
 
-                    try {
-                        dateOfBirth = this.userInfo.get("birthday").toString();
-                    } catch (Exception e) {
-                        dateOfBirth = "";
-                    }
-
-                    try {
-                        gender = this.userInfo.get("gender").toString();
-                    } catch (Exception e) {
-                        gender = "";
-                    }
-
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
-
-                    userMap.put("facebookId", facebookId);
-                    userMap.put("id", currentUser.getUid());
-                    userMap.put("email", currentUser.getEmail());
-                    userMap.put("dateOfBirth", new Date(calendar.getTimeInMillis()));
-                    userMap.put("gender", gender);
-                    userMap.put("name", currentUser.getDisplayName());
-                    userMap.put("profileUrl", currentUser.getPhotoUrl().toString());
-                    userMap.put("location", new GeoPoint(latitude, longitude));
-
-                    this.db.collection("member").document(currentUser.getUid())
-                            .set(userMap)
-                            .addOnSuccessListener(aVoid -> {
-                                Log.d(TAG, "DocumentSnapshot successfully written!");
-
-                                List<String> userList = new ArrayList<>();
-                                userList.add(mAuth.getCurrentUser().getUid());
-
-                                SendBird.createUserListQuery(userList);
                                 try {
-                                    FirebaseInstanceId.getInstance().deleteInstanceId();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+                                    facebookId = this.userInfo.get("id").toString();
+                                } catch (Exception e) {
+                                    facebookId = "";
                                 }
-                                String pushToken = FirebaseInstanceId.getInstance().getToken();
 
-                                SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
-                                    if (e != null) {
-                                        // Error.
-                                        /*Crashlytics.logException(e);*/
-                                        return;
-                                    }
+                                try {
+                                    dateOfBirth = this.userInfo.get("birthday").toString();
+                                    calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
+                                } catch (Exception e) {
+                                    dateOfBirth = "";
+                                }
 
-                                    SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
-                                        if (e12 != null) {
-                                            // Error.
-                                            /*Crashlytics.logException(e12);*/
-                                            return;
-                                        }
+                                try {
+                                    gender = this.userInfo.get("gender").toString();
+                                } catch (Exception e) {
+                                    gender = "";
+                                }
 
-                                        SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
-                                            if (e1 != null) {
-                                                /*Crashlytics.logException(e1);*/
-                                                return;
+                                userMap.put("facebookId", facebookId);
+                                userMap.put("id", currentUser.getUid());
+                                userMap.put("email", currentUser.getEmail());
+                                userMap.put("dateOfBirth", new Date(calendar.getTimeInMillis()));
+                                userMap.put("gender", gender);
+                                userMap.put("name", currentUser.getDisplayName());
+                                userMap.put("profileUrl", currentUser.getPhotoUrl().toString());
+                                userMap.put("location", new GeoPoint(latitude, longitude));
+
+                                this.db.collection("member").document(currentUser.getUid())
+                                        .set(userMap)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Log.d(TAG, "DocumentSnapshot successfully written!");
+
+                                            List<String> userList = new ArrayList<>();
+                                            userList.add(mAuth.getCurrentUser().getUid());
+
+                                            SendBird.createUserListQuery(userList);
+                                            try {
+                                                FirebaseInstanceId.getInstance().deleteInstanceId();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
                                             }
+                                            String pushToken = FirebaseInstanceId.getInstance().getToken();
 
-                                            if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
-                                                // Try registering the token after a connection has been successfully established.
-                                            } else {
-                                            /*finish();*/
-                                                startActivity(new Intent(this, SelectCountryActivity.class));
-                                            }
+                                            SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
+                                                if (e != null) {
+                                                    // Error.
+                                                    /*Crashlytics.logException(e);*/
+                                                    return;
+                                                }
+
+                                                SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
+                                                    if (e12 != null) {
+                                                        // Error.
+                                                        /*Crashlytics.logException(e12);*/
+                                                        return;
+                                                    }
+
+                                                    SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
+                                                        if (e1 != null) {
+                                                            /*Crashlytics.logException(e1);*/
+                                                            return;
+                                                        }
+
+                                                        if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
+                                                            // Try registering the token after a connection has been successfully established.
+                                                        } else {
+                                                            /*finish();*/
+                                                            startActivity(new Intent(this, SelectCountryActivity.class));
+                                                        }
+                                                    });
+                                                });
+                                            });
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            /*Crashlytics.logException(e);*/
                                         });
-                                    });
-                                });
-                            })
-                            .addOnFailureListener(e -> {
-                                /*Crashlytics.logException(e);*/
                             });
+
+                    Bundle parameters = new Bundle();
+                    parameters.putString("fields", "id, name, gender, birthday");
+                    request.setParameters(parameters);
+                    request.executeAsync();
                 }
             } else {
                 /*Crashlytics.logException(task.getException());*/

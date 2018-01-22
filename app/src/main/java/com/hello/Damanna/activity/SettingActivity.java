@@ -130,7 +130,7 @@ public class SettingActivity extends AppCompatActivity {
             });
 
             question.setOnPreferenceClickListener(preference -> {
-                Uri uri = Uri.parse("mailto:xxx@abc.com");
+                Uri uri = Uri.parse("mailto:hellostudioteam@naver.com");
                 Intent it = new Intent(Intent.ACTION_SENDTO, uri);
                 startActivity(it);
 

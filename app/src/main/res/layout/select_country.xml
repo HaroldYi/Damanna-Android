@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     >
 
-    <com.meg7.widget.CircleImageView
+    <com.hello.Damanna.common.RadiusNetworkImageView
         android:id="@+id/user_profile_photo"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -12,10 +12,7 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:layout_marginTop="50dp"
-        android:elevation="24dp"
-        android:padding="20dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/layer_4" />
+        android:scaleType="fitXY" />
 
     <TextView
         android:id="@+id/user_name"

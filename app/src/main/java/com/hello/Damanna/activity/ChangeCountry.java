@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,8 +19,12 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by lji5317 on 08/01/2018.
@@ -34,6 +39,8 @@ public class ChangeCountry extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private FirebaseFirestore db;
+
+    private static String TAG = "cloudFireStore";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,9 +77,24 @@ public class ChangeCountry extends AppCompatActivity {
         Button saveBtn = (Button) actionView.findViewById(R.id.saveBtn);
 
         Spinner spinner = (Spinner) findViewById(R.id.country_list);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.country_list, R.layout.support_simple_spinner_dropdown_item);
+        List<String> nationList = new ArrayList<>();
 
-        spinner.setAdapter(adapter);
+        this.db.collection("nation/")
+                /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
+                .addSnapshotListener((value, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
+
+                    for (DocumentSnapshot document : value) {
+                        String nation = document.getString("nation_kr");
+                        nationList.add(nation);
+                    }
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, nationList);
+                    spinner.setAdapter(adapter);
+                });
 
         String[] countryList = getResources().getStringArray(R.array.country_list);
         int index = 0;

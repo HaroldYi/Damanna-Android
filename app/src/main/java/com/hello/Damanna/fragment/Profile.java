@@ -909,6 +909,8 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     sayVo.setMsg("등록된 내용이 없습니다.");
                     sayVo.setNoMsg(true);
 
+                    this.listView.disableLoadmore();
+
                     this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
                 }
 

@@ -15,6 +15,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
 import com.hello.Damanna.common.CommonFunction;
+import com.hello.Damanna.common.RadiusNetworkImageView;
+import com.hello.Damanna.common.VolleySingleton;
 import com.meg7.widget.CircleImageView;
 
 /**
@@ -40,9 +42,10 @@ public class SelectRoleActivity extends BaseActivity implements View.OnClickList
         TextView tv = (TextView) findViewById(R.id.user_name);
         tv.setText(this.user.getDisplayName());
 
-        Bitmap profileBitmap = CommonFunction.getBitmapFromURL(this.user.getPhotoUrl().toString());
-        CircleImageView imageView = (CircleImageView) findViewById(R.id.user_profile_photo);
-        imageView.setImageBitmap(profileBitmap);
+        /*Bitmap profileBitmap = CommonFunction.getBitmapFromURL(this.user.getPhotoUrl().toString());*/
+        RadiusNetworkImageView imageView = (RadiusNetworkImageView) findViewById(R.id.user_profile_photo);
+        imageView.setRadius(175f);
+        imageView.setImageUrl(this.user.getPhotoUrl().toString(), VolleySingleton.getInstance(this).getImageLoader());
 
         Button student = (Button) findViewById(R.id.student);
         student.setOnClickListener(this);
