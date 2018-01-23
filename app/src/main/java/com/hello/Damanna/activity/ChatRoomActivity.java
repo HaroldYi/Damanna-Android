@@ -21,6 +21,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.Damanna.R;
 import com.hello.Damanna.fragment.GroupChatFragment;
+import com.sendbird.android.BaseChannel;
+import com.sendbird.android.BaseMessage;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.Member;
 import com.sendbird.android.SendBird;
@@ -67,7 +69,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         View actionView = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
 
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
-        title.setText(getIntent().getStringExtra("userName"));
+        title.setText(getIntent().getStringExtra(""));
 
         Typeface typeface = Typeface.createFromAsset(this.getAssets(), "fonts/NotoSans-Medium.ttf");
         title.setTypeface(typeface);
@@ -79,8 +81,12 @@ public class ChatRoomActivity extends AppCompatActivity {
 
         ImageButton backBtn = (ImageButton) actionView.findViewById(R.id.backBtn);
         backBtn.setOnClickListener(view1 -> {
-            MainActivity.tabIndex = 1;
-            startActivity(new Intent(this, MainActivity.class));
+            boolean userInfoYn = getIntent().getBooleanExtra("userInfoYn", false);
+            if(!userInfoYn) {
+                MainActivity.tabIndex = 1;
+                startActivity(new Intent(this, MainActivity.class));
+            }
+            finish();
         });
 
         /*if (savedInstanceState == null) {
@@ -98,28 +104,49 @@ public class ChatRoomActivity extends AppCompatActivity {
         String channelUrl = getIntent().getStringExtra("channelUrl");
         String uid = getIntent().getStringExtra("uid");
 
-        if(channelUrl != null) {
+        SendBird.connect(fUser.getUid(), new SendBird.ConnectHandler() {
+            @Override
+            public void onConnected(User user, SendBirdException e) {
+                if (e != null) {
+                    e.printStackTrace();
+                    return;
+                }
 
-            // If started from notification
-            Fragment fragment = GroupChatFragment.newInstance(channelUrl);
-            FragmentManager manager = getSupportFragmentManager();
-            manager.beginTransaction()
-                    .replace(R.id.container_group_channel, fragment)
-                    .addToBackStack(null)
-                    .commit();
-        } else {
+                title.setText(getIntent().getStringExtra("senderName"));
 
-            SendBird.connect(uid, new SendBird.ConnectHandler() {
-                @Override
-                public void onConnected(User user, SendBirdException e) {
-                    if (e != null) {
-                        e.printStackTrace();
-                        return;
-                    }
+                if(channelUrl != null) {
+
+                    // If started from notification
+                    Fragment fragment = GroupChatFragment.newInstance(channelUrl);
+                    FragmentManager manager = getSupportFragmentManager();
+                    manager.beginTransaction()
+                            .replace(R.id.container_group_channel, fragment)
+                            .addToBackStack(null)
+                            .commit();
+                } else {
+
+                    /*GroupChannel.getChannel(channelUrl, new GroupChannel.GroupChannelGetHandler() {
+                        @Override
+                        public void onResult(GroupChannel groupChannel, SendBirdException e) {
+                            if (e != null) {
+                                // Error!
+                                e.printStackTrace();
+                                return;
+                            }
+
+                            List<Member> memberList = groupChannel.getMembers();
+                            for (Member member : memberList) {
+                                if(member.getUserId().equals(uid)) {
+                                    title.setText(member.getNickname());
+                                    break;
+                                }
+                            }
+                        }
+                    });*/
 
                     List<String> userList = new ArrayList<>();
-                    userList.add(fUser.getUid());
                     userList.add(uid);
+                    userList.add(fUser.getUid());
 
                     GroupChannel.createChannelWithUserIds(userList, true, new GroupChannel.GroupChannelCreateHandler() {
                         @Override
@@ -128,13 +155,6 @@ public class ChatRoomActivity extends AppCompatActivity {
                                 // Error!
                                 Log.d("errrr", e.getMessage());
                                 return;
-                            }
-
-                            List<Member> memberList = groupChannel.getMembers();
-                            for (Member member : memberList) {
-                                if(!member.getUserId().equals(uid)) {
-                                    title.setText(member.getNickname());
-                                }
                             }
 
                             Fragment fragment = GroupChatFragment.newInstance(groupChannel.getUrl());
@@ -146,8 +166,8 @@ public class ChatRoomActivity extends AppCompatActivity {
                         }
                     });
                 }
-            });
-        }
+            }
+        });
     }
 
     public interface onBackPressedListener {
@@ -164,9 +184,12 @@ public class ChatRoomActivity extends AppCompatActivity {
         if (mOnBackPressedListener != null && mOnBackPressedListener.onBack()) {
             return;
         }
+        boolean userInfoYn = getIntent().getBooleanExtra("userInfoYn", false);
+        if(!userInfoYn) {
+            MainActivity.tabIndex = 1;
+            startActivity(new Intent(this, MainActivity.class));
+        }
         finish();
-        /*MainActivity.tabIndex = 1;
-        startActivity(new Intent(this, MainActivity.class));*/
         super.onBackPressed();
     }
 

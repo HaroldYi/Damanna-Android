@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -14,13 +15,23 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
+import com.hello.Damanna.vo.SayVo;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by lji5317 on 15/12/2017.
  */
 
 public class PopupActivity extends AppCompatActivity {
+
+    private static String TAG = "cloudFireStore";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +69,33 @@ public class PopupActivity extends AppCompatActivity {
             String contentStr = content.getText().toString();
             if(contentStr != null && !contentStr.isEmpty()) {
                 //데이터 전달하기
-                Intent intent = new Intent();
-                intent.putExtra("sayContent", contentStr);
-                setResult(RESULT_OK, intent);
+                /*setResult(RESULT_OK, intent);*/
 
-                //액티비티(팝업) 닫기
-                finish();
+                Map<String, Object> stringMap = new HashMap<>();
+
+                stringMap.put("member_id", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                stringMap.put("content", contentStr);
+                stringMap.put("reg_dt", new Date());
+
+                /*DocumentReference memberReference = this.db.collection("member").document(this.user.getUid());
+                stringMap.put("member", memberReference);*/
+
+                DocumentReference sayReference = FirebaseFirestore.getInstance().collection("say").document();
+                stringMap.put("id", sayReference.getId());
+
+                sayReference.set(stringMap)
+                        .addOnSuccessListener(documentReference -> {
+                            //액티비티(팝업) 닫기
+                            MainActivity.tabIndex = 0;
+                            startActivity(new Intent(this, MainActivity.class));
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            //
+                            Log.w(TAG, "Error adding document", e);
+                        });
+
+
             } else {
                 Toast toast = Toast.makeText(this, "내용을 입력하여 주세요", Toast.LENGTH_SHORT);
                 toast.show();

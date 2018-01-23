@@ -29,14 +29,17 @@ import com.google.firebase.firestore.Query;
 import com.hello.Damanna.R;
 import com.hello.Damanna.adapter.GridViewAdapter;
 import com.hello.Damanna.adapter.NewSayListViewAdapter;
+import com.hello.Damanna.adapter.RecyclerGridViewAdapter;
 import com.hello.Damanna.adapter.SayListViewAdapter;
 import com.hello.Damanna.common.BaseApplication;
+import com.hello.Damanna.common.EqualSpacingItemDecoration;
 import com.hello.Damanna.common.RadiusNetworkImageView;
 import com.hello.Damanna.common.VolleySingleton;
 import com.hello.Damanna.view.ExpandableHeightListView;
 import com.hello.Damanna.vo.Photo;
 import com.hello.Damanna.view.ExpandableHeightGridView;
 import com.hello.Damanna.vo.SayVo;
+import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 
 import org.joda.time.DateTime;
@@ -74,7 +77,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
     private MaterialTabHost tabHost;
 
-    private CardView photoListView;
+    private ScrollView photoListView;
 
     private int selectedColour = Color.rgb(3, 196, 201);
     private int unSelectedColour = Color.rgb(176, 176, 176);
@@ -83,7 +86,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
     private String userName;
     private String uid;
 
-    private final int limit = 5;
+    private final int limit = 3;
     private Query query;
 
     private FirebaseFirestore db;
@@ -135,11 +138,21 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         this.userName = intent.getStringExtra("userName");
         String profileUrl = intent.getStringExtra("profileUrl");
 
-        this.photoListView = (CardView) view.findViewById(R.id.photo_list_view);
+        this.photoListView = (ScrollView) view.findViewById(R.id.photo_list_view);
 
         this.gridView = (ExpandableHeightGridView) findViewById(R.id.photo_list);
+        this.gridView.addItemDecoration(new EqualSpacingItemDecoration(6, EqualSpacingItemDecoration.GRID));
         this.gridView.setExpanded(true);
         this.gridView.setVisibility(View.INVISIBLE);
+
+        this.gridView.addOnItemTouchListener(
+                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int index) {
+                        viewPhoto(photoList.get(position).getFileUrl(), "jpg");
+                    }
+                })
+        );
 
         /*Bitmap bitmap = CommonFunction.getBitmapFromURL(profileUrl);*/
 
@@ -160,6 +173,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
         TextView textView = (TextView) findViewById(R.id.user_profile_name);
         textView.setText(userName);
+        textView.setTypeface(typeface);
 
         this.tabHost = (MaterialTabHost) findViewById(R.id.tabHost);
 
@@ -185,8 +199,9 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         chatBtn.setOnClickListener(view -> {
             Intent intent1 = new Intent(getApplicationContext(), ChatRoomActivity.class);
             intent1.putExtra("uid", this.uid);
-            intent1.putExtra("userName", this.userName);
+            intent1.putExtra("senderName", this.userName);
             intent1.putExtra("profileUrl", profileUrl);
+            intent1.putExtra("userInfoYn", true);
             startActivity(intent1);
 
             overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
@@ -213,7 +228,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                 handler.postDelayed(new Runnable() {
                     public void run() {
 
-                        BaseApplication.getInstance().progressON(activity, getResources().getString(R.string.loading));
+                        /*BaseApplication.getInstance().progressON(activity, getResources().getString(R.string.loading));*/
 
                         loadingData(query);
                         // linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
@@ -248,7 +263,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                             this.photoList.add(p);
                         }
 
-                        GridViewAdapter adapter = new GridViewAdapter(this, this.photoList, true);
+                        RecyclerGridViewAdapter adapter = new RecyclerGridViewAdapter(this, this.photoList, true);
                         this.gridView.setAdapter(adapter);
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
@@ -257,18 +272,18 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
         this.query = db.collection("say/")
                 .whereEqualTo("member_id", this.uid)
-                /*.orderBy("reg_dt", Query.Direction.DESCENDING)*/
+                .orderBy("reg_dt", Query.Direction.DESCENDING)
                 .limit(this.limit);
 
         loadingData(this.query);
 
-        this.gridView.setOnItemClickListener((parent, v, position, id) -> {
-            /*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
+        /*this.gridView.setOnItemClickListener((parent, v, position, id) -> {
+            *//*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
             viewIntent.putExtra("photoUrl", photoList.get(position).getFileName());
-            startActivityForResult(viewIntent, 1);*/
+            startActivityForResult(viewIntent, 1);*//*
             this.position = position;
             viewPhoto(null);
-        });
+        });*/
     }
 
     @Override
@@ -317,6 +332,15 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
+    private void viewPhoto(String url, String type) {
+        //데이터 담아서 팝업(액티비티) 호출
+        Intent intent = new Intent(this, PhotoViewerActivity.class);
+        intent.putExtra("url", url);
+        intent.putExtra("type", type);
+        startActivityForResult(intent, 1);
+        this.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
+
     private void loadingData(Query queryParam) {
 
         queryParam
@@ -325,111 +349,116 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                     if (task.isSuccessful()) {
 
                         int size = task.getResult().size();
-                        DocumentSnapshot last = null;
+                        if (size > 0) {
+                            DocumentSnapshot last = null;
 
-                        last = task.getResult().getDocuments().get(size - 1);
+                            last = task.getResult().getDocuments().get(size - 1);
 
-                        query = db.collection("say/")
-                                .orderBy("reg_dt", Query.Direction.DESCENDING)
-                                .startAfter(last)
-                                .limit(limit);
+                            query = db.collection("say/")
+                                    .whereEqualTo("member_id", this.uid)
+                                    .orderBy("reg_dt", Query.Direction.DESCENDING)
+                                    .startAfter(last)
+                                    .limit(limit);
 
-                        if(size < limit) {
-                            this.listView.disableLoadmore();
-                        }
+                            Log.d("sizzzz", size + "");
 
-                        for (DocumentSnapshot document : task.getResult()) {
+                            if (size < limit) {
+                                this.listView.disableLoadmore();
+                            }
 
-                            db.collection("member/")
-                                    .whereEqualTo("id", this.uid)
-                                    .get()
-                                    .addOnCompleteListener(task1 -> {
-                                        if (task1.isSuccessful()) {
-                                            if(task1.getResult().size() > 0) {
-                                                for (DocumentSnapshot document1 : task1.getResult()) {
+                            for (DocumentSnapshot document : task.getResult()) {
 
-                                                    DateTime dateTime = new DateTime();
+                                db.collection("member/")
+                                        .whereEqualTo("id", this.uid)
+                                        .get()
+                                        .addOnCompleteListener(task1 -> {
+                                            if (task1.isSuccessful()) {
+                                                if (task1.getResult().size() > 0) {
+                                                    for (DocumentSnapshot document1 : task1.getResult()) {
 
-                                                    String gender = "";
+                                                        DateTime dateTime = new DateTime();
 
-                                                    if(document1.getData().get("gender") != null) {
-                                                        gender = (gender.equals("male") ? "남자" : "여자");
-                                                    } else {
-                                                        gender = "성별 미입력";
+                                                        String gender = "";
+
+                                                        if (document1.getData().get("gender") != null) {
+                                                            gender = (gender.equals("male") ? "남자" : "여자");
+                                                        } else {
+                                                            gender = "성별 미입력";
+                                                        }
+
+                                                        SayVo sayVo = new SayVo();
+
+                                                        sayVo.setUserName(document1.getData().get("name").toString());
+                                                        sayVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
+                                                        sayVo.setMsg(document.getData().get("content").toString());
+                                                        sayVo.setNoMsg(false);
+
+                                                        TextView ageView = (TextView) findViewById(R.id.age);
+
+                                                        if (document1.getData().get("dateOfBirth") != null) {
+                                                            long dateOfBirth = ((Date) document1.getData().get("dateOfBirth")).getTime();
+                                                            long now = System.currentTimeMillis();
+
+                                                            Calendar birthCalendar = Calendar.getInstance();
+                                                            birthCalendar.setTimeInMillis(dateOfBirth);
+
+                                                            int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                                                            Calendar nowCalender = Calendar.getInstance();
+                                                            nowCalender.setTimeInMillis(now);
+
+                                                            int nowYear = nowCalender.get(Calendar.YEAR);
+
+                                                            int koreanAge = nowYear - yearOfBirth + 1;
+
+                                                            String age = String.format("%d세, %s", koreanAge, gender);
+                                                            ageView.setText(age);
+                                                        } else if (document1.getData().get("dateOfBirth") == null) {
+                                                            String age = String.format("%s, %s", "나이 미입력", gender);
+                                                            ageView.setText(age);
+                                                        }
+
+                                                        if (document1.getData().get("identity") != null
+                                                                && document1.getData().get("nation") != null) {
+                                                            String identity = document1.getData().get("identity").toString();
+                                                            String nation = document1.getData().get("nation").toString();
+
+                                                            nation = String.format("%s, %s", nation, identity);
+                                                            TextView identityView = (TextView) findViewById(R.id.identity);
+                                                            identityView.setText(nation);
+
+                                                            sayVo.setIdentity(document1.getData().get("identity").toString());
+                                                            sayVo.setNation(document1.getData().get("nation").toString());
+                                                        }
+
+                                                        this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
+
+                                                        new Handler().postDelayed(() -> {
+                                                            BaseApplication.getInstance().progressOFF();
+                                                            view.setVisibility(View.VISIBLE);
+                                                            this.gridView.setVisibility(View.VISIBLE);
+                                                            this.listView.setVisibility(View.VISIBLE);
+                                                        }, 100);
                                                     }
-
+                                                } else {
                                                     SayVo sayVo = new SayVo();
-
-                                                    sayVo.setUserName(document1.getData().get("name").toString());
-                                                    sayVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
-                                                    sayVo.setMsg(document.getData().get("content").toString());
-                                                    sayVo.setNoMsg(false);
-
-                                                    TextView ageView = (TextView) findViewById(R.id.age);
-
-                                                    if(document1.getData().get("dateOfBirth") != null) {
-                                                        long dateOfBirth = ((Date) document1.getData().get("dateOfBirth")).getTime();
-                                                        long now = System.currentTimeMillis();
-
-                                                        Calendar birthCalendar = Calendar.getInstance();
-                                                        birthCalendar.setTimeInMillis(dateOfBirth);
-
-                                                        int yearOfBirth = birthCalendar.get(Calendar.YEAR);
-
-                                                        Calendar nowCalender = Calendar.getInstance();
-                                                        nowCalender.setTimeInMillis(now);
-
-                                                        int nowYear = nowCalender.get(Calendar.YEAR);
-
-                                                        int koreanAge = nowYear - yearOfBirth + 1;
-
-                                                        String age = String.format("%d세, %s", koreanAge, gender);
-                                                        ageView.setText(age);
-                                                    } else if(document1.getData().get("dateOfBirth") == null ) {
-                                                        String age = String.format("%s, %s", "나이 미입력", gender);
-                                                        ageView.setText(age);
-                                                    }
-
-                                                    if (document1.getData().get("identity") != null
-                                                            && document1.getData().get("nation") != null) {
-                                                        String identity = document1.getData().get("identity").toString();
-                                                        String nation = document1.getData().get("nation").toString();
-
-                                                        nation = String.format("%s, %s", nation, identity);
-                                                        TextView identityView = (TextView) findViewById(R.id.identity);
-                                                        identityView.setText(nation);
-
-                                                        sayVo.setIdentity(document1.getData().get("identity").toString());
-                                                        sayVo.setNation(document1.getData().get("nation").toString());
-                                                    }
-
+                                                    sayVo.setMsg("등록된 내용이 없습니다.");
+                                                    sayVo.setNoMsg(true);
                                                     this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
-
-                                                    new Handler().postDelayed(() -> {
-                                                        BaseApplication.getInstance().progressOFF();
-                                                        view.setVisibility(View.VISIBLE);
-                                                        this.gridView.setVisibility(View.VISIBLE);
-                                                        this.listView.setVisibility(View.VISIBLE);
-                                                    }, 100);
                                                 }
-                                            } else {
-                                                SayVo sayVo = new SayVo();
-                                                sayVo.setMsg("등록된 내용이 없습니다.");
-                                                sayVo.setNoMsg(true);
-                                                this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
-                                            }
 
-                                            BaseApplication.getInstance().progressOFF();
-                                            this.view.setVisibility(View.VISIBLE);
-                                            this.gridView.setVisibility(View.VISIBLE);
-                                            this.listView.setVisibility(View.VISIBLE);
-                                        } else {
-                                            Log.w(TAG, "Error getting documents.", task1.getException());
-                                        }
-                                    });
+                                                BaseApplication.getInstance().progressOFF();
+                                                this.view.setVisibility(View.VISIBLE);
+                                                this.gridView.setVisibility(View.VISIBLE);
+                                                this.listView.setVisibility(View.VISIBLE);
+                                            } else {
+                                                Log.w(TAG, "Error getting documents.", task1.getException());
+                                            }
+                                        });
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
                         }
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
                     }
                 });
 

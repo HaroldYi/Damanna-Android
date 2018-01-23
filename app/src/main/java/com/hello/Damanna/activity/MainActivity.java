@@ -339,6 +339,8 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             }
 
+                            /*SendBird.unregisterPushTokenForCurrentUser(FirebaseInstanceId.getInstance().getToken(), handler);*/
+
                             SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
                                 if (e1 != null) {
                                                             /*Crashlytics.logException(e1);*/

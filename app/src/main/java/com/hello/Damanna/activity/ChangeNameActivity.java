@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.BaseApplication;
 import com.sendbird.android.SendBird;
 
 import java.util.HashMap;
@@ -83,6 +85,10 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
                         .setDisplayName(userName)
                         .build();
 
+                new Handler().postDelayed(() -> {
+                    BaseApplication.getInstance().progressON(this, "Saving...");
+                }, 500);
+
                 user.updateProfile(profileUpdates)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
@@ -102,6 +108,7 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
                                                     return;
                                                 }
 
+                                                BaseApplication.getInstance().progressOFF();
                                                 finish();
                                             });
                                         })

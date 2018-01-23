@@ -32,6 +32,7 @@ import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.GroupChannelListQuery;
+import com.sendbird.android.Member;
 import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
 
@@ -307,16 +308,35 @@ public class GroupChannelListFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();*/
 
-        Intent intent = new Intent(getActivity(), ChatRoomActivity.class);
-        intent.putExtra("channelUrl", channelUrl);
-        intent.putExtra("uid", this.fUser.getUid());
-        intent.putExtra("userName", this.fUser.getDisplayName());
-        intent.putExtra("profileUrl", this.fUser.getPhotoUrl().toString());
-        startActivity(intent);
+        GroupChannel.getChannel(channelUrl, new GroupChannel.GroupChannelGetHandler() {
+            @Override
+            public void onResult(GroupChannel groupChannel, SendBirdException e) {
+                if (e != null) {
+                    // Error!
+                    e.printStackTrace();
+                    return;
+                }
 
-        getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+                Intent intent = new Intent(getActivity(), ChatRoomActivity.class);
+                intent.putExtra("channelUrl", channelUrl);
+                intent.putExtra("uid", fUser.getUid());
+                intent.putExtra("profileUrl", fUser.getPhotoUrl().toString());
 
-        ((MainActivity)getActivity()).tabIndex = 1;
+                List<Member> memberList = groupChannel.getMembers();
+                for (Member member : memberList) {
+                    if(!member.getUserId().equals(fUser.getUid())) {
+                        intent.putExtra("senderName", member.getNickname());
+                        break;
+                    }
+                }
+
+                startActivity(intent);
+
+                getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+
+                ((MainActivity)getActivity()).tabIndex = 1;
+            }
+        });
     }
 
     /**

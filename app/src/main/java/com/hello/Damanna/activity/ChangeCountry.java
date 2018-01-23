@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.hello.Damanna.R;
 
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class ChangeCountry extends AppCompatActivity {
         List<String> nationList = new ArrayList<>();
 
         this.db.collection("nation/")
-                /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
+                .orderBy("nation_kr", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
@@ -94,23 +95,21 @@ public class ChangeCountry extends AppCompatActivity {
 
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, nationList);
                     spinner.setAdapter(adapter);
+
+                    int index = 0;
+
+                    for(String country : nationList) {
+                        Intent intent = getIntent();
+                        String nation = intent.getStringExtra("nation");
+
+                        if(nation.equals(country)) {
+                            break;
+                        }
+
+                        index++;
+                    }
+                    spinner.setSelection(index);
                 });
-
-        String[] countryList = getResources().getStringArray(R.array.country_list);
-        int index = 0;
-
-        for(String country : countryList) {
-            Intent intent = getIntent();
-            String nation = intent.getStringExtra("nation");
-
-            if(nation.equals(country)) {
-                break;
-            }
-
-            index++;
-        }
-
-        spinner.setSelection(index);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

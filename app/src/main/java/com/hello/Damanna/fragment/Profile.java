@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -12,6 +13,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -24,9 +26,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,19 +48,15 @@ import com.hello.Damanna.activity.MainActivity;
 import com.hello.Damanna.activity.PhotoViewerActivity;
 import com.hello.Damanna.activity.PopupActivity;
 import com.hello.Damanna.activity.SettingActivity;
-import com.hello.Damanna.activity.UserInfoActivity;
 import com.hello.Damanna.activity.ViewPhotoActivity;
-import com.hello.Damanna.adapter.GridViewAdapter;
-import com.hello.Damanna.adapter.NewGridViewAdapter;
 import com.hello.Damanna.adapter.NewSayListViewAdapter;
 import com.hello.Damanna.adapter.RecyclerGridViewAdapter;
-import com.hello.Damanna.adapter.SayListViewAdapter;
 import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.common.Constant;
+import com.hello.Damanna.common.EqualSpacingItemDecoration;
 import com.hello.Damanna.common.RadiusNetworkImageView;
 import com.hello.Damanna.common.VolleySingleton;
 import com.hello.Damanna.view.ExpandableHeightGridView;
-import com.hello.Damanna.view.ExpandableHeightListView;
 import com.hello.Damanna.vo.Photo;
 import com.hello.Damanna.vo.SayVo;
 import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
@@ -92,7 +88,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     private Bitmap profileBitmap;
 
-    private RecyclerView gridView;
+    private ExpandableHeightGridView gridView;
     private String kind;
     private int position;
 
@@ -147,6 +143,8 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     @Override
     public void onClick(View view) {
+
+        this.cameraMenu.setVisibility(View.GONE);
 
         switch (view.getId()) {
             case R.id.take:
@@ -241,6 +239,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         });
 
         TextView textView = (TextView) this.view.findViewById(R.id.user_profile_name);
+        textView.setTypeface(typeface);
 
         this.profileBitmap = CommonFunction.getBitmapFromURL(this.user.getPhotoUrl().toString());
 
@@ -252,9 +251,10 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         /*view.setVisibility(View.INVISIBLE);*/
 
-        this.gridView = (RecyclerView) view.findViewById(R.id.photo_list);
+        this.gridView = (ExpandableHeightGridView) view.findViewById(R.id.photo_list);
+        this.gridView.addItemDecoration(new EqualSpacingItemDecoration(6, EqualSpacingItemDecoration.GRID));
         /*this.gridView.setVisibility(View.INVISIBLE);*/
-        /*this.gridView.setExpanded(true);*/
+        this.gridView.setExpanded(true);
 
         this.listView = (UltimateRecyclerView) view.findViewById(R.id.say_list);
         /*this.listView.setVisibility(View.INVISIBLE);*/
@@ -276,18 +276,9 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.listView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
             @Override
             public void loadMore(int itemsCount, final int maxLastVisiblePosition) {
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-
-                        progressON(getResources().getString(R.string.loading));
-
-                        loadingData(query);
-                        // linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
-                        //   linearLayoutManager.scrollToPosition(maxLastVisiblePosition);
-
-                    }
-                }, 1000);
+                loadingData(query, true);
+                /*linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
+                linearLayoutManager.scrollToPosition(maxLastVisiblePosition);*/
             }
         });
 
@@ -461,10 +452,10 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                 });*/
         this.query = this.db.collection("say/")
                 .whereEqualTo("member_id", this.user.getUid())
-                /*.orderBy("reg_dt", Query.Direction.DESCENDING)*/
+                .orderBy("reg_dt", Query.Direction.DESCENDING)
                 .limit(this.limit);
 
-        loadingData(this.query);
+        loadingData(this.query, false);
 
         /*this.gridView.setOnItemClickListener((parent, v, position, id) -> {
             this.kind = this.photoList.get(position).getKind();
@@ -521,23 +512,24 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode != 1) {
+        /*if(requestCode != 1) {*/
             if (resultCode == Activity.RESULT_OK) {
 
                 switch (requestCode) {
 
                     case Constant.GALLERY_CODE:
-                        sendPicture(data); //갤러리에서 가져오기
+                        sendPicture(data, Constant.GALLERY_CODE); //갤러리에서 가져오기
                         break;
                     case Constant.CAMERA_CODE:
-                        sendPicture(data); //카메라에서 가져오기
+                        sendPicture(data, Constant.CAMERA_CODE); //카메라에서 가져오기
                         break;
 
                     default:
                         break;
                 }
             }
-        } else if(requestCode == 1) {
+        /*}*/
+        /*else if(requestCode == 1) {
             if(resultCode == Activity.RESULT_OK) {
                 //데이터 받기
                 String sayContent = data.getStringExtra("sayContent");
@@ -571,7 +563,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                             Log.w(TAG, "Error adding document", e);
                         });
             }
-        }
+        }*/
     }
 
     @Override
@@ -580,6 +572,8 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.tabHost.getCurrentTab().setTextColor(this.unSelectedColour);
         this.tabHost.setSelectedNavigationItem(tab.getPosition());
         this.tabHost.getCurrentTab().setTextColor(this.selectedColour);
+
+        this.cameraMenu.setVisibility(View.GONE);
 
         switch (tab.getPosition()) {
 
@@ -618,7 +612,21 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         return FileProvider.getUriForFile( getActivity(), "com.hello.Damanna.provider", file );
     }
 
-    private void sendPicture(Intent data) {
+    private void sendPicture(Intent data, int cameraCode) {
+
+
+        /*switch (cameraCode) {
+
+            case Constant.GALLERY_CODE:
+                fileName = data.getData().getLastPathSegment(); //갤러리에서 가져오기
+                break;
+            case Constant.CAMERA_CODE:
+                fileName = this.mImageCaptureUri.getLastPathSegment(); //카메라에서 가져오기
+                break;
+
+            default:
+                break;
+        }*/
 
         String fileName = this.mImageCaptureUri.getLastPathSegment();
 
@@ -627,6 +635,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         StorageReference storageThumRef = storage.getReference().child("thumbnail/" + fileName + "_thumbnail.jpg");
 
         ExifInterface exif = null;
+
         try {
             exif = new ExifInterface(this.imgPath);
         } catch (IOException e) {
@@ -644,7 +653,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         options.outHeight = 1000;
         options.outWidth = 1000;
         Bitmap bitmap = BitmapFactory.decodeFile(this.imgPath, options);//경로를 통해 비트맵으로 전환
-        bitmap = rotate(bitmap, exifDegree);
+        /*bitmap = rotate(bitmap, exifDegree);*/
 
         Bitmap thumbnail = Bitmap.createScaledBitmap(bitmap, bitmap.getHeight() / 10, bitmap.getHeight() / 10, false);
         ByteArrayOutputStream bitmapOps = new ByteArrayOutputStream();
@@ -660,10 +669,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         UploadTask uploadThumTask = storageThumRef.putBytes(bitmapThumByte);
 
         Bitmap finalBitmap = thumbnail;
+        String finalFileName1 = fileName;
         uploadTask.addOnFailureListener(exception -> {
             // Handle unsuccessful uploads
         }).addOnSuccessListener(taskSnapshot -> {
 
+            String finalFileName = finalFileName1;
             uploadThumTask.addOnFailureListener(exception -> {
                 // Handle unsuccessful uploads
             }).addOnSuccessListener(taskThumSnapshot -> {
@@ -673,7 +684,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                 this.photoList.get(this.lastIndex).setKind("photo");*/
 
                 Photo newPhoto = new Photo();
-                newPhoto.setFileName(fileName);
+                newPhoto.setFileName(finalFileName);
                 newPhoto.setBitmap(finalBitmap);
                 newPhoto.setKind("photo");
 
@@ -711,7 +722,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                 Map<String, Object> photoMap = new HashMap<>();
 
                 photoMap.put("member_id", this.user.getUid());
-                photoMap.put("fileName", fileName);
+                photoMap.put("fileName", finalFileName);
                 photoMap.put("reg_dt", new Date());
 
                 this.db.collection("photo")
@@ -749,7 +760,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                 src.getHeight(), matrix, true);
     }
 
-   /* public static String getRealPathFromURI(Context context, Uri contentUri) {
+    /*public static String getRealPathFromURI(Context context, Uri contentUri) {
         //copy file and send new file path
         String fileName = getFileName(contentUri);
         if (!TextUtils.isEmpty(fileName)) {
@@ -782,7 +793,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public String getRealPathFromURI(Uri contentUri) {
         int column_index=0;
@@ -793,7 +804,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         }
 
         return cursor.getString(column_index);
-    }*/
+    }
 
     public int exifOrientationToDegrees(int exifOrientation) {
         if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
@@ -831,6 +842,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.mImageCaptureUri = getFileUri();
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
         intent.putExtra( MediaStore.EXTRA_OUTPUT, this.mImageCaptureUri);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -845,10 +857,11 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     }
 
     private void selectPhoto() {
+
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
         intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, Constant.CAMERA_CODE);
+        startActivityForResult(intent, Constant.GALLERY_CODE);
     }
 
     private View.OnTouchListener menuListener = (v, event) -> {
@@ -856,7 +869,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         return false;
     };
 
-    private void loadingData(Query queryParam) {
+    private void loadingData(Query queryParam, boolean loadMoreYn) {
         queryParam
         .whereEqualTo("member_id", this.user.getUid())
         .get()
@@ -871,6 +884,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     last = task.getResult().getDocuments().get(size - 1);
 
                     query = db.collection("say/")
+                            .whereEqualTo("member_id", this.user.getUid())
                             .orderBy("reg_dt", Query.Direction.DESCENDING)
                             .startAfter(last)
                             .limit(limit);
@@ -905,14 +919,18 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     }
 
                 } else {
-                    SayVo sayVo = new SayVo();
-                    sayVo.setMsg("등록된 내용이 없습니다.");
-                    sayVo.setNoMsg(true);
+
+                    if(!loadMoreYn) {
+                        SayVo sayVo = new SayVo();
+                        sayVo.setMsg("등록된 내용이 없습니다.");
+                        sayVo.setNoMsg(true);
+
+                        this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
+                    }
 
                     this.listView.disableLoadmore();
-
-                    this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
                 }
+
 
                 new Handler().postDelayed(() -> {
                     progressOFF();

@@ -1,6 +1,7 @@
 package com.hello.Damanna.view;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.GridView;
@@ -9,7 +10,7 @@ import android.widget.GridView;
  * Created by lji5317 on 12/12/2017.
  */
 
-public class ExpandableHeightGridView extends GridView {
+public class ExpandableHeightGridView extends RecyclerView {
     boolean expanded = false;
 
     public ExpandableHeightGridView(Context context) {

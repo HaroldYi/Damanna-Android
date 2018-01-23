@@ -38,23 +38,25 @@
 
             <TextView
                 android:id="@+id/age"
-                android:text="age"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignStart="@+id/user_profile_name"
                 android:layout_marginTop="33dp"
+                android:text="age"
                 android:textColor="@color/dark_gray"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:typeface="sans" />
 
             <TextView
                 android:id="@+id/identity"
-                android:text="id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignStart="@+id/user_profile_name"
                 android:layout_marginTop="53dp"
+                android:text="id"
                 android:textColor="@color/dark_gray"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:typeface="sans" />
 
             <com.hello.Damanna.common.RadiusNetworkImageView
                 android:id="@+id/user_profile_photo"
@@ -82,7 +84,7 @@
                 android:id="@+id/chat_btn"
                 android:layout_width="80dp"
                 android:layout_height="40dp"
-                android:layout_marginLeft="80dp"
+                android:layout_marginLeft="-5dp"
                 android:layout_alignStart="@+id/follow_btn"
                 android:background="@drawable/shadow_rect_blu"
                 android:layout_marginTop="80dp"
@@ -103,32 +105,34 @@
 
         </it.neokree.materialtabs.MaterialTabHost>
 
-        <android.support.v7.widget.CardView
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        <ScrollView
             android:id="@+id/photo_list_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            app:cardBackgroundColor="@color/white"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
             android:layout_below="@+id/tabHost"
             android:visibility="gone"
-            app:cardUseCompatPadding="true">
-            <com.hello.Damanna.view.ExpandableHeightGridView
-                android:id="@+id/photo_list"
+            >
+            <android.support.v7.widget.CardView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:layout_marginBottom="7dp"
-                android:layout_marginRight="7dp"
-                android:horizontalSpacing="3dp"
-                android:verticalSpacing="3dp"
-                android:isScrollContainer="false"
-                android:stretchMode="columnWidth"
-                android:numColumns="2"
-                />
-        </android.support.v7.widget.CardView>
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardUseCompatPadding="true">
+                <com.hello.Damanna.view.ExpandableHeightGridView
+                    android:id="@+id/photo_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2dp"
+                    android:isScrollContainer="false"
+                    app:layoutManager="GridLayoutManager"
+                    app:spanCount="2"
+                    />
+            </android.support.v7.widget.CardView>
+        </ScrollView>
 
         <RelativeLayout
             android:id="@+id/list_hd"

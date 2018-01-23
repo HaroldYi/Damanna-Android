@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
 import com.hello.Damanna.activity.ViewPhotoActivity;
 import com.hello.Damanna.adapter.GridViewAdapter;
+import com.hello.Damanna.adapter.RecyclerGridViewAdapter;
 import com.hello.Damanna.adapter.UserSayListViewAdapter;
 import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.view.ExpandableHeightGridView;
@@ -111,7 +112,7 @@ public class UserInfo extends BaseFragment implements View.OnClickListener {
                             this.photoList.add(p);
                         }
 
-                        GridViewAdapter adapter = new GridViewAdapter(getActivity(), this.photoList, true);
+                        RecyclerGridViewAdapter adapter = new RecyclerGridViewAdapter(getActivity(), this.photoList, true);
                         this.gridView.setAdapter(adapter);
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
@@ -173,13 +174,13 @@ public class UserInfo extends BaseFragment implements View.OnClickListener {
                     }
                 });
 
-        this.gridView.setOnItemClickListener((parent, v, position, id) -> {
-            /*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
+        /*this.gridView.setOnItemClickListener((parent, v, position, id) -> {
+            *//*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
             viewIntent.putExtra("photoUrl", photoList.get(position).getFileName());
-            startActivityForResult(viewIntent, 1);*/
+            startActivityForResult(viewIntent, 1);*//*
             this.position = position;
             viewPhoto(null);
-        });
+        });*/
 
         return view;
     }

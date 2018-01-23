@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.Damanna.R;
@@ -75,7 +76,7 @@ public class SelectCountryActivity extends BaseActivity {
         List<String> nationList = new ArrayList<>();
 
         this.db.collection("nation/")
-                /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
+                .orderBy("nation_kr", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);

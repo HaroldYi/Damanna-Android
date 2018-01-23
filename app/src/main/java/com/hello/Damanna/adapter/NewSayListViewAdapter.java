@@ -147,45 +147,49 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int index) {
-        if(!this.sayVoList.get(index).isNoMsg()) {
+        try {
+            if (!this.sayVoList.get(index).isNoMsg()) {
 
-            String nation = this.sayVoList.get(index).getNation();
-            String identity = this.sayVoList.get(index).getIdentity();
+                String nation = this.sayVoList.get(index).getNation();
+                String identity = this.sayVoList.get(index).getIdentity();
 
-            String userInfo = "";
+                String userInfo = "";
 
-            if(nation != null && !nation.isEmpty()
-                    && identity != null && !identity.isEmpty() ) {
-                userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), identity);
-            } else if((nation == null || nation.isEmpty())
-                    && (identity != null && !identity.isEmpty()) ) {
-                userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), identity);
-            } else if((nation != null && !nation.isEmpty())
-                    && (identity == null || identity.isEmpty()) ) {
-                userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), nation);
+                if (nation != null && !nation.isEmpty()
+                        && identity != null && !identity.isEmpty()) {
+                    userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), identity);
+                } else if ((nation == null || nation.isEmpty())
+                        && (identity != null && !identity.isEmpty())) {
+                    userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), identity);
+                } else if ((nation != null && !nation.isEmpty())
+                        && (identity == null || identity.isEmpty())) {
+                    userInfo = String.format("%s (%s)", this.sayVoList.get(index).getUserName(), nation);
+                } else {
+                    userInfo = this.sayVoList.get(index).getUserName();
+                }
+
+                ((ViewHolder) holder).userName.setText(userInfo);
+                ((ViewHolder) holder).distance.setText(this.sayVoList.get(index).getDistance());
             } else {
-                userInfo = this.sayVoList.get(index).getUserName();
+                ((ViewHolder) holder).content.setGravity(Gravity.CENTER);
+                ((ViewHolder) holder).userName.setVisibility(View.GONE);
+                ((ViewHolder) holder).distance.setVisibility(View.GONE);
             }
 
-            ((ViewHolder) holder).userName.setText(userInfo);
-            ((ViewHolder) holder).distance.setText(this.sayVoList.get(index).getDistance());
-        } else {
-            ((ViewHolder) holder).content.setGravity(Gravity.CENTER);
-            ((ViewHolder) holder).userName.setVisibility(View.GONE);
-            ((ViewHolder) holder).distance.setVisibility(View.GONE);
-        }
-
-        ((ViewHolder) holder).content.setText(this.sayVoList.get(index).getMsg());
+            ((ViewHolder) holder).content.setText(this.sayVoList.get(index).getMsg());
 
         /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
         downloadImageTask.execute(this.sayVoList.get(index).getPhotoUrl());*/
 
-        this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
+            this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
 
-        Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSans-Medium.ttf");
-        ((ViewHolder) holder).userName.setTypeface(typeface);
+            Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSans-Medium.ttf");
+            ((ViewHolder) holder).userName.setTypeface(typeface);
 
-        ((ViewHolder) holder).img.setImageUrl(this.sayVoList.get(index).getPhotoUrl(), this.imageLoader);
+            ((ViewHolder) holder).img.setImageUrl(this.sayVoList.get(index).getPhotoUrl(), this.imageLoader);
+        } catch (Exception e) {
+
+        }
 
         /*((ViewHolder) holder).sayLayout.setOnClickListener(v -> {
             Intent intent = new Intent(this.context, UserInfoActivity.class);
