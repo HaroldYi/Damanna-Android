@@ -13,11 +13,13 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.hello.Damanna.R;
 import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.common.RadiusNetworkImageView;
 import com.hello.Damanna.common.VolleySingleton;
 import com.meg7.widget.CircleImageView;
+import com.sendbird.android.SendBird;
 
 /**
  * Created by lji5317 on 04/01/2018.
@@ -89,12 +91,30 @@ public class SelectRoleActivity extends BaseActivity implements View.OnClickList
                 break;
         }
 
+        String finalIdentity1 = identity;
         this.db.collection("member").document(this.user.getUid())
                 .update("identity", identity)
                 .addOnSuccessListener(aVoid -> {
                     /*for(Activity activity : super.actList) {
                         activity.finish();
                     }*/
+
+                    String finalIdentity = finalIdentity1;
+                    SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
+                        if (e != null) {
+                            // Error.
+                                                    /*Crashlytics.logException(e);*/
+                            return;
+                        }
+
+                        SendBird.updateCurrentUserInfo(String.format("%s(%s)", mAuth.getCurrentUser().getDisplayName(), finalIdentity), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
+                            if (e12 != null) {
+                                // Error.
+                                                        /*Crashlytics.logException(e12);*/
+                                return;
+                            }
+                        });
+                    });
 
                     startActivity(new Intent(this, MainActivity.class));
                     finish();

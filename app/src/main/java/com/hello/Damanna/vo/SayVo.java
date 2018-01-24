@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 
 public class SayVo {
 
+    private String sayId = "";
+
     private String uid = "";
     private String userName = "";
     private String nation = "";
@@ -23,6 +25,14 @@ public class SayVo {
     private Bitmap bitmap;
 
     private String distance;
+
+    public String getSayId() {
+        return sayId;
+    }
+
+    public void setSayId(String sayId) {
+        this.sayId = sayId;
+    }
 
     public String getUid() {
         return uid;

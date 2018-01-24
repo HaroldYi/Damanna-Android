@@ -4,15 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
 import com.hello.Damanna.activity.UserInfoActivity;
 import com.hello.Damanna.common.RadiusNetworkImageView;
@@ -138,7 +144,15 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
     private List<SayVo> sayVoList;
     private ImageLoader imageLoader;
 
+    private boolean profileYn = false;
+
     private static String TAG = "cloudFireStore";
+
+    public NewSayListViewAdapter(Context context, List<SayVo> sayVoList, boolean profileYn) {
+        this.context = context;
+        this.sayVoList = sayVoList;
+        this.profileYn = profileYn;
+    }
 
     public NewSayListViewAdapter(Context context, List<SayVo> sayVoList) {
         this.context = context;
@@ -147,7 +161,31 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int index) {
+
         try {
+
+            if(this.profileYn) {
+                ((ViewHolder) holder).delSayBtn.setVisibility(View.VISIBLE);
+                ((ViewHolder) holder).delSayBtn.setOnClickListener(v -> {
+                    String id = this.sayVoList.get(index).getSayId();
+                    FirebaseFirestore.getInstance().collection("say").document(id)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                    remove(index);
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error deleting document", e);
+                                }
+                            });
+                });
+            }
+
             if (!this.sayVoList.get(index).isNoMsg()) {
 
                 String nation = this.sayVoList.get(index).getNation();
@@ -174,6 +212,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
                 ((ViewHolder) holder).content.setGravity(Gravity.CENTER);
                 ((ViewHolder) holder).userName.setVisibility(View.GONE);
                 ((ViewHolder) holder).distance.setVisibility(View.GONE);
+                ((ViewHolder) holder).delSayBtn.setVisibility(View.GONE);
             }
 
             ((ViewHolder) holder).content.setText(this.sayVoList.get(index).getMsg());
@@ -308,6 +347,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         TextView userName;
         TextView content;
         TextView distance;
+        ImageButton delSayBtn;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -317,6 +357,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
             this.img = (RadiusNetworkImageView) itemView.findViewById(R.id.user_profile_photo);
             this.img.setRadius(100f);
             this.distance = (TextView) itemView.findViewById(R.id.distance);
+            this.delSayBtn = (ImageButton) itemView.findViewById(R.id.del_say_btn);
         }
 
         @Override

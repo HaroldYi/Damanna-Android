@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="30dp"
-                android:layout_toEndOf="@+id/user_profile_photo"
+                android:layout_toEndOf="@+id/profile_photo_area"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/black"
                 android:textSize="18sp"
@@ -57,14 +57,30 @@
                 android:textSize="14sp"
                 android:typeface="sans" />
 
-            <com.hello.Damanna.common.RadiusNetworkImageView
-                android:id="@+id/user_profile_photo"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="14dp"
-                android:scaleType="fitXY" />
+            <FrameLayout
+                android:id="@+id/profile_photo_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.hello.Damanna.common.RadiusNetworkImageView
+                    android:id="@+id/user_profile_photo"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginStart="14dp"
+                    android:scaleType="fitXY" />
+
+                <com.hello.Damanna.common.RadiusNetworkImageView
+                    android:id="@+id/profile_camera_btn"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="103dp"
+                    android:layout_marginTop="87dp"
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                     />
+            </FrameLayout>
         </RelativeLayout>
 
         <it.neokree.materialtabs.MaterialTabHost
@@ -163,8 +179,7 @@
         android:layout_width="wrap_content"
         android:layout_height="110dp"
         android:orientation="vertical"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
         android:background="@drawable/shadow_rect"
         android:visibility="gone"
         android:padding="10dp">

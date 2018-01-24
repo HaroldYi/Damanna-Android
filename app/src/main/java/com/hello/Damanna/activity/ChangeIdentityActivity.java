@@ -17,8 +17,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.BaseApplication;
+import com.sendbird.android.SendBird;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,11 +35,18 @@ public class ChangeIdentityActivity extends AppCompatActivity {
     public static String identity = "";
     public Button saveBtn;
 
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
+
     private static String TAG = "cloudFireStore";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.mAuth = FirebaseAuth.getInstance();
+        this.user = this.mAuth.getCurrentUser();
+
         ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
         actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
@@ -80,6 +90,18 @@ public class ChangeIdentityActivity extends AppCompatActivity {
                     .update(userInfo)
                     .addOnSuccessListener(aVoid -> {
                         Log.d(TAG, "DocumentSnapshot successfully written!");
+
+                        SendBird.updateCurrentUserInfo(String.format("%s(%s)", this.user.getDisplayName(), identity), this.user.getPhotoUrl().toString(), e12 -> {
+                            if (e12 != null) {
+                                // Error.
+                                /*Crashlytics.logException(e12);*/
+                                return;
+                            }
+
+                            BaseApplication.getInstance().progressOFF();
+                            finish();
+                        });
+
                         finish();
                     })
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));

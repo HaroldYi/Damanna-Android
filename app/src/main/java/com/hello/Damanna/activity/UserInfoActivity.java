@@ -136,6 +136,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
         this.uid = intent.getStringExtra("uid");
         this.userName = intent.getStringExtra("userName");
+        String identity = intent.getStringExtra("identity");
         String profileUrl = intent.getStringExtra("profileUrl");
 
         this.photoListView = (ScrollView) view.findViewById(R.id.photo_list_view);
@@ -199,7 +200,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         chatBtn.setOnClickListener(view -> {
             Intent intent1 = new Intent(getApplicationContext(), ChatRoomActivity.class);
             intent1.putExtra("uid", this.uid);
-            intent1.putExtra("senderName", this.userName);
+            intent1.putExtra("senderName", String.format("%s(%s)", this.userName, identity));
             intent1.putExtra("profileUrl", profileUrl);
             intent1.putExtra("userInfoYn", true);
             startActivity(intent1);

@@ -187,11 +187,17 @@ public class SignActivity extends BaseActivity {
 
         /*Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show();*/
 
+        AuthUI.IdpConfig.Builder facebookBuilder = new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER);
+        facebookBuilder.setPermissions(Arrays.asList("public_profile", "email", "user_birthday"));
+
+        AuthUI.IdpConfig.Builder googleBuilder = new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER);
+        googleBuilder.setPermissions(Arrays.asList("profile", "email"));
+
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                 .setIsSmartLockEnabled(!BuildConfig.DEBUG)
                 .setAvailableProviders(Arrays.asList(
-                        new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
-                        /*new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()*/
+                        facebookBuilder.build(),
+                        googleBuilder.build()
                 ))
                 .setLogo(R.color.fui_transparent)
                 .setTheme(R.style.firebase_ui)
@@ -246,7 +252,7 @@ public class SignActivity extends BaseActivity {
                             (object, response) -> {
                                 // Application code
                                 userInfo = response.getJSONObject();
-
+                                Log.d("userInfo", userInfo.toString());
                                 String facebookId = "";
                                 String dateOfBirth = "";
                                 String gender = "";
@@ -254,20 +260,20 @@ public class SignActivity extends BaseActivity {
                                 Calendar calendar = Calendar.getInstance();
 
                                 try {
-                                    facebookId = this.userInfo.get("id").toString();
+                                    facebookId = userInfo.get("id").toString();
                                 } catch (Exception e) {
                                     facebookId = "";
                                 }
 
                                 try {
-                                    dateOfBirth = this.userInfo.get("birthday").toString();
+                                    dateOfBirth = userInfo.get("birthday").toString();
                                     calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
                                 } catch (Exception e) {
                                     dateOfBirth = "";
                                 }
 
                                 try {
-                                    gender = this.userInfo.get("gender").toString();
+                                    gender = userInfo.get("gender").toString();
                                 } catch (Exception e) {
                                     gender = "";
                                 }
@@ -281,7 +287,7 @@ public class SignActivity extends BaseActivity {
                                 userMap.put("profileUrl", currentUser.getPhotoUrl().toString());
                                 userMap.put("location", new GeoPoint(latitude, longitude));
 
-                                this.db.collection("member").document(currentUser.getUid())
+                                db.collection("member").document(currentUser.getUid())
                                         .set(userMap)
                                         .addOnSuccessListener(aVoid -> {
                                             Log.d(TAG, "DocumentSnapshot successfully written!");
@@ -321,7 +327,7 @@ public class SignActivity extends BaseActivity {
                                                             // Try registering the token after a connection has been successfully established.
                                                         } else {
                                                             /*finish();*/
-                                                            startActivity(new Intent(this, SelectCountryActivity.class));
+                                                            /*startActivity(new Intent(getApplicationContext(), SelectCountryActivity.class));*/
                                                         }
                                                     });
                                                 });

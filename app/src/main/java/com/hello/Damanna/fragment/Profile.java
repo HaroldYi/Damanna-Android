@@ -13,7 +13,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -21,14 +20,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -36,7 +33,6 @@ import android.widget.TextView;
 import com.android.volley.toolbox.ImageLoader;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -94,7 +90,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     public List<Photo> photoList;
     private RecyclerGridViewAdapter adapter;
-    private ImageView profileCameraBtn;
+    private RadiusNetworkImageView profileCameraBtn;
     private RadiusNetworkImageView profileImageView;
 
     private FirebaseFirestore db;
@@ -238,6 +234,14 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             viewPhoto(this.user.getPhotoUrl().toString(), "jpg");
         });
 
+        this.profileCameraBtn = (RadiusNetworkImageView) this.view.findViewById(R.id.profile_camera_btn);
+        this.profileCameraBtn.setRadius(30f);
+        this.profileCameraBtn.setDefaultImageResId(R.drawable.ic_fa_camera);
+        this.profileCameraBtn.bringToFront();
+        this.profileCameraBtn.setOnClickListener(view1 -> {
+            this.cameraMenu.setVisibility(View.VISIBLE);
+        });
+
         TextView textView = (TextView) this.view.findViewById(R.id.user_profile_name);
         textView.setTypeface(typeface);
 
@@ -245,7 +249,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         this.imageLoader = VolleySingleton.getInstance(getActivity()).getImageLoader();
 
-        this.profileImageView.bringToFront();
+        /*this.profileImageView.bringToFront();*/
         this.profileImageView.setImageUrl(this.user.getPhotoUrl().toString(), this.imageLoader);
         textView.setText(this.user.getDisplayName());
 
@@ -267,7 +271,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.photoList = new ArrayList<>();
         this.sayVoList = new ArrayList<>();
 
-        this.userSayListViewAdapter = new NewSayListViewAdapter(getActivity(), this.sayVoList);
+        this.userSayListViewAdapter = new NewSayListViewAdapter(getActivity(), this.sayVoList, true);
         this.listView.setAdapter(this.userSayListViewAdapter);
         this.listView.setHasFixedSize(false);
 
@@ -299,12 +303,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     @Override
                     public void onItemClick(View view, int index) {
                         kind = photoList.get(index).getKind();
-                        position = position;
+                        position = index;
 
                         if(!kind.equals("logo_t")) {
 
                             if(kind.equals("photo") || kind.equals("profile")) {
-                                viewPhoto(photoList.get(position).getFileUrl(), "jpg");
+                                viewPhoto(photoList.get(index).getFileUrl(), "jpg");
                             } else {
 
                                 if(cameraMenu.getVisibility() == View.VISIBLE) {
@@ -374,6 +378,10 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                         this.photoList.clear();
                     }
 
+                    Photo addBtn = new Photo();
+                    addBtn.setKind("add_btn");
+                    this.photoList.add(addBtn);
+
                     for (DocumentSnapshot document : value) {
                         Photo photo = new Photo();
                         photo.setFileName(document.getString("fileName").toString());
@@ -389,10 +397,6 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                             Log.d("에러~", e1.getMessage());
                         });
                     }
-
-                    Photo photo = new Photo();
-                    photo.setKind("add_btn");
-                    this.photoList.add(photo);
 
                 /*this.adapter.clearAdapter();
                 this.adapter.addNewValues(this.photoList);*/
@@ -909,6 +913,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                         }
 
                         SayVo sayVo = new SayVo();
+                        sayVo.setSayId(document.get("id").toString());
                         sayVo.setUserName(this.user.getDisplayName());
                         sayVo.setMsg(document.getData().get("content").toString());
                         sayVo.setPhotoUrl(this.user.getPhotoUrl().toString());

@@ -1,0 +1,9 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:shape="oval">
+    <stroke android:width="3dp" android:color="@color/white"/>
+    <solid app:srcCompat="@drawable/ic_fa_camera"/>
+    <padding android:left="0dp" android:top="0dp" android:right="0dp" android:bottom="0dp"/>
+    <corners android:radius="4dp"/>
+</shape>

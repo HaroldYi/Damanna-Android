@@ -184,17 +184,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN) {
+        /*if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
                 // Sign in succeeded
-                /*updateUI(mAuth.getCurrentUser());*/
+                *//*updateUI(mAuth.getCurrentUser());*//*
                 addUser(this.mAuth.getCurrentUser());
             } else {
                 // Sign in failed
                 Toast.makeText(this, "Sign In Failed", Toast.LENGTH_SHORT).show();
-                /*updateUI(null);*/
+                *//*updateUI(null);*//*
             }
-        }
+        }*/
     }
 
     /*@Override
@@ -202,165 +202,6 @@ public class MainActivity extends AppCompatActivity {
         super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
     }*/
 
-    private void addUser(FirebaseUser currentUser) {
-
-        List<Photo> photoList = new ArrayList<>();
-
-        /*LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        try {
-            // GPS를 이용한 위치 요청
-            locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    this.gpsListener);
-
-            // 네트워크를 이용한 위치 요청
-            locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    this.gpsListener);
-
-            // 위치요청을 한 상태에서 위치추적되는 동안 먼저 최근 위치를 조회해서 set
-            Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lastLocation != null) {
-                this.latitude = lastLocation.getLatitude();
-                this.longitude = lastLocation.getLongitude();
-            }
-        } catch(SecurityException ex) {
-            Log.e("gpsERR", ex.toString());
-            ex.printStackTrace();
-        }*/
-
-        DocumentReference docRef = this.db.collection("member").document(currentUser.getUid());
-        docRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document != null && document.exists()) {
-                    setContentView(R.layout.activity_main);
-                    this.initUI();
-                    /*this.navigationTabBar.setModelIndex(0, true);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.contentContainer, new Say()).addToBackStack("say").commit();*/
-                } else {
-
-                    List<String> providers = this.mAuth.getCurrentUser().getProviders();
-                    String provider = providers.get(0);
-
-                    if(provider.indexOf("facebook") != -1) {
-                        GraphRequest request = GraphRequest.newMeRequest(
-                                AccessToken.getCurrentAccessToken(),
-                                (object, response) -> {
-                                    // Application code
-                                    userInfo = response.getJSONObject();
-
-                                    String facebookId = "";
-                                    String dateOfBirth = "";
-                                    String gender = "";
-
-                                    try {
-                                        facebookId = this.userInfo.get("id").toString();
-                                    } catch (Exception e) {
-                                        facebookId = "";
-                                    }
-
-                                    try {
-                                        dateOfBirth = this.userInfo.get("birthday").toString();
-                                    } catch (Exception e) {
-                                        dateOfBirth = "";
-                                    }
-
-                                    try {
-                                        gender = this.userInfo.get("gender").toString();
-                                    } catch (Exception e) {
-                                        gender = "";
-                                    }
-
-                                    addUserDB(facebookId, dateOfBirth, gender);
-                                });
-
-                        Bundle parameters = new Bundle();
-                        parameters.putString("fields", "id, name, gender, birthday");
-                        request.setParameters(parameters);
-                        request.executeAsync();
-                    } else if(provider.indexOf("google") != -1) {
-                        /*GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);*/
-
-                    }
-                }
-            } else {
-                /*Crashlytics.logException(task.getException());*/
-            }
-        });
-    }
-
-
-    private void addUserDB(String facebookId, String dateOfBirth, String gender) {
-
-        Map<String, Object> userMap = new HashMap<>();
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
-        userMap.put("facebookId", facebookId);
-        userMap.put("id", this.fUser.getUid());
-        userMap.put("email", this.fUser.getEmail());
-        userMap.put("dateOfBirth", new Date(calendar.getTimeInMillis()));
-        userMap.put("gender", gender);
-        userMap.put("name", this.fUser.getDisplayName());
-        userMap.put("profileUrl", this.fUser.getPhotoUrl().toString());
-                                    /*userMap.put("location", new GeoPoint(latitude, longitude));*/
-        this.db.collection("member").document(this.fUser.getUid())
-                .set(userMap)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "DocumentSnapshot successfully written!");
-
-                    List<String> userList = new ArrayList<>();
-                    userList.add(mAuth.getCurrentUser().getUid());
-
-                    SendBird.createUserListQuery(userList);
-                    try {
-                        FirebaseInstanceId.getInstance().deleteInstanceId();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    String pushToken = FirebaseInstanceId.getInstance().getToken();
-
-                    SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
-                        if (e != null) {
-                            // Error.
-                                                    /*Crashlytics.logException(e);*/
-                            return;
-                        }
-
-                        SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
-                            if (e12 != null) {
-                                // Error.
-                                                        /*Crashlytics.logException(e12);*/
-                                return;
-                            }
-
-                            /*SendBird.unregisterPushTokenForCurrentUser(FirebaseInstanceId.getInstance().getToken(), handler);*/
-
-                            SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
-                                if (e1 != null) {
-                                                            /*Crashlytics.logException(e1);*/
-                                    return;
-                                }
-
-                                if (ptrs == SendBird.PushTokenRegistrationStatus.PENDING) {
-                                    // Try registering the token after a connection has been successfully established.
-                                } else {
-                                                            /*finish();*/
-                                    startActivity(new Intent(this, SelectCountryActivity.class));
-                                }
-                            });
-                        });
-                    });
-                })
-                .addOnFailureListener(e -> {
-                                            /*Crashlytics.logException(e);*/
-                });
-    }
 
     // 메인프레그먼트에서 호출되는 메소드
     public void onFragmentChange (int index) {

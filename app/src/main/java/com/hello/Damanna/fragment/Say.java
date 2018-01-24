@@ -1,6 +1,5 @@
 package com.hello.Damanna.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -15,18 +14,15 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -41,10 +37,7 @@ import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by lji5317 on 13/12/2017.
@@ -229,6 +222,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                             Intent intent = new Intent(getActivity(), UserInfoActivity.class);
                             intent.putExtra("uid", sayVoList.get(index).getUid());
                             intent.putExtra("userName", sayVoList.get(index).getUserName());
+                            intent.putExtra("identity", sayVoList.get(index).getIdentity());
                             intent.putExtra("profileUrl", sayVoList.get(index).getPhotoUrl());
                             intent.putExtra("bitmapImage", sayVoList.get(index).getBitmap());
 
