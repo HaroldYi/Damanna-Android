@@ -28,6 +28,7 @@ import com.hello.Damanna.vo.Photo;
 import com.marshalchen.ultimaterecyclerview.UltimateGridLayoutAdapter;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerviewViewHolder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -106,12 +107,8 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
             if(kind.equals("photo") || kind.equals("profile")) {
                 Profile.viewPhoto(photo.getFileUrl(), "jpg");
             } else {
-
-                if(Profile.cameraMenu.getVisibility() == View.VISIBLE) {
-                    Profile.cameraMenu.setVisibility(View.GONE);
-                } else {
-                    Profile.cameraMenu.setVisibility(View.VISIBLE);
-                }
+                Profile.chageProfileYn(false);
+                Profile.showCameraDialog();
             }
         });
 
