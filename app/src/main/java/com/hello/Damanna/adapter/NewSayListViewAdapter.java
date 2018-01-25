@@ -1,6 +1,8 @@
 package com.hello.Damanna.adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -167,22 +169,36 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
             if(this.profileYn) {
                 ((ViewHolder) holder).delSayBtn.setVisibility(View.VISIBLE);
                 ((ViewHolder) holder).delSayBtn.setOnClickListener(v -> {
-                    String id = this.sayVoList.get(index).getSayId();
-                    FirebaseFirestore.getInstance().collection("say").document(id)
-                            .delete()
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                                    remove(index);
-                                }
+
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.context);
+                    alertDialogBuilder.setTitle("Say삭제");
+                    alertDialogBuilder.setMessage("삭제하시겠습니까?")
+                            .setCancelable(false)
+                            .setPositiveButton("삭제", (dialog, id) -> {
+                                String sayId = sayVoList.get(index).getSayId();
+                                FirebaseFirestore.getInstance().collection("say").document(sayId)
+                                        .delete()
+                                        .addOnSuccessListener(aVoid -> {
+                                            Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                            remove(index);
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "Error deleting document", e);
+                                            }
+                                        });
                             })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.w(TAG, "Error deleting document", e);
-                                }
+                            .setNegativeButton("취소", (dialog, id) -> {
+                                // 다이얼로그를 취소한다
+                                dialog.cancel();
                             });
+
+                    // 다이얼로그 생성
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+
+                    // 다이얼로그 보여주기
+                    alertDialog.show();
                 });
             }
 

@@ -16,11 +16,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +35,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -45,6 +53,7 @@ import com.hello.Damanna.activity.PhotoViewerActivity;
 import com.hello.Damanna.activity.PopupActivity;
 import com.hello.Damanna.activity.SettingActivity;
 import com.hello.Damanna.activity.ViewPhotoActivity;
+import com.hello.Damanna.adapter.NewRecyclerGridViewAdapter;
 import com.hello.Damanna.adapter.NewSayListViewAdapter;
 import com.hello.Damanna.adapter.RecyclerGridViewAdapter;
 import com.hello.Damanna.common.CommonFunction;
@@ -84,12 +93,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     private Bitmap profileBitmap;
 
-    private ExpandableHeightGridView gridView;
+    private UltimateRecyclerView gridView;
     private String kind;
     private int position;
 
     public List<Photo> photoList;
-    private RecyclerGridViewAdapter adapter;
+    private NewRecyclerGridViewAdapter adapter;
     private RadiusNetworkImageView profileCameraBtn;
     private RadiusNetworkImageView profileImageView;
 
@@ -106,7 +115,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     private MaterialTabHost tabHost;
 
-    private ScrollView photoListView;
+    private CardView photoListView;
 
     private String regMin = "";
     private Uri mImageCaptureUri;
@@ -116,7 +125,8 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     private Query query;
 
     private View view;
-    private LinearLayout cameraMenu;
+    public static LinearLayout cameraMenu;
+    private static Activity activity;
     private LinearLayoutManager linearLayoutManager;
     private BasicGridLayoutManager basicGridLayoutManager;
 
@@ -156,6 +166,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.activity = getActivity();
         /*setHasOptionsMenu(true);*/
     }
 
@@ -182,7 +193,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         this.tabHost = (MaterialTabHost) view.findViewById(R.id.tabHost);
 
-        this.photoListView = (ScrollView) view.findViewById(R.id.photo_list_view);
+        this.photoListView = (CardView) view.findViewById(R.id.photo_list_view);
 
         // init view pager
         String[] tabList = getResources().getStringArray(R.array.tab_list);
@@ -255,10 +266,10 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         /*view.setVisibility(View.INVISIBLE);*/
 
-        this.gridView = (ExpandableHeightGridView) view.findViewById(R.id.photo_list);
+        this.gridView = (UltimateRecyclerView) view.findViewById(R.id.photo_list);
         this.gridView.addItemDecoration(new EqualSpacingItemDecoration(6, EqualSpacingItemDecoration.GRID));
         /*this.gridView.setVisibility(View.INVISIBLE);*/
-        this.gridView.setExpanded(true);
+        /*this.gridView.setExpanded(true);*/
 
         this.listView = (UltimateRecyclerView) view.findViewById(R.id.say_list);
         /*this.listView.setVisibility(View.INVISIBLE);*/
@@ -293,34 +304,68 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             startActivityForResult(intent, 1);
         });
 
-        this.adapter = new RecyclerGridViewAdapter(getActivity(), this.photoList);
+        this.adapter = new NewRecyclerGridViewAdapter(getActivity(), this.photoList);
+        this.adapter.setSpanColumns(2);
+
+        this.basicGridLayoutManager = new BasicGridLayoutManager(getActivity(), 2, this.adapter);
+
+        this.gridView.setLayoutManager(this.basicGridLayoutManager);
         this.gridView.setAdapter(this.adapter);
+
+        this.gridView.setHasFixedSize(true);
         this.gridView.setSaveEnabled(true);
         this.gridView.setClipToPadding(false);
 
-        this.gridView.addOnItemTouchListener(
+        /*this.gridView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int index) {
                         kind = photoList.get(index).getKind();
                         position = index;
 
-                        if(!kind.equals("logo_t")) {
+                        Log.d("VIEWID", (view.getId())+"");
+                        Log.d("VIEWID", (R.id.del_photo_btn)+"");
 
-                            if(kind.equals("photo") || kind.equals("profile")) {
-                                viewPhoto(photoList.get(index).getFileUrl(), "jpg");
-                            } else {
+                        ImageButton delPhotoBtn = view.findViewById(R.id.del_photo_btn);
+                        NetworkImageView imageView = view.findViewById(R.id.img1);
 
-                                if(cameraMenu.getVisibility() == View.VISIBLE) {
-                                    cameraMenu.setVisibility(View.GONE);
+                        delPhotoBtn.setOnClickListener(v -> {
+                            String id = photoList.get(position).getPhotoId();
+                            FirebaseFirestore.getInstance().collection("photo").document(id)
+                                    .delete()
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                            adapter.removeAt(position);
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w(TAG, "Error deleting document", e);
+                                        }
+                                    });
+                        });
+
+                        imageView.setOnClickListener(v -> {
+                            if(!kind.equals("logo_t")) {
+
+                                if(kind.equals("photo") || kind.equals("profile")) {
+                                    viewPhoto(photoList.get(index).getFileUrl(), "jpg");
                                 } else {
-                                    cameraMenu.setVisibility(View.VISIBLE);
+
+                                    if(cameraMenu.getVisibility() == View.VISIBLE) {
+                                        cameraMenu.setVisibility(View.GONE);
+                                    } else {
+                                        cameraMenu.setVisibility(View.VISIBLE);
+                                    }
                                 }
                             }
-                        }
+                        });
                     }
                 })
-        );
+        );*/
 
         /*this.basicGridLayoutManager = new BasicGridLayoutManager(getActivity(), this.columns, this.adapter);
         this.gridView.setLayoutManager(this.basicGridLayoutManager);*/
@@ -365,9 +410,9 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     identityView.setText(nation);
                 });
 
-        this.db.collection("photo/")
+        /*this.db.collection("photo/")
                 .whereEqualTo("member_id", this.user.getUid())
-                /*.orderBy("reg_dt", Query.Direction.ASCENDING)*/
+                *//*.orderBy("reg_dt", Query.Direction.ASCENDING)*//*
                 .addSnapshotListener((value, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
@@ -380,13 +425,16 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
                     Photo addBtn = new Photo();
                     addBtn.setKind("add_btn");
-                    this.photoList.add(addBtn);
+                    *//*this.photoList.add(addBtn);*//*
+                    this.adapter.insertLast(addBtn);
 
                     for (DocumentSnapshot document : value) {
                         Photo photo = new Photo();
+                        photo.setPhotoId(document.getString("id"));
                         photo.setFileName(document.getString("fileName").toString());
                         photo.setKind("photo");
-                        this.photoList.add(photo);
+                        *//*this.photoList.add(photo);*//*
+                        this.adapter.insertLast(photo);
 
                         StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getString("fileName") + ".jpg");
 
@@ -398,30 +446,37 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                         });
                     }
 
-                /*this.adapter.clearAdapter();
-                this.adapter.addNewValues(this.photoList);*/
-                    this.adapter.notifyDataSetChanged();
+                    afterAdd();
 
-                /*this.adapter.notifyDataSetChanged();
-                this.gridView.invalidateViews();
-                this.gridView.setAdapter(this.adapter);*/
-                });
+                    *//*this.adapter.clearAdapter();
+                    this.adapter.addNewValues(this.photoList);*//*
+                    *//*this.adapter.notifyDataSetChanged();*//*
 
-        /*this.db.collection("photo/")
-            *//*.orderBy("reg_dt", Query.Direction.ASCENDING)*//*
+                    *//*this.adapter.notifyDataSetChanged();
+                    this.gridView.invalidateViews();
+                    this.gridView.setAdapter(this.adapter);*//*
+                });*/
+
+        this.db.collection("photo/")
+                .orderBy("reg_dt", Query.Direction.ASCENDING)
                 .whereEqualTo("member_id", this.user.getUid())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
 
+                        Photo addBtn = new Photo();
+                        addBtn.setKind("add_btn");
+                        this.adapter.insertLast(addBtn);
+
                         if (task.getResult().size() > 0) {
+
                             for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("FilePath", "original/" + document.getData().get("fileName").toString() + ".jpg");
 
                                 Photo photo = new Photo();
+                                photo.setPhotoId(document.getString("id"));
                                 photo.setFileName(document.getData().get("fileName").toString());
                                 photo.setKind("photo");
-                                this.photoList.add(photo);
+                                this.adapter.insertLast(photo);
 
                                 StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getData().get("fileName").toString() + ".jpg");
 
@@ -434,26 +489,23 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                             }
                         }
 
-                        Photo photo = new Photo();
-                        photo.setKind("add_btn");
-                        this.photoList.add(photo);
-
                         int size = this.photoList.size();
                         this.lastIndex = this.photoList.size() - 1;
-*//*
-                    if(size % 4 != 0) {
+
+                    /*if(size % 4 != 0) {
                         for (int i = 0; i < (4 - size % 4); i++) {
                             Photo photo2 = new Photo();
                             photo2.setKind("logo_t");
                             this.photoList.add(photo2);
                         }
-                    }*//*
+                    }
 
-                        this.adapter.notifyDataSetChanged();
+                        this.adapter.notifyDataSetChanged();*/
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
                     }
-                });*/
+                });
+
         this.query = this.db.collection("say/")
                 .whereEqualTo("member_id", this.user.getUid())
                 .orderBy("reg_dt", Query.Direction.DESCENDING)
@@ -606,6 +658,10 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     }
 
+    protected void afterAdd() {
+
+    }
+
     private Uri getFileUri() {
         File dir = new File( getActivity().getFilesDir(), "img" );
         if ( !dir.exists() ) {
@@ -683,21 +739,6 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                 // Handle unsuccessful uploads
             }).addOnSuccessListener(taskThumSnapshot -> {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                /*this.photoList.get(this.lastIndex).setFileName(fileName);
-                this.photoList.get(this.lastIndex).setBitmap(finalBitmap);
-                this.photoList.get(this.lastIndex).setKind("photo");*/
-
-                Photo newPhoto = new Photo();
-                newPhoto.setFileName(finalFileName);
-                newPhoto.setBitmap(finalBitmap);
-                newPhoto.setKind("photo");
-
-                this.photoList.remove(this.photoList.size() - 1);
-                this.photoList.add(newPhoto);
-
-                Photo photo = new Photo();
-                photo.setKind("add_btn");
-                this.photoList.add(photo);
 
                 /*if((this.lastIndex + 1) < this.photoList.size()) {
                     this.photoList.set((this.lastIndex + 1), photo);
@@ -729,18 +770,30 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                 photoMap.put("fileName", finalFileName);
                 photoMap.put("reg_dt", new Date());
 
-                this.db.collection("photo")
-                        .add(photoMap)
+                DocumentReference photoReference = this.db.collection("photo").document();
+                photoMap.put("id", photoReference.getId());
+
+                Photo newPhoto = new Photo();
+
+                newPhoto.setPhotoId(photoReference.getId());
+                newPhoto.setFileName(finalFileName);
+                newPhoto.setBitmap(finalBitmap);
+                newPhoto.setKind("photo");
+
+                this.adapter.insertInternal(this.photoList, newPhoto, 1);
+
+                photoReference
+                        .set(photoMap)
                         .addOnSuccessListener(documentReference -> {
                             //
-                            Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                            Log.d(TAG, "DocumentSnapshot written with ID: " + photoReference.getId());
                         })
                         .addOnFailureListener(e -> {
                             //
                             Log.w(TAG, "Error adding document", e);
                         });
 
-                this.adapter = new RecyclerGridViewAdapter(getActivity(), this.photoList);
+                this.adapter = new NewRecyclerGridViewAdapter(getActivity(), this.photoList);
                 this.gridView.setAdapter(adapter);
                 this.adapter.notifyDataSetChanged();
 
@@ -832,13 +885,13 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
-    private void viewPhoto(String url, String type) {
+    public static void viewPhoto(String url, String type) {
         //데이터 담아서 팝업(액티비티) 호출
-        Intent intent = new Intent(getActivity(), PhotoViewerActivity.class);
+        Intent intent = new Intent(activity, PhotoViewerActivity.class);
         intent.putExtra("url", url);
         intent.putExtra("type", type);
-        startActivityForResult(intent, 1);
-        getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        activity.startActivityForResult(intent, 1);
+        activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
     private void takePhoto() {

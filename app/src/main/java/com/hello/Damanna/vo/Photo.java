@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
  */
 
 public class Photo {
+    private String photoId = "";
     private String fileName = "";
     private String fileUrl = "";
     private double distance;
@@ -15,6 +16,14 @@ public class Photo {
     private Bitmap bitmap;
 
     private String kind = "";
+
+    public String getPhotoId() {
+        return photoId;
+    }
+
+    public void setPhotoId(String photoId) {
+        this.photoId = photoId;
+    }
 
     public String getFileName() {
         return fileName;
