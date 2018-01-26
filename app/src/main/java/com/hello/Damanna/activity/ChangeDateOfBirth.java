@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.CommonFunction;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -39,6 +40,8 @@ public class ChangeDateOfBirth extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_date_of_birth);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         this.calendar = Calendar.getInstance();
         this.db = FirebaseFirestore.getInstance();

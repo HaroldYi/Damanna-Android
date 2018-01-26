@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.CommonFunction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,8 @@ public class ChangeGenderActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_gender);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         RadioButton male = (RadioButton) findViewById(R.id.male);
         RadioButton female = (RadioButton) findViewById(R.id.female);

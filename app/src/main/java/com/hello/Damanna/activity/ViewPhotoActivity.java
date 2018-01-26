@@ -17,6 +17,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.common.DownloadImageTask;
 import com.hello.Damanna.common.VolleySingleton;
 
@@ -35,6 +36,9 @@ public class ViewPhotoActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        CommonFunction.sendMsg(getApplicationContext());
+
         //타이틀바 없애기
         /*requestWindowFeature(Window.FEATURE_NO_TITLE);*/
         setContentView(R.layout.view_photo_activity);

@@ -18,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -26,21 +25,20 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.hello.Damanna.R;
-import com.hello.Damanna.adapter.GridViewAdapter;
+import com.hello.Damanna.adapter.NewRecyclerGridViewAdapter;
 import com.hello.Damanna.adapter.NewSayListViewAdapter;
-import com.hello.Damanna.adapter.RecyclerGridViewAdapter;
-import com.hello.Damanna.adapter.SayListViewAdapter;
 import com.hello.Damanna.common.BaseApplication;
 import com.hello.Damanna.common.EqualSpacingItemDecoration;
 import com.hello.Damanna.common.RadiusNetworkImageView;
 import com.hello.Damanna.common.VolleySingleton;
-import com.hello.Damanna.view.ExpandableHeightListView;
 import com.hello.Damanna.vo.Photo;
-import com.hello.Damanna.view.ExpandableHeightGridView;
 import com.hello.Damanna.vo.SayVo;
 import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
+import com.marshalchen.ultimaterecyclerview.grid.BasicGridLayoutManager;
 
 import org.joda.time.DateTime;
 
@@ -63,11 +61,13 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
     private UltimateRecyclerView listView;
     private LinearLayoutManager linearLayoutManager;
+    private BasicGridLayoutManager basicGridLayoutManager;
     private List<SayVo> sayVoList;
     private List<Photo> photoList;
 
-    private ExpandableHeightGridView gridView;
+    private UltimateRecyclerView gridView;
     private NewSayListViewAdapter userSayListViewAdapter;
+    private NewRecyclerGridViewAdapter adapter;
 
     private ImageLoader imageLoader;
 
@@ -77,7 +77,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
     private MaterialTabHost tabHost;
 
-    private ScrollView photoListView;
+    private CardView photoListView;
 
     private int selectedColour = Color.rgb(3, 196, 201);
     private int unSelectedColour = Color.rgb(176, 176, 176);
@@ -86,8 +86,10 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
     private String userName;
     private String uid;
 
-    private final int limit = 3;
-    private Query query;
+    private int moreNum = 2, columns = 2;
+    private final int limit = 10;
+    private Query sayQuery;
+    private Query photoQuery;
 
     private FirebaseFirestore db;
 
@@ -139,30 +141,14 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         String identity = intent.getStringExtra("identity");
         String profileUrl = intent.getStringExtra("profileUrl");
 
-        this.photoListView = (ScrollView) view.findViewById(R.id.photo_list_view);
-
-        this.gridView = (ExpandableHeightGridView) findViewById(R.id.photo_list);
-        this.gridView.addItemDecoration(new EqualSpacingItemDecoration(6, EqualSpacingItemDecoration.GRID));
-        this.gridView.setExpanded(true);
-        this.gridView.setVisibility(View.INVISIBLE);
-
-        this.gridView.addOnItemTouchListener(
-                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int index) {
-                        viewPhoto(photoList.get(position).getFileUrl(), "jpg");
-                    }
-                })
-        );
-
         /*Bitmap bitmap = CommonFunction.getBitmapFromURL(profileUrl);*/
 
         RadiusNetworkImageView imageView = (RadiusNetworkImageView) findViewById(R.id.user_profile_photo);
         imageView = (RadiusNetworkImageView) findViewById(R.id.user_profile_photo);
         imageView.setRadius(25f);
-        /*imageView.setOnClickListener(view1 -> {
-            viewPhoto( profileBitmap);
-        });*/
+        imageView.setOnClickListener(view1 -> {
+            viewPhoto(profileUrl, "jpg");
+        });
 
         this.imageLoader = VolleySingleton.getInstance(this).getImageLoader();
 
@@ -231,7 +217,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
                         /*BaseApplication.getInstance().progressON(activity, getResources().getString(R.string.loading));*/
 
-                        loadingData(query);
+                        loadingSayData(sayQuery);
                         // linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
                         //   linearLayoutManager.scrollToPosition(maxLastVisiblePosition);
 
@@ -239,44 +225,79 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                 }, 1000);
             }
         });
+
         this.listView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
 
             userSayListViewAdapter.clear();
             sayVoList.clear();
-            this.query = db.collection("say/")
+            this.sayQuery = db.collection("say/")
                     .whereEqualTo("member_id", this.uid)
                 /*.orderBy("reg_dt", Query.Direction.DESCENDING)*/
                     .limit(this.limit);
 
-            loadingData(query);
+            loadingSayData(sayQuery);
         }, 1000));
 
-        this.db.collection("photo/")
-                .whereEqualTo("member_id", this.uid)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
+        this.photoListView = (CardView) view.findViewById(R.id.photo_list_view);
 
-                        for (DocumentSnapshot document : task.getResult()) {
-                            Photo p = new Photo();
-                            p.setFileName(document.getData().get("fileName").toString());
-                            p.setKind("photo");
-                            this.photoList.add(p);
-                        }
+        this.gridView = (UltimateRecyclerView) findViewById(R.id.photo_list);
+        this.gridView.addItemDecoration(new EqualSpacingItemDecoration(6, EqualSpacingItemDecoration.GRID));
+        this.gridView.setVisibility(View.INVISIBLE);
 
-                        RecyclerGridViewAdapter adapter = new RecyclerGridViewAdapter(this, this.photoList, true);
-                        this.gridView.setAdapter(adapter);
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
+        this.gridView.setHasFixedSize(true);
+        this.gridView.setSaveEnabled(true);
+        this.gridView.setClipToPadding(false);
+
+        this.adapter = new NewRecyclerGridViewAdapter(this, this.photoList, false);
+        this.adapter.setSpanColumns(2);
+        this.gridView.setAdapter(this.adapter);
+        this.basicGridLayoutManager = new BasicGridLayoutManager(this, this.columns, this.adapter);
+
+        this.gridView.setLayoutManager(this.basicGridLayoutManager);
+
+        this.gridView.addOnItemTouchListener(
+                new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int index) {
+                        viewPhoto(photoList.get(position).getFileUrl(), "jpg");
                     }
-                });
+                })
+        );
 
-        this.query = db.collection("say/")
+        this.gridView.reenableLoadmore();
+
+        this.gridView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
+            @Override
+            public void loadMore(int itemsCount, final int maxLastVisiblePosition) {
+                loadingPhotoData(photoQuery, true);
+            }
+        });
+
+        this.gridView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
+
+            adapter.clear();
+            photoList.clear();
+            this.photoQuery = this.db.collection("photo/")
+                    .whereEqualTo("member_id", this.uid)
+                    .orderBy("reg_dt", Query.Direction.DESCENDING)
+                    .limit(this.limit);
+
+            loadingPhotoData(photoQuery, false);
+        }, 1000));
+
+        this.photoQuery = this.db.collection("photo/")
                 .whereEqualTo("member_id", this.uid)
                 .orderBy("reg_dt", Query.Direction.DESCENDING)
                 .limit(this.limit);
 
-        loadingData(this.query);
+        loadingPhotoData(this.photoQuery, false);
+
+        this.sayQuery = db.collection("say/")
+                .whereEqualTo("member_id", this.uid)
+                .orderBy("reg_dt", Query.Direction.DESCENDING)
+                .limit(this.limit);
+
+        loadingSayData(this.sayQuery);
 
         /*this.gridView.setOnItemClickListener((parent, v, position, id) -> {
             *//*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
@@ -342,7 +363,54 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         this.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
-    private void loadingData(Query queryParam) {
+    private void loadingPhotoData(Query queryParam, boolean loadMoreYn) {
+        queryParam
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+
+                        int size = task.getResult().size();
+                        DocumentSnapshot last = null;
+
+                        if (size > 0) {
+
+                            last = task.getResult().getDocuments().get(size - 1);
+
+                            this.photoQuery = db.collection("photo/")
+                                    .whereEqualTo("member_id", this.uid)
+                                    .orderBy("reg_dt", Query.Direction.DESCENDING)
+                                    .startAfter(last)
+                                    .limit(this.limit);
+
+                            if(size < this.limit) {
+                                this.gridView.disableLoadmore();
+                            }
+
+                            for (DocumentSnapshot document : task.getResult()) {
+
+                                Photo photo = new Photo();
+                                photo.setPhotoId(document.getString("id"));
+                                photo.setFileName(document.getData().get("fileName").toString());
+                                photo.setKind("photo");
+                                this.adapter.insertLast(photo);
+
+                                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getData().get("fileName").toString() + ".jpg");
+
+                                islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
+                                    //do something with downloadurl
+                                    photo.setFileUrl(downloadUrl.toString());
+                                }).addOnFailureListener(e -> {
+                                    Log.d("에러~", e.getMessage());
+                                });
+                            }
+                        }
+                    } else {
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                    }
+                });
+    }
+
+    private void loadingSayData(Query queryParam) {
 
         queryParam
                 .get()
@@ -355,7 +423,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
                             last = task.getResult().getDocuments().get(size - 1);
 
-                            query = db.collection("say/")
+                            sayQuery = db.collection("say/")
                                     .whereEqualTo("member_id", this.uid)
                                     .orderBy("reg_dt", Query.Direction.DESCENDING)
                                     .startAfter(last)
@@ -476,7 +544,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
                             last = task.getResult().getDocuments().get(size - 1);
 
-                            query = db.collection("say/")
+                            sayQuery = db.collection("say/")
                                     .orderBy("reg_dt", Query.Direction.DESCENDING)
                                     .startAfter(last)
                                     .limit(limit);

@@ -23,6 +23,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.CommonFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,8 @@ public class ChangeCountry extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_country);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         this.db = FirebaseFirestore.getInstance();
         this.mAuth = FirebaseAuth.getInstance();

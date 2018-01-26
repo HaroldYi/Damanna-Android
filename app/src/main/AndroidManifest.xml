@@ -21,8 +21,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
+        android:largeHeap="true"
         >
-
         <activity
             android:name="com.hello.Damanna.activity.MainActivity"
             android:screenOrientation="portrait"

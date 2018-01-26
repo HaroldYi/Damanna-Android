@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.vo.SayVo;
 
 import java.util.Date;
@@ -37,6 +38,8 @@ public class PopupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.popup_activity);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         //UI 객체생성
         EditText content = (EditText)findViewById(R.id.content);

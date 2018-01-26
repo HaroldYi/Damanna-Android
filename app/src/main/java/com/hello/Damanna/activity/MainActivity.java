@@ -2,8 +2,14 @@ package com.hello.Damanna.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.FragmentManager;
@@ -25,11 +31,18 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.CommonFunction;
+import com.hello.Damanna.common.Constant;
 import com.hello.Damanna.fragment.GroupChannelListFragment;
 import com.hello.Damanna.fragment.Profile;
 import com.hello.Damanna.fragment.Say;
 import com.hello.Damanna.vo.Photo;
+import com.sendbird.android.AdminMessage;
+import com.sendbird.android.BaseChannel;
+import com.sendbird.android.BaseMessage;
+import com.sendbird.android.FileMessage;
 import com.sendbird.android.SendBird;
+import com.sendbird.android.UserMessage;
 
 import org.json.JSONObject;
 
@@ -41,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import co.intentservice.chatui.models.ChatMessage;
 import devlight.io.library.ntb.NavigationTabBar;
 
 public class MainActivity extends AppCompatActivity {
@@ -74,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         /*for(int i = 0 ; i < 250 ; i++) {
             Map<String, Object> stringMap = new HashMap<>();

@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.fragment.GroupChatFragment;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
@@ -47,6 +48,8 @@ public class ChatRoomActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_channel);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_group_channel);
         setSupportActionBar(toolbar);

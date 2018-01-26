@@ -22,6 +22,7 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
 import com.hello.Damanna.common.BaseApplication;
+import com.hello.Damanna.common.CommonFunction;
 import com.sendbird.android.SendBird;
 
 import java.util.HashMap;
@@ -41,6 +42,8 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.change_name);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         this.userName = (EditText) findViewById(R.id.userName);
 

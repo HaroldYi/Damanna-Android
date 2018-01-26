@@ -18,6 +18,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.hello.Damanna.R;
+import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.common.ImageUtils;
 
 public class PhotoViewerActivity extends AppCompatActivity {
@@ -26,6 +27,8 @@ public class PhotoViewerActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_viewer);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.

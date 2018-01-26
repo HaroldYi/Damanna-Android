@@ -2,6 +2,8 @@ package com.hello.Damanna.adapter;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -39,7 +41,7 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
 
     private Context context;
     private List<Photo> list;
-    private boolean flag = false;
+    private boolean profileYn = true;
     private static ImageLoader imageLoader;
 
     private static String TAG = "cloudFireStore";
@@ -51,11 +53,11 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
         this.imageLoader = VolleySingleton.getInstance(this.context).getImageLoader();
     }
 
-    public NewRecyclerGridViewAdapter(Context context, List<Photo> list, boolean flag) {
+    public NewRecyclerGridViewAdapter(Context context, List<Photo> list, boolean profileYn) {
         super(list);
         this.context = context;
         this.list = list;
-        this.flag = flag;
+        this.profileYn = profileYn;
     }
 
     /**
@@ -123,13 +125,15 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
 
                 StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
 
-                islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
+                /*islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
                     //do something with downloadurl
+                    Log.d("downloadUrl", downloadUrl.toString());
+
                     holder.img.setImageUrl(downloadUrl.toString(), this.imageLoader);
                     holder.delPhotoBtn.setVisibility(View.VISIBLE);
-                });
+                });*/
 
-                /*final long ONE_MEGABYTE = 1024 * 1024;
+                final long ONE_MEGABYTE = 1024 * 1024;
                 islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
                     // Data for "images/island.jpg" is returns, use this as needed
 
@@ -137,10 +141,13 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
                     Bitmap resized = Bitmap.createScaledBitmap(src, src.getWidth(), src.getHeight() / 2, true);
 
                     holder.img.setBackground(new BitmapDrawable(resized));
+                    if(profileYn) {
+                        holder.delPhotoBtn.setVisibility(View.VISIBLE);
+                    }
                 }).addOnFailureListener(exception -> {
                     // Handle any errors
                     Log.e("bytess", exception.getMessage());
-                });*/
+                });
             } else if (photo.getKind().equals("add_btn")) {
                 /*holder.img.setImageUrl("https://pbs.twimg.com/profile_images/839721704163155970/LI_TRk1z_400x400.jpg", this.imageLoader);*/
                 holder.img.setDefaultImageResId(R.drawable.add_btn);
@@ -149,7 +156,9 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
             }
         } else {
             holder.img.setBackground(new BitmapDrawable(photo.getBitmap()));
-            holder.delPhotoBtn.setVisibility(View.VISIBLE);
+            if(profileYn) {
+                holder.delPhotoBtn.setVisibility(View.VISIBLE);
+            }
         }
 
         holder.delPhotoBtn.setOnClickListener(v -> {
@@ -250,128 +259,9 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
         return list.size();
     }
 
-    /*    @Override
-    public int getCount() {
-        return list.size();
+    public void clear() {
+        clearInternal(this.list);
     }
-
-    @Override
-    public Object getItem(int index) {
-        return list.get(index);
-    }
-
-    @Override
-    public long getItemId(int index) {
-        return 0;
-    }
-
-    @Override
-    public View getView(int index, View view, ViewGroup viewGroup) {
-
-        if(view == null) {
-            view = View.inflate(this.context.getApplicationContext(), R.layout.griditem, null);
-            new ViewHolder(view);
-        }
-
-        this.imageLoader = VolleySingleton.getInstance(this.context).getImageLoader();
-
-        ViewHolder holder = (ViewHolder) view.getTag();
-        Photo photo = list.get(index);
-
-        if(photo.getBitmap() == null) {
-            if (photo.getKind().equals("profile")) {
-
-                *//*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
-                downloadImageTask.execute(photo.getFileName());*//*
-
-            } else if (photo.getKind().equals("photo")) {
-                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
-
-                islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
-                    //do something with downloadurl
-                    holder.img.setImageUrl(downloadUrl.toString(), this.imageLoader);
-                });
-
-                *//*final long ONE_MEGABYTE = 1024 * 1024;
-                islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
-                    // Data for "images/island.jpg" is returns, use this as needed
-
-                    Bitmap src = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    Bitmap resized = Bitmap.createScaledBitmap(src, src.getWidth(), src.getHeight() / 2, true);
-
-                    holder.img.setBackground(new BitmapDrawable(resized));
-                }).addOnFailureListener(exception -> {
-                    // Handle any errors
-                    Log.e("bytess", exception.getMessage());
-                });*//*
-            } else if (photo.getKind().equals("add_btn")) {
-                holder.img.setDefaultImageResId(R.drawable.add_btn);
-            } else if (photo.getKind().equals("logo_t")) {
-                holder.img.setDefaultImageResId(R.drawable.logo_t);
-            }
-        } else
-            holder.img.setImageBitmap(photo.getBitmap());
-
-        return view;
-    }*/
-
-    // 필수로 Generate 되어야 하는 메소드 1 : 새로운 뷰 생성
-    /*@Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // 새로운 뷰를 만든다
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.griditem, parent,false);
-        ViewHolder holder = new ViewHolder(v);
-        return holder;
-    }
-
-    // 필수로 Generate 되어야 하는 메소드 2 : ListView의 getView 부분을 담당하는 메소드
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int index) {
-        this.imageLoader = VolleySingleton.getInstance(this.context).getImageLoader();
-
-        Photo photo = list.get(index);
-
-        if(photo.getBitmap() == null) {
-            if (photo.getKind().equals("profile")) {
-
-                *//*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
-                downloadImageTask.execute(photo.getFileName());*//*
-
-            } else if (photo.getKind().equals("photo")) {
-                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
-
-                islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
-                    //do something with downloadurl
-                    holder.img.setImageUrl(downloadUrl.toString(), this.imageLoader);
-                });
-
-                *//*final long ONE_MEGABYTE = 1024 * 1024;
-                islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(bytes -> {
-                    // Data for "images/island.jpg" is returns, use this as needed
-
-                    Bitmap src = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    Bitmap resized = Bitmap.createScaledBitmap(src, src.getWidth(), src.getHeight() / 2, true);
-
-                    holder.img.setBackground(new BitmapDrawable(resized));
-                }).addOnFailureListener(exception -> {
-                    // Handle any errors
-                    Log.e("bytess", exception.getMessage());
-                });*//*
-            } else if (photo.getKind().equals("add_btn")) {
-                holder.img.setDefaultImageResId(R.drawable.add_btn);
-            } else if (photo.getKind().equals("logo_t")) {
-                holder.img.setDefaultImageResId(R.drawable.logo_t);
-            }
-        } else
-            holder.img.setImageBitmap(photo.getBitmap());
-    }
-
-    // 필수로 Generate 되어야 하는 메소드 3
-    @Override
-    public int getItemCount() {
-        return this.list.size();
-    }
-*/
 
     class ViewHolder extends UltimateRecyclerviewViewHolder {
         private NetworkImageView img;

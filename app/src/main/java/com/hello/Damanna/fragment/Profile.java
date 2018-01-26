@@ -12,34 +12,25 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.media.CameraProfile;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -58,17 +49,13 @@ import com.hello.Damanna.activity.SettingActivity;
 import com.hello.Damanna.activity.ViewPhotoActivity;
 import com.hello.Damanna.adapter.NewRecyclerGridViewAdapter;
 import com.hello.Damanna.adapter.NewSayListViewAdapter;
-import com.hello.Damanna.adapter.RecyclerGridViewAdapter;
-import com.hello.Damanna.common.BaseApplication;
 import com.hello.Damanna.common.CommonFunction;
 import com.hello.Damanna.common.Constant;
 import com.hello.Damanna.common.EqualSpacingItemDecoration;
 import com.hello.Damanna.common.RadiusNetworkImageView;
 import com.hello.Damanna.common.VolleySingleton;
-import com.hello.Damanna.view.ExpandableHeightGridView;
 import com.hello.Damanna.vo.Photo;
 import com.hello.Damanna.vo.SayVo;
-import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 import com.marshalchen.ultimaterecyclerview.grid.BasicGridLayoutManager;
 import com.sendbird.android.SendBird;
@@ -125,7 +112,8 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     private String regMin = "";
 
     private final int limit = 5;
-    private Query query;
+    private Query sayQuery;
+    private Query photoQuery;
 
     private View view;
     private static Activity activity;
@@ -284,7 +272,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.listView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
             @Override
             public void loadMore(int itemsCount, final int maxLastVisiblePosition) {
-                loadingData(query, true);
+                loadingSayData(sayQuery, true);
                 /*linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
                 linearLayoutManager.scrollToPosition(maxLastVisiblePosition);*/
             }
@@ -308,6 +296,15 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.gridView.setHasFixedSize(true);
         this.gridView.setSaveEnabled(true);
         this.gridView.setClipToPadding(false);
+
+        this.gridView.reenableLoadmore();
+
+        this.gridView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
+            @Override
+            public void loadMore(int itemsCount, final int maxLastVisiblePosition) {
+                loadingPhotoData(photoQuery, true);
+            }
+        });
 
         this.db.collection("member/")
                 .document(this.user.getUid())
@@ -396,61 +393,19 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     this.gridView.setAdapter(this.adapter);*//*
                 });*/
 
-        this.db.collection("photo/")
-                .orderBy("reg_dt", Query.Direction.ASCENDING)
-                .whereEqualTo("member_id", this.user.getUid())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-
-                        Photo addBtn = new Photo();
-                        addBtn.setKind("add_btn");
-                        this.adapter.insertLast(addBtn);
-
-                        if (task.getResult().size() > 0) {
-
-                            for (DocumentSnapshot document : task.getResult()) {
-
-                                Photo photo = new Photo();
-                                photo.setPhotoId(document.getString("id"));
-                                photo.setFileName(document.getData().get("fileName").toString());
-                                photo.setKind("photo");
-                                this.adapter.insertLast(photo);
-
-                                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getData().get("fileName").toString() + ".jpg");
-
-                                islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
-                                    //do something with downloadurl
-                                    photo.setFileUrl(downloadUrl.toString());
-                                }).addOnFailureListener(e -> {
-                                    Log.d("에러~", e.getMessage());
-                                });
-                            }
-                        }
-
-                        int size = this.photoList.size();
-                        this.lastIndex = this.photoList.size() - 1;
-
-                    /*if(size % 4 != 0) {
-                        for (int i = 0; i < (4 - size % 4); i++) {
-                            Photo photo2 = new Photo();
-                            photo2.setKind("logo_t");
-                            this.photoList.add(photo2);
-                        }
-                    }
-
-                        this.adapter.notifyDataSetChanged();*/
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
-                    }
-                });
-
-        this.query = this.db.collection("say/")
+        this.photoQuery = this.db.collection("photo/")
                 .whereEqualTo("member_id", this.user.getUid())
                 .orderBy("reg_dt", Query.Direction.DESCENDING)
                 .limit(this.limit);
 
-        loadingData(this.query, false);
+        loadingPhotoData(this.photoQuery, false);
+
+        this.sayQuery = this.db.collection("say/")
+                .whereEqualTo("member_id", this.user.getUid())
+                .orderBy("reg_dt", Query.Direction.DESCENDING)
+                .limit(this.limit);
+
+        loadingSayData(this.sayQuery, false);
 
         return view;
     }
@@ -579,7 +534,59 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         return false;
     };
 
-    private void loadingData(Query queryParam, boolean loadMoreYn) {
+    private void loadingPhotoData(Query queryParam, boolean loadMoreYn) {
+        queryParam
+                .whereEqualTo("member_id", this.user.getUid())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+
+                        Photo addBtn = new Photo();
+                        addBtn.setKind("add_btn");
+                        this.adapter.insertLast(addBtn);
+
+                        int size = task.getResult().size();
+                        DocumentSnapshot last = null;
+
+                        if (size > 0) {
+
+                            last = task.getResult().getDocuments().get(size - 1);
+
+                            this.photoQuery = db.collection("photo/")
+                                    .whereEqualTo("member_id", this.user.getUid())
+                                    .orderBy("reg_dt", Query.Direction.DESCENDING)
+                                    .startAfter(last)
+                                    .limit(this.limit);
+
+                            if(size < this.limit) {
+                                this.gridView.disableLoadmore();
+                            }
+
+                            for (DocumentSnapshot document : task.getResult()) {
+
+                                Photo photo = new Photo();
+                                photo.setPhotoId(document.getString("id"));
+                                photo.setFileName(document.getData().get("fileName").toString());
+                                photo.setKind("photo");
+                                this.adapter.insertLast(photo);
+
+                                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getData().get("fileName").toString() + ".jpg");
+
+                                islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
+                                    //do something with downloadurl
+                                    photo.setFileUrl(downloadUrl.toString());
+                                }).addOnFailureListener(e -> {
+                                    Log.d("에러~", e.getMessage());
+                                });
+                            }
+                        }
+                    } else {
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                    }
+                });
+    }
+
+    private void loadingSayData(Query queryParam, boolean loadMoreYn) {
         queryParam
                 .whereEqualTo("member_id", this.user.getUid())
                 .get()
@@ -593,13 +600,13 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
                             last = task.getResult().getDocuments().get(size - 1);
 
-                            query = db.collection("say/")
+                            this.sayQuery = this.db.collection("say/")
                                     .whereEqualTo("member_id", this.user.getUid())
                                     .orderBy("reg_dt", Query.Direction.DESCENDING)
                                     .startAfter(last)
-                                    .limit(limit);
+                                    .limit(this.limit);
 
-                            if(size < limit) {
+                            if(size < this.limit) {
                                 this.listView.disableLoadmore();
                             }
 
@@ -756,9 +763,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         private void sendPicture(Intent data, int cameraCode) {
 
-            /*switch (cameraCode) {
+            String fileName = "";
+
+            switch (cameraCode) {
 
                 case Constant.GALLERY_CODE:
+                    this.imgPath = getRealPathFromURI(data.getData());
                     fileName = data.getData().getLastPathSegment(); //갤러리에서 가져오기
                     break;
                 case Constant.CAMERA_CODE:
@@ -767,9 +777,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
                 default:
                     break;
-            }*/
-
-            String fileName = this.mImageCaptureUri.getLastPathSegment();
+            }
 
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference().child("original/" + fileName + ".jpg");
@@ -846,6 +854,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                         Photo newPhoto = new Photo();
 
                         newPhoto.setPhotoId(photoReference.getId());
+                        newPhoto.setFileUrl(taskSnapshot.getDownloadUrl().toString());
                         newPhoto.setFileName(finalFileName);
                         newPhoto.setBitmap(finalBitmap);
                         newPhoto.setKind("photo");

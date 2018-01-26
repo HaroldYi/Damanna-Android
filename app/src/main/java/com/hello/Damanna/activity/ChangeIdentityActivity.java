@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.Damanna.R;
 import com.hello.Damanna.common.BaseApplication;
+import com.hello.Damanna.common.CommonFunction;
 import com.sendbird.android.SendBird;
 
 import java.util.HashMap;
@@ -43,6 +44,8 @@ public class ChangeIdentityActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        CommonFunction.sendMsg(getApplicationContext());
 
         this.mAuth = FirebaseAuth.getInstance();
         this.user = this.mAuth.getCurrentUser();

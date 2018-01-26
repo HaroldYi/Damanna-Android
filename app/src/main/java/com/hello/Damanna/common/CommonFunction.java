@@ -1,5 +1,10 @@
 package com.hello.Damanna.common;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,6 +13,17 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.media.RingtoneManager;
+import android.net.Uri;
+
+import com.hello.Damanna.R;
+import com.hello.Damanna.activity.ChatRoomActivity;
+import com.sendbird.android.AdminMessage;
+import com.sendbird.android.BaseChannel;
+import com.sendbird.android.BaseMessage;
+import com.sendbird.android.FileMessage;
+import com.sendbird.android.SendBird;
+import com.sendbird.android.UserMessage;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,5 +87,49 @@ public class CommonFunction {
         canvas.drawBitmap(bitmap, rect, rect, paint);
 
         return output;
+    }
+
+    public static void sendMsg(Context context) {
+        SendBird.addChannelHandler(Constant.CHANNEL_HANDLER_ID, new SendBird.ChannelHandler() {
+            @Override
+            public void onMessageReceived(BaseChannel baseChannel, BaseMessage baseMessage) {
+                if (baseMessage instanceof UserMessage) {
+
+                    UserMessage userMessage = (UserMessage)baseMessage;
+
+                    // message is a UserMessage
+                    Intent intent = new Intent(context, ChatRoomActivity.class);
+                    intent.putExtra("channelUrl", userMessage.getChannelUrl());
+                    intent.putExtra("senderName", userMessage.getSender().getNickname());
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                    PendingIntent pendingIntent = PendingIntent.getActivity(context, 1 /* Request code */, intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+                    String msg = userMessage.getMessage();
+
+                    Notification.Builder notificationBuilder = new Notification.Builder(context)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle(context.getResources().getString(R.string.app_name))
+                            .setContentText(msg)
+                            .setAutoCancel(true)
+                            .setSound(defaultSoundUri)
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setDefaults(Notification.DEFAULT_ALL)
+                            .setContentIntent(pendingIntent);
+
+                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                    notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+
+                } else if (baseMessage instanceof FileMessage) {
+                    // message is a FileMessage
+                } else if (baseMessage instanceof AdminMessage) {
+                    // message is an AdminMessage
+                }
+            }
+        });
     }
 }
