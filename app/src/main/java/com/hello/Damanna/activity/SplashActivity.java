@@ -1,8 +1,10 @@
 package com.hello.Damanna.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,12 +13,14 @@ import android.widget.Toast;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -27,7 +31,6 @@ import com.google.api.services.people.v1.PeopleService;
 import com.google.api.services.people.v1.model.Person;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -54,20 +57,28 @@ import java.util.Map;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
+    private static Context context;
+
+    private static FirebaseAuth mAuth;
+
     private FirebaseUser fUser;
-    private FirebaseFirestore db;
+    private static FirebaseFirestore db;
 
     private JSONObject userInfo;
 
-    private Intent intent;
+    private GoogleApiClient mGoogleApiClient;
+
+    private String secret;
 
     private static final int RC_SIGN_IN = 9001;
+    private static final int RC_SIGN_GOOGLE = 9002;
     private static final String TAG = "FacebookLogin";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.context = this;
 
         this.mAuth = FirebaseAuth.getInstance();
         this.fUser = this.mAuth.getCurrentUser();
@@ -97,15 +108,15 @@ public class SplashActivity extends AppCompatActivity {
             this.checkMember();
 
         } else {
-            startActivity(new Intent(SplashActivity.this, SignActivity.class));
+            /*startActivity(new Intent(SplashActivity.this, SignActivity.class));*/
 
             Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show();
 
-            /*AuthUI.IdpConfig.Builder facebookBuilder = new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER);
+            AuthUI.IdpConfig.Builder facebookBuilder = new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER);
             facebookBuilder.setPermissions(Arrays.asList("public_profile", "email", "user_birthday"));
 
             AuthUI.IdpConfig.Builder googleBuilder = new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER);
-            googleBuilder.setPermissions(Arrays.asList(Scopes.EMAIL, Scopes.PROFILE, Scopes.PLUS_ME));
+            googleBuilder.setPermissions(Arrays.asList(Scopes.EMAIL, Scopes.PROFILE, Scopes.PLUS_ME, "https://www.googleapis.com/auth/user.birthday.read"));
 
             Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                     .setIsSmartLockEnabled(!BuildConfig.DEBUG)
@@ -117,15 +128,13 @@ public class SplashActivity extends AppCompatActivity {
                     .setTheme(R.style.firebase_ui)
                     .build();
 
-            startActivityForResult(intent, RC_SIGN_IN);*/
+            startActivityForResult(intent, RC_SIGN_IN);
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        this.intent = data;
 
         List<String> providers = this.mAuth.getCurrentUser().getProviders();
         String provider = providers.get(0);
@@ -137,8 +146,10 @@ public class SplashActivity extends AppCompatActivity {
                     addUser(this.mAuth.getCurrentUser());
                 } else if(provider.indexOf("google") != -1) {
 
-                    IdpResponse idpResponse = IdpResponse.fromResultIntent(data);
+                    String googleClientId = "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com";
 
+                    setupGoogleAdditionalDetailsLogin(googleClientId);
+                    startGoogleAdditionalRequest();
                     /*GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
                     if(result.isSuccess()) {
@@ -154,7 +165,51 @@ public class SplashActivity extends AppCompatActivity {
                 Toast.makeText(this, "Sign In Failed", Toast.LENGTH_SHORT).show();
                 /*updateUI(null);*/
             }
+        } else if(requestCode == RC_SIGN_GOOGLE) {
+            googleAdditionalDetailsResult(data);
+            return;
         }
+    }
+
+    private void setupGoogleAdditionalDetailsLogin(String googleClientId) {
+        // Configure sign-in to request the user's ID, email address, and basic profile. ID and
+        // basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(googleClientId)
+                .requestServerAuthCode(googleClientId)
+                .requestScopes(new Scope("profile"))
+                .build();
+
+        // Build a GoogleApiClient with access to GoogleSignIn.API and the options above.
+        this.mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Log.d(TAG, "onConnectionFailed: ");
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+    }
+
+    public void googleAdditionalDetailsResult(Intent data) {
+
+        GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+        Log.d(TAG, "googleAdditionalDetailsResult: ");
+        if (result.isSuccess()) {
+            // Signed in successfully
+            GoogleSignInAccount acct = result.getSignInAccount();
+            // execute AsyncTask to get data from Google People API
+            new GoogleAdditionalDetailsTask().execute(acct);
+        } else {
+            Log.d(TAG, "googleAdditionalDetailsResult: fail");
+        }
+    }
+
+    private void startGoogleAdditionalRequest() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_GOOGLE);
     }
 
     private void checkMember() {
@@ -259,7 +314,10 @@ public class SplashActivity extends AppCompatActivity {
                                         gender = "";
                                     }
 
-                                    addUserDB(facebookId, dateOfBirth, gender);
+                                    Calendar calendar = Calendar.getInstance();
+                                    calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
+
+                                    addUserDB(facebookId, calendar, gender);
                                 });
 
                         Bundle parameters = new Bundle();
@@ -277,27 +335,27 @@ public class SplashActivity extends AppCompatActivity {
     }
 
 
-    private void addUserDB(String facebookId, String dateOfBirth, String gender) {
+    protected static void addUserDB(String facebookId, Calendar dateOfBirth, String gender) {
+
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
 
         Map<String, Object> userMap = new HashMap<>();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Integer.parseInt(dateOfBirth.split("/")[2]), Integer.parseInt(dateOfBirth.split("/")[0]) - 1, Integer.parseInt(dateOfBirth.split("/")[1]));
         userMap.put("facebookId", facebookId);
-        userMap.put("id", this.fUser.getUid());
-        userMap.put("email", this.fUser.getEmail());
-        userMap.put("dateOfBirth", new Date(calendar.getTimeInMillis()));
+        userMap.put("id", fUser.getUid());
+        userMap.put("email", fUser.getEmail());
+        userMap.put("dateOfBirth", new Date(dateOfBirth.getTimeInMillis()));
         userMap.put("gender", gender);
-        userMap.put("name", this.fUser.getDisplayName());
-        userMap.put("profileUrl", this.fUser.getPhotoUrl().toString());
-                                    /*userMap.put("location", new GeoPoint(latitude, longitude));*/
-        this.db.collection("member").document(this.fUser.getUid())
+        userMap.put("name", fUser.getDisplayName());
+        userMap.put("profileUrl", fUser.getPhotoUrl().toString());
+        /*userMap.put("location", new GeoPoint(latitude, longitude));*/
+        FirebaseFirestore.getInstance().collection("member").document(fUser.getUid())
                 .set(userMap)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "DocumentSnapshot successfully written!");
 
                     List<String> userList = new ArrayList<>();
-                    userList.add(mAuth.getCurrentUser().getUid());
+                    userList.add(fUser.getUid());
 
                     SendBird.createUserListQuery(userList);
                     try {
@@ -307,14 +365,14 @@ public class SplashActivity extends AppCompatActivity {
                     }
                     String pushToken = FirebaseInstanceId.getInstance().getToken();
 
-                    SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
+                    SendBird.connect(fUser.getUid(), (user, e) -> {
                         if (e != null) {
                             // Error.
                                                     /*Crashlytics.logException(e);*/
                             return;
                         }
 
-                        SendBird.updateCurrentUserInfo(mAuth.getCurrentUser().getDisplayName(), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
+                        SendBird.updateCurrentUserInfo(fUser.getDisplayName(), fUser.getPhotoUrl().toString(), e12 -> {
                             if (e12 != null) {
                                 // Error.
                                                         /*Crashlytics.logException(e12);*/
@@ -333,7 +391,7 @@ public class SplashActivity extends AppCompatActivity {
                                     // Try registering the token after a connection has been successfully established.
                                 } else {
                                                             /*finish();*/
-                                    startActivity(new Intent(this, SelectCountryActivity.class));
+                                    context.startActivity(new Intent(context, SelectCountryActivity.class));
                                 }
                             });
                         });
@@ -349,8 +407,8 @@ class GoogleAdditionalDetailsTask extends AsyncTask<GoogleSignInAccount, Void, P
 
     private static final String TAG = "googleResult";
 
-    private static final String GOOGLE_CLIENT_ID = "629394807535-bb46mu7u97ck8fiue3k8ini2am7n37gd.apps.googleusercontent.com";
-    private static final String GOOGLE_CLIENT_SECRET = "DwupZLq9H2oNGZaAZWWBcQPQ";
+    private static final String GOOGLE_CLIENT_ID = "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com";
+    private static final String GOOGLE_CLIENT_SECRET = "wJm0I2pfh7lU8VInxn4S19b1";
 
     @Override
     protected Person doInBackground(GoogleSignInAccount... googleSignInAccounts) {
@@ -386,7 +444,7 @@ class GoogleAdditionalDetailsTask extends AsyncTask<GoogleSignInAccount, Void, P
                     .build();
 
             // Get the user's profile
-            profile = peopleService.people().get("people/me").setRequestMaskIncludeField("person.names, person.emailAddresses, person.genders, person.birthdays").execute();
+            profile = peopleService.people().get("people/me").setPersonFields("birthdays,genders").execute();
         } catch (IOException e) {
             Log.d(TAG, "doInBackground: " + e.getMessage());
             e.printStackTrace();
@@ -396,13 +454,15 @@ class GoogleAdditionalDetailsTask extends AsyncTask<GoogleSignInAccount, Void, P
 
     @Override
     protected void onPostExecute(Person person) {
-
         String profileGender = "";
         String profileBirthday = "";
         String profileAbout = "";
         String profileCover = "";
 
+        Calendar dateOfBirth = Calendar.getInstance();
+
         if (person != null) {
+
             if (person.getGenders() != null && person.getGenders().size() > 0) {
                 profileGender = person.getGenders().get(0).getValue();
             }
@@ -410,7 +470,13 @@ class GoogleAdditionalDetailsTask extends AsyncTask<GoogleSignInAccount, Void, P
 //                    yyyy-MM-dd
                 com.google.api.services.people.v1.model.Date dobDate = person.getBirthdays().get(0).getDate();
                 if (dobDate.getYear() != null) {
-                    profileBirthday = dobDate.getYear() + "-" + dobDate.getMonth() + "-" + dobDate.getDay();
+
+                    String month = (dobDate.getMonth() < 10 ? "0" + dobDate.getMonth() : dobDate.getMonth().toString());
+                    String dayOfMonth = (dobDate.getDay() < 10 ? "0" + dobDate.getDay() : dobDate.getDay().toString());
+
+                    profileBirthday = dobDate.getYear() + "-" + month + "-" + dayOfMonth;
+
+                    dateOfBirth.set(dobDate.getYear(), dobDate.getMonth() - 1, dobDate.getDay());
                 }
             }
             if (person.getBiographies() != null && person.getBiographies().size() > 0) {
@@ -419,7 +485,12 @@ class GoogleAdditionalDetailsTask extends AsyncTask<GoogleSignInAccount, Void, P
             if (person.getCoverPhotos() != null && person.getCoverPhotos().size() > 0) {
                 profileCover = person.getCoverPhotos().get(0).getUrl();
             }
+
             Log.d(TAG, String.format("googleOnComplete: gender: %s, birthday: %s, about: %s, cover: %s", profileGender, profileBirthday, profileAbout, profileCover));
+
+            SplashActivity.addUserDB("", dateOfBirth, profileGender);
+        } else {
+            Log.d(TAG, "NULLLL!!!!");
         }
     }
 }
