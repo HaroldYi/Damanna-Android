@@ -3,7 +3,7 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.hello.Damanna.common.RadiusNetworkImageView
+    <com.hello.holaApp.common.RadiusNetworkImageView
         android:id="@+id/user_profile_photo"
         android:layout_width="100dp"
         android:layout_height="100dp"

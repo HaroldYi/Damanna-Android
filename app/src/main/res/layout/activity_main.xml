@@ -7,7 +7,7 @@
     android:background="#ffffff"
     android:gravity="bottom"
     android:orientation="vertical"
-    tools:context="com.hello.Damanna.activity.MainActivity">
+    tools:context="com.hello.holaApp.activity.MainActivity">
 
     <FrameLayout
         android:id="@+id/contentContainer"

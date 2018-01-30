@@ -25,10 +25,12 @@
         app:layout_anchorGravity="bottom|right" />
 
     <RelativeLayout
+        android:id="@+id/say_list_area"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:layout_marginTop="10dp"
+        android:visibility="gone"
         >
 
         <!--<android.support.v4.widget.SwipeRefreshLayout
@@ -48,10 +50,26 @@
             android:id="@+id/say_list"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:visibility="gone"
             app:recyclerviewClipToPadding="true"
             app:recyclerviewDefaultSwipeColor="@array/google_colors"
             app:recyclerviewFloatingActionView="@layout/floating_view"
             app:recyclerviewEmptyView="@layout/empty_view"
             app:recyclerviewScrollbars="vertical" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/no_data_area"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/no_say_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/no_data"
+            android:typeface="sans"
+            android:visibility="gone" />
     </RelativeLayout>
 </RelativeLayout>

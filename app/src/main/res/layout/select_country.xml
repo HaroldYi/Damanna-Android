@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     >
 
-    <com.hello.Damanna.common.RadiusNetworkImageView
+    <com.hello.holaApp.common.RadiusNetworkImageView
         android:id="@+id/user_profile_photo"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -32,7 +32,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="100dp"
         android:textColor="@color/black"
-        android:text="거주 또는 여행할\n국가를 선택해주세요"
+        android:text="@string/request_area"
         android:textAlignment="center"
         android:textStyle="bold" />
 

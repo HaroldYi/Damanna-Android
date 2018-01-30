@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/home_layout"
-    tools:context="com.hello.Damanna.fragment.Chat" >
+    tools:context="com.hello.holaApp.fragment.Chat" >
 
     <GridView
         android:layout_weight="1"

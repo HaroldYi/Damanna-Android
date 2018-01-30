@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:629394807535:android:1c218b44f8f35e95",
         "android_client_info": {
-          "package_name": "com.hello.Damanna"
+          "package_name": "com.hello.TrevelMeetUp"
         }
       },
       "oauth_client": [
@@ -42,6 +42,57 @@
         "mobilesdk_app_id": "1:629394807535:android:cc8410374032c52f",
         "android_client_info": {
           "package_name": "com.hello.Damanna"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "629394807535-sahrmt9eoocereeq38vbpui9ndbbaba0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hello.Damanna",
+            "certificate_hash": "a5a47165361a36642aa6b2bbe8eb7975387cb2d3"
+          }
+        },
+        {
+          "client_id": "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPancg8F6b8oLuyt8pAJoZmwFAMY6G5HM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "629394807535-8ojcmufitv8716p70jroe50nvdr6q9jg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hello.Damanna"
+              }
+            },
+            {
+              "client_id": "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629394807535:android:9a7375c3065e656f",
+        "android_client_info": {
+          "package_name": "com.hello.holaApp"
         }
       },
       "oauth_client": [

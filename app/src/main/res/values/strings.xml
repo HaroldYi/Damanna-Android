@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">다만나</string>
+    <string name="app_name">홀라앱</string>
     <string name="app_id">FAA3AB52-6F82-4C6D-B29F-294701179246</string>
     <string name="loading">Loading...</string>
     <string name="uploading">Uploading...</string>
@@ -23,4 +23,32 @@
         <item>Say</item>
         <item>Photo</item>
     </string-array>
+
+    <string name="googleClientId">
+        629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com
+    </string>
+    <string name="googleSecret">
+        wJm0I2pfh7lU8VInxn4S19b1
+    </string>
+    <string name="no_data">
+        등록된 내용이 없습니다
+    </string>
+    <string name="no_chat">
+        대화이력이 없습니다
+    </string>
+    <string name="request_area">
+        거주 또는 여행할\n국가를 선택해주세요
+    </string>
+    <string name="using_camera">
+        사진 앨범에서 등록
+    </string>
+    <string name="choose_from_gallery">
+        사진 앨범에서 등록
+    </string>
+    <string name="default_profile_url">
+
+    </string>
+    <string name="confirm_btn">
+        확인
+    </string>
 </resources>

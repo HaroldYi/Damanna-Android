@@ -9,6 +9,7 @@
     android:padding="3dp" >
 
     <android.support.v7.widget.CardView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/say_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
@@ -17,34 +18,13 @@
         app:cardUseCompatPadding="true">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="80dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/content"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_weight="1"
-                android:text="TextView"
-                android:textColor="@color/dark_gray"
-                android:typeface="sans" />
-
-        </LinearLayout>
-
-        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
-            <com.hello.Damanna.common.RadiusNetworkImageView
+            <com.hello.holaApp.common.RadiusNetworkImageView
                 android:id="@+id/user_profile_photo"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -97,6 +77,27 @@
             app:srcCompat="@drawable/ic_x_btn"
             />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="80dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="1"
+                android:text="TextView"
+                android:textColor="@color/dark_gray"
+                android:typeface="sans" />
+
+        </LinearLayout>
+
         <!--<LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -121,5 +122,29 @@
                 android:textAlignment="viewEnd" />
         </LinearLayout>-->
 
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/no_say_list"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardUseCompatPadding="true"
+        android:visibility="gone"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <TextView
+                android:id="@+id/no_say_msg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textAlignment="center"
+                />
+        </RelativeLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

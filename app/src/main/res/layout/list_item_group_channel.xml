@@ -7,12 +7,40 @@
     android:background="?attr/selectableItemBackground"
     android:clickable="true">
 
-    <com.hello.Damanna.common.RadiusNetworkImageView
+    <FrameLayout
+        android:id="@+id/image_group_channel_list_cover_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_centerVertical="true" >
+
+        <com.hello.holaApp.common.RadiusNetworkImageView
+            android:id="@+id/image_group_channel_list_cover"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:scaleType="centerCrop"
+            android:layout_centerVertical="true"/>
+
+        <ImageView
+            android:id="@+id/connectionStatus"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="45dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/connetion_status" />
+
+    </FrameLayout>
+
+    <!--<com.hello.Damanna.common.RadiusNetworkImageView
         android:id="@+id/image_group_channel_list_cover"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:scaleType="centerCrop"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true"/>-->
 
     <!--<com.stfalcon.multiimageview.MultiImageView
         android:id="@+id/image_group_channel_list_cover"
@@ -25,8 +53,8 @@
         android:id="@+id/container_group_channel_list_topic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/image_group_channel_list_cover"
-        android:layout_alignTop="@id/image_group_channel_list_cover"
+        android:layout_toRightOf="@id/image_group_channel_list_cover_layout"
+        android:layout_alignTop="@id/image_group_channel_list_cover_layout"
         android:layout_marginLeft="16dp"
         android:orientation="horizontal"
         android:gravity="center_vertical">
