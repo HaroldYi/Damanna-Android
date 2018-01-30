@@ -34,12 +34,16 @@ import com.hello.holaApp.activity.MainActivity;
 import com.hello.holaApp.activity.PopupActivity;
 import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.adapter.NewSayListViewAdapter;
+import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.vo.SayVo;
+import com.hello.holaApp.vo.UserVo;
 import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lji5317 on 13/12/2017.
@@ -61,6 +65,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
     private TextView noSayList;
     private RelativeLayout noDataArea;
     private RelativeLayout sayListArea;
+
+    private Map<String, UserVo> userMap;
 
     private LinearLayoutManager linearLayoutManager;
 
@@ -244,7 +250,31 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
         this.progressON(getResources().getString(R.string.loading));
 
-        this.loadingData(this.query, true);
+        this.userMap = new HashMap();
+        this.db.collection("member/")
+                .get()
+                .addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        for (DocumentSnapshot document1 : task1.getResult()) {
+                            UserVo userVo = new UserVo();
+                            String uid = document1.getData().get("id").toString();
+                            GeoPoint geoPoint = (GeoPoint) document1.getData().get("location");
+
+                            userVo.setUid(uid);
+                            userVo.setUserName(document1.getData().get("name").toString());
+                            userVo.setIdentity(document1.getData().get("identity").toString());
+                            userVo.setNation(document1.getData().get("nation").toString());
+                            userVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
+                            userVo.setGeoPoint(geoPoint);
+
+                            userMap.put(uid, userVo);
+                        }
+                        this.loadingData(this.query, true);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FIREERROR", e.getMessage());
+                });
 
         /*this.listView.setOnItemClickListener((adapterView, view1, index, l) -> {
 
@@ -346,137 +376,12 @@ public class Say extends BaseFragment implements View.OnClickListener {
         List<SayVo> tempSayVoList = new ArrayList<>();
 
         queryParam
-                .addSnapshotListener((value, e) -> {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
-
-            /*sayListViewAdapter = new NewSayListViewAdapter(getActivity(), sayVoList);
-            listView.setAdapter(sayListViewAdapter);*/
-
-                    List<DocumentSnapshot> documentSnapshotList = value.getDocuments();
-                    int size = documentSnapshotList.size();
-                    DocumentSnapshot last = null;
-                    Log.d("sizeeeeeee", size+"");
-                    if(size > 0) {
-                        last = documentSnapshotList.get(size - 1);
-
-                        query = db.collection("say/")
-                                .orderBy("reg_dt", Query.Direction.DESCENDING)
-                                .startAfter(last)
-                                .limit(limit);
-
-                /*listView.setSelection(sayListViewAdapter.getCount() - 1);*/
-                        if(size < limit) {
-                            lastYn = true;
-                            /*this.listView.disableLoadmore();*/
-                        }
-
-                        for (DocumentSnapshot document : documentSnapshotList) {
-                            SayVo sayVo = new SayVo();
-
-                            String memberId = document.getString("member_id");
-
-                            sayVo.setUid(memberId);
-                            sayVo.setMsg(document.getData().get("content").toString());
-
-                            long regDt = document.getDate("reg_dt").getTime();
-                            long now = System.currentTimeMillis();
-
-                            long regTime = (now - regDt) / 60000;
-
-                            String regMin = "";
-                            if(regTime < 60) {
-                                regMin = String.format("%dmin", regTime);
-                            } else if(regTime >= 60 && regTime < 1440) {
-                                regMin = String.format("%dh", (int)(regTime / 60));
-                            } else if(regTime > 1440) {
-                                regMin = String.format("%dd", (int)(regTime / 1440));
-                            }
-
-                            sayVo.setRegMin(regMin);
-
-                            tempSayVoList.add(sayVo);
-                            Log.d("sizeee", tempSayVoList.size() + "");
-                        }
-
-                        listView.setVisibility(View.VISIBLE);
-                        noDataArea.setVisibility(View.GONE);
-                        sayListArea.setVisibility(View.VISIBLE);
-                        this.noSayList.setVisibility(View.GONE);
-                    } else if(size == 0 && initYn) {
-                        lastYn = true;
-                        listView.setVisibility(View.GONE);
-                        noDataArea.setVisibility(View.VISIBLE);
-                        sayListArea.setVisibility(View.GONE);
-                        this.noSayList.setVisibility(View.VISIBLE);
-                    } else {
-                        lastYn = true;
-                        listView.setVisibility(View.GONE);
-                    }
-                });
-
-        this.db.collection("member")
-                .addSnapshotListener((value, e) -> {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
-
-                    GeoPoint myGeoPoint = null;
-
-                    for (DocumentSnapshot doc : value) {
-                        String uid = doc.getString("id");
-                        if(uid.equals(this.user.getUid())) {
-                            myGeoPoint = doc.getGeoPoint("location");
-                            break;
-                        }
-                    }
-
-                    for (DocumentSnapshot doc : value) {
-                        String uid = doc.getString("id");
-
-                        if(uid != null) {
-                            for (SayVo sayVo : tempSayVoList) {
-                                if (uid.equals(sayVo.getUid())) {
-                                    sayVo.setUserName(doc.getString("name"));
-                                    sayVo.setNation(doc.getString("nation"));
-                                    sayVo.setIdentity(doc.getString("identity"));
-                                    sayVo.setPhotoUrl(doc.getString("profileUrl"));
-
-                                    GeoPoint geoPoint = doc.getGeoPoint("location");
-                                    Location loc = new Location("pointA");
-                                    Location loc1 = new Location("pointB");
-
-                                    loc.setLatitude(geoPoint.getLatitude());
-                                    loc.setLongitude(geoPoint.getLongitude());
-
-                                    loc1.setLatitude(myGeoPoint.getLatitude());
-                                    loc1.setLongitude(myGeoPoint.getLongitude());
-
-                                    String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
-                                    sayVo.setDistance(String.format("%s / %s", sayVo.getRegMin(), distance));
-                                }
-                            }
-                        }
-                    }
-
-                    for (SayVo sayVo : tempSayVoList) {
-                        this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
-                    }
-
-                    progressOFF();
-                });
-
-        /*query
-        *//*.whereEqualTo("member_id", this.user.getUid())*//*
         .get()
         .addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
 
-                this.sayListViewAdapter = new SayListViewAdapter(getActivity(), this.sayVoList);
-                this.listView.setAdapter(this.sayListViewAdapter);
+                sayListViewAdapter = new NewSayListViewAdapter(getActivity(), sayVoList);
+                listView.setAdapter(sayListViewAdapter);
 
                 List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
 
@@ -491,67 +396,51 @@ public class Say extends BaseFragment implements View.OnClickListener {
                             .startAfter(last)
                             .limit(this.limit);
 
-                    this.listView.setSelection(this.sayListViewAdapter.getCount() - 1);
-
                     for (DocumentSnapshot document : documentSnapshotList) {
 
                         String memberId = document.getData().get("member_id").toString();
+                        UserVo user = userMap.get(memberId);
 
-                        this.db.collection("member/")
-                                .whereEqualTo("id", memberId)
-                                .get()
-                                .addOnCompleteListener(task1 -> {
-                                    if (task1.isSuccessful()) {
-                                        for (DocumentSnapshot document1 : task1.getResult()) {
-                                            SayVo sayVo = new SayVo();
+                        SayVo sayVo = new SayVo();
 
-                                            String nation = (document1.getData().get("nation") != null ? document1.getData().get("nation").toString() : "");
-                                            String identity = (document1.getData().get("identity") != null ? document1.getData().get("identity").toString() : "");
+                        sayVo.setUid(memberId);
+                        sayVo.setMsg(document.getData().get("content").toString());
 
-                                            long regDt = ((Date) document.getData().get("reg_dt")).getTime();
-                                            long now = System.currentTimeMillis();
+                        long regDt = document.getDate("reg_dt").getTime();
+                        long now = System.currentTimeMillis();
 
-                                            long regTime = (now - regDt) / 60000;
+                        long regTime = (now - regDt) / 60000;
 
-                                            String regMin = "";
-                                            if(regTime < 60) {
-                                                regMin = String.format("%dmin", regTime);
-                                            } else if(regTime >= 60 && regTime < 1440) {
-                                                regMin = String.format("%dh", (int)(regTime / 60));
-                                            } else if(regTime > 1440) {
-                                                regMin = String.format("%dd", (int)(regTime / 1440));
-                                            }
+                        String regMin = "";
+                        if(regTime < 60) {
+                            regMin = String.format("%dmin", regTime);
+                        } else if(regTime >= 60 && regTime < 1440) {
+                            regMin = String.format("%dh", (int)(regTime / 60));
+                        } else if(regTime > 1440) {
+                            regMin = String.format("%dd", (int)(regTime / 1440));
+                        }
 
-                                            sayVo.setUid(document1.getData().get("id").toString());
-                                            sayVo.setUserName(document1.getData().get("name").toString());
-                                            sayVo.setNation(nation);
-                                            sayVo.setIdentity(identity);
-                                            sayVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
-                                            sayVo.setMsg(document.getData().get("content").toString());
+                        sayVo.setRegMin(regMin);
 
-                                            GeoPoint geoPoint = (GeoPoint) document1.getData().get("location");
+                        sayVo.setUserName(user.getUserName());
+                        sayVo.setNation(user.getNation());
+                        sayVo.setIdentity(user.getIdentity());
+                        sayVo.setPhotoUrl(user.getPhotoUrl());
 
-                                            Location loc = new Location("pointA");
-                                            Location loc1 = new Location("pointB");
+                        GeoPoint geoPoint = user.getGeoPoint();
+                        Location loc = new Location("pointA");
+                        Location loc1 = new Location("pointB");
 
-                                            loc.setLatitude(geoPoint.getLatitude());
-                                            loc.setLongitude(geoPoint.getLongitude());
+                        loc.setLatitude(geoPoint.getLatitude());
+                        loc.setLongitude(geoPoint.getLongitude());
 
-                                            loc1.setLatitude(this.latitude);
-                                            loc1.setLongitude(this.longitude);
+                        loc1.setLatitude(CommonFunction.getLatitude());
+                        loc1.setLongitude(CommonFunction.getLongitude());
 
-                                            String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
-                                            sayVo.setDistance(String.format("%s / %s", regMin, distance));
+                        String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
+                        sayVo.setDistance(String.format("%s / %s", sayVo.getRegMin(), distance));
 
-                                            this.sayVoList.add(sayVo);
-                                            this.sayListViewAdapter.notifyDataSetChanged();
-                                        }
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e("FIREERROR", e.getMessage());
-                                });
-
+                        this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
                     }
 
                     if(size < this.limit) {
@@ -559,21 +448,26 @@ public class Say extends BaseFragment implements View.OnClickListener {
                     }
 
                     this.progressOFF();
-                    this.listView.setVisibility(View.VISIBLE);
+                    listView.setVisibility(View.VISIBLE);
+                    noDataArea.setVisibility(View.GONE);
+                    sayListArea.setVisibility(View.VISIBLE);
+                    this.noSayList.setVisibility(View.GONE);
+                } else if(size == 0 && initYn) {
+                    lastYn = true;
+                    listView.setVisibility(View.GONE);
+                    noDataArea.setVisibility(View.VISIBLE);
+                    sayListArea.setVisibility(View.GONE);
+                    this.noSayList.setVisibility(View.VISIBLE);
                 } else {
-                    this.lastYn = true;
-                    this.progressOFF();
-                    this.listView.setVisibility(View.VISIBLE);
+                    lastYn = true;
+                    listView.setVisibility(View.GONE);
                 }
 
-                *//*new Handler().postDelayed(() -> {
-                    progressOFF();
-                    this.listView.setVisibility(View.VISIBLE);
-                }, 100);*//*
+                progressOFF();
 
             } else {
                 Log.w(TAG, "Error getting documents.", task.getException());
             }
-        });*/
+        });
     }
 }

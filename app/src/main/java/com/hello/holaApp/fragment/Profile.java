@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
@@ -31,10 +30,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.google.android.gms.tasks.OnFailureListener;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -50,7 +48,6 @@ import com.hello.holaApp.activity.MainActivity;
 import com.hello.holaApp.activity.PhotoViewerActivity;
 import com.hello.holaApp.activity.PopupActivity;
 import com.hello.holaApp.activity.SettingActivity;
-import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.activity.ViewPhotoActivity;
 import com.hello.holaApp.adapter.NewRecyclerGridViewAdapter;
 import com.hello.holaApp.adapter.NewSayListViewAdapter;
@@ -62,7 +59,6 @@ import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
 import com.hello.holaApp.vo.Photo;
 import com.hello.holaApp.vo.SayVo;
-import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 import com.marshalchen.ultimaterecyclerview.grid.BasicGridLayoutManager;
 import com.sendbird.android.SendBird;
@@ -804,9 +800,11 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                                         SendBird.updateCurrentUserInfo(FirebaseAuth.getInstance().getCurrentUser().getDisplayName(), profileUrl, e12 -> {
                                             if (e12 != null) {
                                                 // Error.
-                                                    /*Crashlytics.logException(e12);*/
+                                                Crashlytics.logException(e12);
                                                 return;
                                             }
+
+                                            profileImageView.setImageUrl(profileUrl, imageLoader);
                                         });
                                     })
                                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));

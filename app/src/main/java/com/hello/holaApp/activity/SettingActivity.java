@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -108,10 +109,11 @@ public class SettingActivity extends AppCompatActivity {
             Preference name = findPreference("name");
             Preference age = findPreference("age");
             Preference nation = findPreference("nation");
-            Preference gender = findPreference("gender");
             Preference identity = findPreference("identity");
             Preference question = findPreference("question");
             Preference signOut = findPreference("signOut");
+
+            Preference gender = findPreference("gender");
 
             notification.setOnPreferenceClickListener(preference -> {
 
@@ -137,6 +139,11 @@ public class SettingActivity extends AppCompatActivity {
                 editor.commit();
                 return false;
             });
+
+            /*gender.setOnPreferenceClickListener(preference -> {
+                startActivity(new Intent(getActivity(), ChangeGenderActivity.class));
+                return false;
+            });*/
 
             question.setOnPreferenceClickListener(preference -> {
                 Uri uri = Uri.parse("mailto:hellostudioteam@naver.com");
@@ -218,7 +225,7 @@ public class SettingActivity extends AppCompatActivity {
                         });
                     }
                 } else {
-                    /*Crashlytics.logException(task.getException());*/
+                    Crashlytics.logException(task.getException());
                 }
             });
         }

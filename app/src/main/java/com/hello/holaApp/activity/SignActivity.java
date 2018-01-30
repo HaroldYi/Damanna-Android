@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
@@ -229,6 +230,7 @@ public class SignActivity extends BaseActivity {
             }
         } catch(SecurityException ex) {
             Log.e("gpsERR", ex.toString());
+            Crashlytics.logException(ex);
             ex.printStackTrace();
         }
 
@@ -339,7 +341,7 @@ public class SignActivity extends BaseActivity {
                     request.executeAsync();
                 }
             } else {
-                /*Crashlytics.logException(task.getException());*/
+                Crashlytics.logException(task.getException());
             }
         });
     }
@@ -356,7 +358,7 @@ public class SignActivity extends BaseActivity {
                         addUserDb(this.mAuth.getCurrentUser());
                     } else {
                         // If sign in fails, display a message to the user.
-                        /*Crashlytics.logException(task.getException());*/
+                        Crashlytics.logException(task.getException());
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
                     }
 

@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -77,6 +78,9 @@ public class ChangeDateOfBirth extends AppCompatActivity {
                     .update("dateOfBirth", new Date(this.calendar.getTimeInMillis()))
                     .addOnSuccessListener(aVoid -> {
                         finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Crashlytics.logException(e);
                     });
         });
 

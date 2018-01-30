@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -94,6 +95,7 @@ public class PopupActivity extends AppCompatActivity {
                         })
                         .addOnFailureListener(e -> {
                             //
+                            Crashlytics.logException(e);
                             Log.w(TAG, "Error adding document", e);
                         });
 

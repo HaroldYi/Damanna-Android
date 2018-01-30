@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.holaApp.R;
@@ -154,6 +155,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                             if (e != null) {
                                 // Error!
                                 Log.d("errrr", e.getMessage());
+                                Crashlytics.logException(e);
                                 return;
                             }
 

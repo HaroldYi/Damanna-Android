@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -21,14 +22,17 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.hello.holaApp.R;
 import com.hello.holaApp.adapter.NewRecyclerGridViewAdapter;
 import com.hello.holaApp.adapter.NewSayListViewAdapter;
 import com.hello.holaApp.common.BaseApplication;
+import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.EqualSpacingItemDecoration;
 import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
@@ -271,7 +275,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
             }
         });
 
-        this.gridView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
+        /*this.gridView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
 
             adapter.clear();
             photoList.clear();
@@ -281,7 +285,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                     .limit(this.limit);
 
             loadingPhotoData(photoQuery, false);
-        }, 1000));
+        }, 1000));*/
 
         this.photoQuery = this.db.collection("photo/")
                 .whereEqualTo("member_id", this.uid)
@@ -404,6 +408,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                             }
                         }
                     } else {
+                        Crashlytics.logException(task.getException());
                         Log.w(TAG, "Error getting documents.", task.getException());
                     }
                 });
@@ -499,6 +504,35 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                                                             sayVo.setNation(document1.getData().get("nation").toString());
                                                         }
 
+                                                        long regDt = document.getDate("reg_dt").getTime();
+                                                        long now = System.currentTimeMillis();
+
+                                                        long regTime = (now - regDt) / 60000;
+
+                                                        String regMin = "";
+                                                        if(regTime < 60) {
+                                                            regMin = String.format("%dmin", regTime);
+                                                        } else if(regTime >= 60 && regTime < 1440) {
+                                                            regMin = String.format("%dh", (int)(regTime / 60));
+                                                        } else if(regTime > 1440) {
+                                                            regMin = String.format("%dd", (int)(regTime / 1440));
+                                                        }
+
+                                                        GeoPoint geoPoint = (GeoPoint)document1.getData().get("location");
+                                                        GeoPoint myGeoPoint = new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude());
+
+                                                        Location loc = new Location("pointA");
+                                                        Location loc1 = new Location("pointB");
+
+                                                        loc.setLatitude(geoPoint.getLatitude());
+                                                        loc.setLongitude(geoPoint.getLongitude());
+
+                                                        loc1.setLatitude(myGeoPoint.getLatitude());
+                                                        loc1.setLongitude(myGeoPoint.getLongitude());
+
+                                                        String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
+                                                        sayVo.setDistance(String.format("%s / %s", regMin, distance));
+
                                                         this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
 
                                                         new Handler().postDelayed(() -> {
@@ -522,11 +556,13 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                                                 this.gridView.setVisibility(View.VISIBLE);
                                                 this.listView.setVisibility(View.VISIBLE);
                                             } else {
+                                                Crashlytics.logException(task1.getException());
                                                 Log.w(TAG, "Error getting documents.", task1.getException());
                                             }
                                         });
                             }
                         } else {
+                            Crashlytics.logException(task.getException());
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
                     }

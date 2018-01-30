@@ -14,9 +14,13 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.hello.holaApp.R;
 import com.hello.holaApp.activity.ChatRoomActivity;
 import com.sendbird.android.AdminMessage;
@@ -37,6 +41,26 @@ import javax.net.ssl.HttpsURLConnection;
  */
 
 public class CommonFunction {
+
+    private static double latitude = 0f;
+    private static double longitude = 0f;
+
+    public static double getLatitude() {
+        return latitude;
+    }
+
+    public static void setLatitude(double latitude) {
+        CommonFunction.latitude = latitude;
+    }
+
+    public static double getLongitude() {
+        return longitude;
+    }
+
+    public static void setLongitude(double longitude) {
+        CommonFunction.longitude = longitude;
+    }
+
     public static Bitmap getBitmapFromURL(String imageURL) {
         try {
             URL url = new URL(imageURL);
@@ -67,6 +91,7 @@ public class CommonFunction {
             bitmap = BitmapFactory.decodeStream(input).copy(Bitmap.Config.ARGB_8888, true);
         } catch (IOException e) {
             // Log exception
+            Crashlytics.logException(e);
             return null;
         }
 

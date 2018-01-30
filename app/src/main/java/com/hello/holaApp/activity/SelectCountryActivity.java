@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -73,6 +74,7 @@ public class SelectCountryActivity extends BaseActivity {
                 .addSnapshotListener((value, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
+                        Crashlytics.logException(e);
                         return;
                     }
 
@@ -106,7 +108,10 @@ public class SelectCountryActivity extends BaseActivity {
                         .addOnSuccessListener(aVoid -> {
                             startActivity(new Intent(this, SelectRoleActivity.class));
                             finish();
-                        });
+                        })
+                .addOnFailureListener(e -> {
+                    Crashlytics.logException(e);
+                });
             }
         });
     }

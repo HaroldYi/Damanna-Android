@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.crashlytics.android.Crashlytics;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.PreferenceUtils;
 import com.hello.holaApp.fragment.SelectDistinctFragment;
@@ -163,6 +164,7 @@ public class CreateGroupChannelActivity extends AppCompatActivity
             public void onResult(GroupChannel groupChannel, SendBirdException e) {
                 if (e != null) {
                     // Error!
+                    Crashlytics.logException(e);
                     return;
                 }
 

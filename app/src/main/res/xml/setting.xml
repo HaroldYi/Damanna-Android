@@ -64,6 +64,15 @@
         android:title="신분"
         android:summary="Harold"/>
 
+    <!--<Preference
+        android:defaultValue="Default value"
+        android:key="gender"
+        android:enabled="true"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="상뱔"
+        android:summary="Harold"/>-->
+
     <Preference
         android:defaultValue="Default value"
         android:key="question"

@@ -51,4 +51,7 @@
     <string name="confirm_btn">
         확인
     </string>
+    <string name="require_arg">
+        %1$s은(는) 필수항목입니다
+    </string>
 </resources>

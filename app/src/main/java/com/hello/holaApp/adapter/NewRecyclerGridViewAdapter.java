@@ -198,7 +198,7 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
                                                 .delete()
                                                 .addOnSuccessListener(aVoid1 -> {
                                                     Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                                                    removeAt(position);
+                                                    removeAt(holder.getAdapterPosition());
                                                 })
                                                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
                                     }

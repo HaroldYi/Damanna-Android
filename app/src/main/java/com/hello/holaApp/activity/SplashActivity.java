@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.firebase.ui.auth.AuthUI;
@@ -44,6 +45,7 @@ import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 import com.hello.holaApp.BuildConfig;
 import com.hello.holaApp.R;
+import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.vo.Photo;
 import com.sendbird.android.SendBird;
 
@@ -77,9 +79,6 @@ public class SplashActivity extends AppCompatActivity {
 
     private String secret;
 
-    private static Double latitude = 0.0;
-    private static Double longitude = 0.0;
-
     private static LocationManager locationManager;
 
     private static final int RC_SIGN_IN = 9001;
@@ -97,6 +96,8 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         this.context = this;
+
+        MainActivity.tabIndex = 0;
 
         this.mAuth = FirebaseAuth.getInstance();
         this.fUser = this.mAuth.getCurrentUser();
@@ -139,15 +140,6 @@ public class SplashActivity extends AppCompatActivity {
                     });
                 }
             });
-
-            this.db.collection("member").document(this.mAuth.getCurrentUser().getUid())
-                    .update("location", new GeoPoint(this.latitude, this.longitude))
-                    .addOnSuccessListener(aVoid -> {
-                        locationManager.removeUpdates(gpsListener);
-                    })
-                    .addOnFailureListener(command -> {
-                        Log.d("ERRRR", command.getMessage());
-                    });
 
             this.checkMember(this.fUser.getUid());
 
@@ -226,8 +218,8 @@ public class SplashActivity extends AppCompatActivity {
         // LocationManager 에서 위치정보가 변경되면 호출
         @Override
         public void onLocationChanged(Location location) {
-            latitude = location.getLatitude();
-            longitude = location.getLongitude();
+            CommonFunction.setLatitude(location.getLatitude());
+            CommonFunction.setLongitude(location.getLongitude());
         }
 
         @Override
@@ -267,11 +259,12 @@ public class SplashActivity extends AppCompatActivity {
             // 위치요청을 한 상태에서 위치추적되는 동안 먼저 최근 위치를 조회해서 set
             Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (lastLocation != null) {
-                this.latitude = lastLocation.getLatitude();
-                this.longitude = lastLocation.getLongitude();
+                CommonFunction.setLatitude(lastLocation.getLatitude());
+                CommonFunction.setLongitude(lastLocation.getLongitude());
             }
         } catch(SecurityException ex) {
             Log.e("gpsERR", ex.toString());
+            Crashlytics.logException(ex);
             ex.printStackTrace();
         }
     }
@@ -324,10 +317,17 @@ public class SplashActivity extends AppCompatActivity {
                 DocumentSnapshot document = task.getResult();
                 if (document != null && document.exists()) {
 
+                    docRef
+                        .update("location", new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude()))
+                        .addOnSuccessListener(aVoid -> {
+                            locationManager.removeUpdates(gpsListener);
+                        })
+                        .addOnFailureListener(command -> {
+                            Log.d("ERRRR", command.getMessage());
+                        });
+
                     Object nation = document.getData().get("nation");
                     Object identity = document.getData().get("identity");
-
-                    Object map = document.getData();
 
                     if(nation == null) {
                         startActivity(new Intent(this, SelectCountryActivity.class));
@@ -342,7 +342,7 @@ public class SplashActivity extends AppCompatActivity {
 
                 }
             } else {
-                /*Crashlytics.logException(task.getException());*/
+                Crashlytics.logException(task.getException());
             }
         }).addOnFailureListener(command -> {
             Log.d("ERRRR", command.getMessage());
@@ -408,7 +408,7 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 }
             } else {
-                /*Crashlytics.logException(task.getException());*/
+                Crashlytics.logException(task.getException());
             }
         });
     }
@@ -427,7 +427,7 @@ public class SplashActivity extends AppCompatActivity {
         userMap.put("gender", gender);
         userMap.put("name", fUser.getDisplayName());
         userMap.put("profileUrl", fUser.getPhotoUrl().toString());
-        userMap.put("location", new GeoPoint(latitude, longitude));
+        userMap.put("location", new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude()));
         FirebaseFirestore.getInstance().collection("member").document(fUser.getUid())
                 .set(userMap)
                 .addOnSuccessListener(aVoid -> {
@@ -449,14 +449,14 @@ public class SplashActivity extends AppCompatActivity {
                     SendBird.connect(fUser.getUid(), (user, e) -> {
                         if (e != null) {
                             // Error.
-                            /*Crashlytics.logException(e);*/
+                            Crashlytics.logException(e);
                             return;
                         }
 
                         SendBird.updateCurrentUserInfo(fUser.getDisplayName(), fUser.getPhotoUrl().toString(), e12 -> {
                             if (e12 != null) {
                                 // Error.
-                                /*Crashlytics.logException(e12);*/
+                                Crashlytics.logException(e12);
                                 return;
                             }
 
@@ -464,7 +464,7 @@ public class SplashActivity extends AppCompatActivity {
 
                             SendBird.registerPushTokenForCurrentUser(pushToken, (ptrs, e1) -> {
                                 if (e1 != null) {
-                                    /*Crashlytics.logException(e1);*/
+                                    Crashlytics.logException(e1);
                                     return;
                                 }
 
@@ -483,7 +483,7 @@ public class SplashActivity extends AppCompatActivity {
                     });
                 })
                 .addOnFailureListener(e -> {
-                    /*Crashlytics.logException(e);*/
+                    Crashlytics.logException(e);
                 });
     }
 }
@@ -532,6 +532,7 @@ class GoogleAdditionalDetailsTask extends AsyncTask<GoogleSignInAccount, Void, P
             profile = peopleService.people().get("people/me").setPersonFields("birthdays,genders").execute();
         } catch (IOException e) {
             Log.d(TAG, "doInBackground: " + e.getMessage());
+            Crashlytics.logException(e);
             e.printStackTrace();
         }
         return profile;

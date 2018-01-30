@@ -12,10 +12,13 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.holaApp.R;
 import com.sendbird.android.SendBird;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by TedPark on 2017. 3. 18..
@@ -43,7 +46,7 @@ public class BaseApplication extends Application {
 
         SendBird.init(getResources().getString(R.string.app_id), getApplicationContext());
 
-        /*Fabric.with(this, new Crashlytics());*/
+        Fabric.with(this, new Crashlytics());
 
         this.mAuth = FirebaseAuth.getInstance();
         this.fUser = this.mAuth.getCurrentUser();
@@ -53,6 +56,7 @@ public class BaseApplication extends Application {
                 if (e != null) {
                     // Error.
                     Log.e("sendBirdErr", e.getMessage());
+                    Crashlytics.logException(e);
                     return;
                 }
             });

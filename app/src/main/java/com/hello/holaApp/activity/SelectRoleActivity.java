@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -98,14 +99,14 @@ public class SelectRoleActivity extends BaseActivity implements View.OnClickList
                     SendBird.connect(mAuth.getCurrentUser().getUid(), (user, e) -> {
                         if (e != null) {
                             // Error.
-                                                    /*Crashlytics.logException(e);*/
+                            Crashlytics.logException(e);
                             return;
                         }
 
                         SendBird.updateCurrentUserInfo(String.format("%s(%s)", mAuth.getCurrentUser().getDisplayName(), finalIdentity), mAuth.getCurrentUser().getPhotoUrl().toString(), e12 -> {
                             if (e12 != null) {
                                 // Error.
-                                                        /*Crashlytics.logException(e12);*/
+                                Crashlytics.logException(e12);
                                 return;
                             }
                         });

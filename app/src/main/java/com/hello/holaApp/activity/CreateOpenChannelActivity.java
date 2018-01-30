@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
+import com.crashlytics.android.Crashlytics;
 import com.hello.holaApp.R;
 import com.sendbird.android.OpenChannel;
 import com.sendbird.android.SendBirdException;
@@ -112,6 +113,7 @@ public class CreateOpenChannelActivity extends AppCompatActivity {
             public void onResult(OpenChannel openChannel, SendBirdException e) {
                 if (e != null) {
                     // Error!
+                    Crashlytics.logException(e);
                     return;
                 }
 

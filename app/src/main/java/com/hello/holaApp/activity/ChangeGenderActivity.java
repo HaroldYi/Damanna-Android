@@ -18,7 +18,9 @@ import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -83,7 +85,7 @@ public class ChangeGenderActivity extends AppCompatActivity {
             dialog.show();
         });
 
-        TextView finalDateOfBirth = dateOfBirth;
+        /*TextView finalDateOfBirth = dateOfBirth;
         dateOfBirth.setOnEditorActionListener((v, actionId, event) -> {
             switch (actionId) {
                 case EditorInfo.IME_ACTION_DONE:
@@ -95,15 +97,20 @@ public class ChangeGenderActivity extends AppCompatActivity {
                     break;
             }
             return true;
-        });
+        });*/
 
-        if(this.genderStr != null && !this.genderStr.isEmpty()) {
-            saveBtn.setBackgroundColor(Color.GRAY);
-        } else {
-            TextView finalDateOfBirth1 = dateOfBirth;
-            saveBtn.setOnClickListener(view -> {
+        saveBtn.setOnClickListener(view -> {
+            RadioButton genderRadioBtn = (RadioButton) findViewById(genderGroup.getCheckedRadioButtonId());
 
-                RadioButton genderRadioBtn = (RadioButton) findViewById(genderGroup.getCheckedRadioButtonId());
+            if(genderRadioBtn == null && (this.dateOfBirth == null || this.dateOfBirth.getText().toString().isEmpty())) {
+                Toast.makeText(this, "생년월일과 성별은 필수로 입력하셔야 합니다", Toast.LENGTH_SHORT).show();
+            } else if(genderRadioBtn != null && (this.dateOfBirth == null || this.dateOfBirth.getText().toString().isEmpty())) {
+            /*saveBtn.setBackgroundColor(Color.GRAY);*/
+                Toast.makeText(this, "생년월일이 입력되지 않았습니다", Toast.LENGTH_SHORT).show();
+            } else if(genderRadioBtn == null && (this.dateOfBirth != null && !this.dateOfBirth.getText().toString().isEmpty())) {
+                Toast.makeText(this, "성별이 선택되지 않았습니다", Toast.LENGTH_SHORT).show();
+            } else if(genderRadioBtn != null && this.dateOfBirth != null && !this.dateOfBirth.getText().toString().isEmpty()) {
+
                 this.genderStr = genderRadioBtn.getText().toString();
 
                 Map<String, Object> userInfo = new HashMap<>();
@@ -117,9 +124,12 @@ public class ChangeGenderActivity extends AppCompatActivity {
                             startActivity(new Intent(this, SelectCountryActivity.class));
                             finish();
                         })
-                        .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-            });
-        }
+                        .addOnFailureListener(e -> {
+                            Log.w(TAG, "Error writing document", e);
+                            Crashlytics.logException(e);
+                        });
+            }
+        });
 
         /*actionBar.setCustomView(actionView);*/
 

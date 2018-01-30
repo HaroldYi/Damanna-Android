@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.crashlytics.android.Crashlytics;
 import com.hello.holaApp.R;
 import com.hello.holaApp.adapter.UserListAdapter;
 import com.hello.holaApp.fragment.GroupChatFragment;
@@ -81,6 +82,7 @@ public class MemberListActivity extends AppCompatActivity {
             public void onResult(GroupChannel groupChannel, SendBirdException e) {
                 if (e != null) {
                     // Error!
+                    Crashlytics.logException(e);
                     return;
                 }
 
@@ -97,6 +99,7 @@ public class MemberListActivity extends AppCompatActivity {
             public void onResult(SendBirdException e) {
                 if (e != null) {
                     // Error!
+                    Crashlytics.logException(e);
                     return;
                 }
 

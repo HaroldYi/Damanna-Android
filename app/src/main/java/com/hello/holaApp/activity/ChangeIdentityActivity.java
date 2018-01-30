@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -107,7 +108,10 @@ public class ChangeIdentityActivity extends AppCompatActivity {
 
                         finish();
                     })
-                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                    .addOnFailureListener(e -> {
+                        Log.w(TAG, "Error writing document", e);
+                        Crashlytics.logException(e);
+                    });
         });
 
     }
