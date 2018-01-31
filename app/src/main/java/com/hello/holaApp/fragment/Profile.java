@@ -39,6 +39,7 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -59,6 +60,7 @@ import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
 import com.hello.holaApp.vo.Photo;
 import com.hello.holaApp.vo.SayVo;
+import com.hello.holaApp.vo.UserVo;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 import com.marshalchen.ultimaterecyclerview.grid.BasicGridLayoutManager;
 import com.sendbird.android.SendBird;
@@ -346,7 +348,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             }
         });*/
 
-        this.db.collection("member/")
+        /*this.db.collection("member/")
                 .document(this.user.getUid())
                 .addSnapshotListener((documentSnapshot, e) -> {
                     if (e != null) {
@@ -384,6 +386,57 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     nation = String.format("%s, %s", nation, identity);
                     TextView identityView = (TextView) view.findViewById(R.id.identity);
                     identityView.setText(nation);
+                });*/
+
+        this.db.collection("member/")
+                .get()
+                .addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        for (DocumentSnapshot document1 : task1.getResult()) {
+                            UserVo userVo = new UserVo();
+                            String uid = document1.getData().get("id").toString();
+                            GeoPoint geoPoint = (GeoPoint) document1.getData().get("location");
+
+                            userVo.setUid(uid);
+                            userVo.setUserName(document1.getData().get("name").toString());
+                            userVo.setIdentity(document1.getData().get("identity").toString());
+                            userVo.setNation(document1.getData().get("nation").toString());
+                            userVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
+                            userVo.setGeoPoint(geoPoint);
+
+                            String identity = document1.getData().get("identity").toString();
+                            String nation = document1.getData().get("nation").toString();
+
+                            String gender = document1.getData().get("gender").toString();
+                            gender = (gender.equals("male") ? "남자" : "여자");
+
+                            long dateOfBirth = document1.getDate("dateOfBirth").getTime();
+                            long now = System.currentTimeMillis();
+
+                            Calendar birthCalendar = Calendar.getInstance();
+                            birthCalendar.setTimeInMillis(dateOfBirth);
+
+                            int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                            Calendar nowCalender = Calendar.getInstance();
+                            nowCalender.setTimeInMillis(now);
+
+                            int nowYear = nowCalender.get(Calendar.YEAR);
+
+                            int koreanAge = nowYear - yearOfBirth + 1;
+
+                            String age = String.format("%d세, %s", koreanAge, gender);
+                            TextView ageView = (TextView) view.findViewById(R.id.age);
+                            ageView.setText(age);
+
+                            nation = String.format("%s, %s", nation, identity);
+                            TextView identityView = (TextView) view.findViewById(R.id.identity);
+                            identityView.setText(nation);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FIREERROR", e.getMessage());
                 });
 
         /*this.db.collection("photo/")
