@@ -351,6 +351,8 @@ public class SplashActivity extends AppCompatActivity {
 
     private void addUser(FirebaseUser currentUser, Intent data) {
 
+        this.fUser = currentUser;
+
         List<Photo> photoList = new ArrayList<>();
 
         DocumentReference docRef = this.db.collection("member").document(currentUser.getUid());
@@ -361,7 +363,27 @@ public class SplashActivity extends AppCompatActivity {
                     this.checkMember(currentUser.getUid());
                 } else {
 
-                    List<String> providers = this.mAuth.getCurrentUser().getProviders();
+                    Map<String, Object> stringMap = new HashMap<>();
+
+                    stringMap.put("member_id", currentUser.getUid());
+                    stringMap.put("content", String.format("%s님이 가입하였습니다!", currentUser.getDisplayName()));
+                    stringMap.put("reg_dt", new Date());
+
+                    DocumentReference sayReference = this.db.collection("say").document();
+                    stringMap.put("id", sayReference.getId());
+
+                    sayReference.set(stringMap)
+                            .addOnSuccessListener(documentReference -> {
+                                //액티비티(팝업) 닫기
+
+                            })
+                            .addOnFailureListener(e -> {
+                                //
+                                Crashlytics.logException(e);
+                                Log.w(TAG, "Error adding document", e);
+                            });
+
+                    List<String> providers = currentUser.getProviders();
                     String provider = providers.get(0);
 
                     if(provider.indexOf("facebook") != -1) {
@@ -369,7 +391,7 @@ public class SplashActivity extends AppCompatActivity {
                                 AccessToken.getCurrentAccessToken(),
                                 (object, response) -> {
                                     // Application code
-                                    userInfo = response.getJSONObject();
+                                    this.userInfo = response.getJSONObject();
 
                                     String facebookId = "";
                                     String dateOfBirth = "";
