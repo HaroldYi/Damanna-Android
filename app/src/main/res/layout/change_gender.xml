@@ -10,7 +10,7 @@
         android:layout_below="@+id/header_cover_image"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="75dp"
         android:scaleType="fitXY" />
 
     <TextView
@@ -18,7 +18,7 @@
         android:layout_width="384dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="200dp"
         android:text="Name"
         android:textColor="@color/black"
         android:layout_centerHorizontal="true"
