@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -57,6 +59,23 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
             return false;
         });
 
+        this.userName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
         actionBar.setDisplayHomeAsUpEnabled(false); //액션바 아이콘을 업 네비게이션 형태로 표시합니다.
@@ -92,7 +111,7 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
         switch (view.getId()) {
 
             case R.id.saveBtn :
-                String userName = this.userName.getText().toString();
+                String userName = this.userName.getText().toString().replace("\n", "");
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()

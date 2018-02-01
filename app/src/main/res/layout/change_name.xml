@@ -19,6 +19,8 @@
         android:textColor="#0e9588"
         android:textSize="13sp"
         android:typeface="sans"
+        android:singleLine = "true"
+        android:lines = "1"
         />
 
     <EditText
