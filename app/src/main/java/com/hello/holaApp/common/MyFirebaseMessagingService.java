@@ -2,11 +2,20 @@ package com.hello.holaApp.common;
 
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.hello.holaApp.activity.MainActivity;
+import com.sendbird.android.GroupChannel;
+import com.sendbird.android.GroupChannelListQuery;
+import com.sendbird.android.SendBirdException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
+
+import devlight.io.library.ntb.NavigationTabBar;
 
 /**
  * Created by lji5317 on 20/12/2017.
@@ -46,7 +55,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             e.printStackTrace();
         }
 
-        CommonFunction.sendNotification(this, remoteMessage.getData().get("message"), channelUrl, senderName);
+        CommonFunction.sendNotification(this, remoteMessage.getData().get("message"), channelUrl, senderName, true);
     }
     // [END receive_message]
 

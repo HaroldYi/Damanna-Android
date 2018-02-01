@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="86.5dp"
     android:paddingLeft="14dp"
@@ -96,7 +97,6 @@
         android:layout_alignLeft="@id/container_group_channel_list_topic"
         android:orientation="horizontal">
 
-
         <include layout="@layout/layout_typing_indicator"
             android:id="@+id/container_group_channel_list_typing_indicator"
             android:layout_width="32dp"
@@ -115,6 +115,16 @@
             android:text="This sounded nonsense to Alice, so she said nothing, but set off at her being blah blah" />
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/offNotification"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_alignTop="@+id/text_group_channel_list_date"
+        android:layout_toEndOf="@+id/container_group_channel_list_topic"
+        android:layout_weight="1"
+        android:backgroundTint="@android:color/transparent"
+        app:srcCompat="@drawable/ic_x_btn" />
 
     <TextView
         android:id="@+id/text_group_channel_list_date"

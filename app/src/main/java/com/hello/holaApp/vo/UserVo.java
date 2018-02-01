@@ -2,6 +2,8 @@ package com.hello.holaApp.vo;
 
 import com.google.firebase.firestore.GeoPoint;
 
+import java.util.List;
+
 /**
  * Created by lji5317 on 31/01/2018.
  */
@@ -10,9 +12,13 @@ public class UserVo {
     private String uid;
     private String userName;
     private GeoPoint geoPoint;
+    private int age;
+    private String gender;
     private String nation;
     private String identity;
     private String photoUrl;
+    private float  distance;
+    private List<PhotoVo> photoVoList;
 
     public String getUid() {
         return uid;
@@ -38,6 +44,22 @@ public class UserVo {
         this.geoPoint = geoPoint;
     }
 
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public String getNation() {
         return nation;
     }
@@ -60,5 +82,21 @@ public class UserVo {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public float getDistance() {
+        return distance;
+    }
+
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
+
+    public List<PhotoVo> getPhotoVoList() {
+        return photoVoList;
+    }
+
+    public void setPhotoVoList(List<PhotoVo> photoVoList) {
+        this.photoVoList = photoVoList;
     }
 }

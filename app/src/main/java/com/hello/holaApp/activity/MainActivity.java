@@ -13,33 +13,33 @@ import android.support.v7.content.res.AppCompatResources;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.crashlytics.android.Crashlytics;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.fragment.GroupChannelListFragment;
+import com.hello.holaApp.fragment.People;
 import com.hello.holaApp.fragment.Profile;
 import com.hello.holaApp.fragment.Say;
+import com.sendbird.android.GroupChannel;
+import com.sendbird.android.GroupChannelListQuery;
+import com.sendbird.android.SendBirdException;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import devlight.io.library.ntb.NavigationTabBar;
 
 public class MainActivity extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
-    private FirebaseUser fUser;
-    private FirebaseFirestore db;
     private boolean fromFragmentYn = false;
 
     private long backKeyPressedTime = 0;
     private Toast toast;
 
     public static Activity activity;
-    private NavigationTabBar navigationTabBar;
+    public static NavigationTabBar navigationTabBar;
     private JSONObject userInfo;
 
     public static int tabIndex = 0;
@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         this.activity = this;
-        this.db = FirebaseFirestore.getInstance();
-        this.fUser = FirebaseAuth.getInstance().getCurrentUser();
 
         Log.d("Created", "Called onCreate");
 
@@ -102,26 +100,19 @@ public class MainActivity extends AppCompatActivity {
 
         this.navigationTabBar = (NavigationTabBar) findViewById(R.id.ntb_horizontal);
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
-
-        /*models.add(
-                new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_first),
-                        Color.parseColor(colors[0]))
-                        .selectedIcon(getResources().getDrawable(R.drawable.ic_sixth))
-                        .title("People")
-                        .build()
-        );*/
-        /*models.add(
-                new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_second),
-                        Color.parseColor(colors[1]))
-                        .title("Club")
-                        .build()
-        );*/
         models.add(
                 new NavigationTabBar.Model.Builder(
                         AppCompatResources.getDrawable(this.activity, R.drawable.ic_feed),
                         Color.parseColor(colors[0]))
+                        .badgeTitle("")
+                        .title("")
+                        .build()
+        );
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        AppCompatResources.getDrawable(this.activity, R.drawable.ic_fa_users),
+                        Color.parseColor(colors[0]))
+                        .badgeTitle("")
                         .title("")
                         .build()
         );
@@ -129,34 +120,83 @@ public class MainActivity extends AppCompatActivity {
                 new NavigationTabBar.Model.Builder(
                         AppCompatResources.getDrawable(this.activity, R.drawable.ic_chat),
                         Color.parseColor(colors[0]))
+                        .badgeTitle("")
                         .title("")
-                        .badgeTitle("1")
                         .build()
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
                         AppCompatResources.getDrawable(this.activity, R.drawable.ic_account),
                         Color.parseColor(colors[0]))
+                        .badgeTitle("")
                         .title("")
                         .build()
         );
 
-        this.navigationTabBar.setIconSizeFraction(0.40f);
+        this.navigationTabBar.setIsBadged(true);
+        this.navigationTabBar.setBadgeBgColor(Color.RED);
+        this.navigationTabBar.setIconSizeFraction(0.55f);
+        this.navigationTabBar.setBadgeGravity(NavigationTabBar.BadgeGravity.TOP);
+        this.navigationTabBar.setBadgePosition(NavigationTabBar.BadgePosition.RIGHT);
         this.navigationTabBar.setModels(models);
+        this.navigationTabBar.setBadgeSize(20);
+        this.navigationTabBar.setBadgeTitleColor(Color.WHITE);
         this.navigationTabBar.setModelIndex(this.tabIndex, true);
+
+        GroupChannelListQuery mChannelListQuery = GroupChannel.createMyGroupChannelListQuery();
+
+        mChannelListQuery.next(new GroupChannelListQuery.GroupChannelListQueryResultHandler() {
+            @Override
+            public void onResult(List<GroupChannel> list, SendBirdException e) {
+                if (e != null) {
+                    // Error!
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                    return;
+                }
+
+                /*final NavigationTabBar.Model model = MainActivity.navigationTabBar.getModels().get(2);
+                if(list.size() > 0) {
+
+                    int unReadCnt = 0;
+                    for(GroupChannel channel : list) {
+                        unReadCnt += channel.getUnreadMessageCount();
+                    }
+
+                    if(unReadCnt > 0) {
+                        model.updateBadgeTitle(String.valueOf(unReadCnt));
+                        model.showBadge();
+                    } else {
+                        model.hideBadge();
+                    }
+
+                } else {
+                    model.hideBadge();
+                }*/
+            }
+        });
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         switch (tabIndex) {
+
             case 0:
+                tabIndex = 0;
                 transaction.replace(R.id.contentContainer, new Say(), "say").commitAllowingStateLoss();
                 break;
 
             case 1:
-                transaction.replace(R.id.contentContainer, new GroupChannelListFragment(), "chat").commitAllowingStateLoss();
+                tabIndex = 1;
+                transaction.replace(R.id.contentContainer, new People(), "people").commitAllowingStateLoss();
                 break;
 
             case 2:
+                tabIndex = 2;
+                transaction.replace(R.id.contentContainer, new GroupChannelListFragment(), "chat").commitAllowingStateLoss();
+                break;
+
+            case 3:
+                tabIndex = 3;
                 transaction.replace(R.id.contentContainer, new Profile(), "profile").commitAllowingStateLoss();
                 break;
         }
@@ -237,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (index) {
                     case 0 :
+                        tabIndex = 0;
                         fragmentTransaction.replace(R.id.contentContainer, new Say(), "say").commit();
                         break;
 
@@ -247,11 +288,19 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (index) {
                     case 1 :
+                        tabIndex = 1;
+                        /*fragmentTransaction.replace(R.id.contentContainer, new Chat()).commit();*/
+                        fragmentTransaction.replace(R.id.contentContainer, new People(), "people").commitAllowingStateLoss();
+                        break;
+
+                    case 2 :
+                        tabIndex = 2;
                         /*fragmentTransaction.replace(R.id.contentContainer, new Chat()).commit();*/
                         fragmentTransaction.replace(R.id.contentContainer, new GroupChannelListFragment(), "chat").commitAllowingStateLoss();
                         break;
 
-                    case 2 :
+                    case 3 :
+                        tabIndex = 3;
                         fragmentTransaction.replace(R.id.contentContainer, new Profile(), "profile").commitAllowingStateLoss();
                         break;
 
@@ -265,13 +314,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-        this.navigationTabBar.postDelayed(() -> {
-            for (int i = 0; i < this.navigationTabBar.getModels().size(); i++) {
-                final NavigationTabBar.Model model = this.navigationTabBar.getModels().get(i);
-                this.navigationTabBar.postDelayed(() -> model.showBadge(), i * 100);
-            }
-        }, 500);
     }
 
     @Override

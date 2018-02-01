@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hello.holaApp.R;
@@ -28,20 +29,18 @@ import com.hello.holaApp.activity.ChatRoomActivity;
 import com.hello.holaApp.activity.CreateGroupChannelActivity;
 import com.hello.holaApp.activity.MainActivity;
 import com.hello.holaApp.adapter.GroupChannelListAdapter;
-import com.sendbird.android.AdminMessage;
+import com.hello.holaApp.common.CommonFunction;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
-import com.sendbird.android.FileMessage;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.GroupChannelListQuery;
 import com.sendbird.android.Member;
 import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
-import com.sendbird.android.UserMessage;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
+
+import devlight.io.library.ntb.NavigationTabBar;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -284,6 +283,8 @@ public class GroupChannelListFragment extends Fragment {
             @Override
             public void onResult(SendBirdException e) {
                 if (e != null) {
+                    Crashlytics.logException(e);
+
                     e.printStackTrace();
                     Toast.makeText(getActivity(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT)
                             .show();
@@ -296,6 +297,8 @@ public class GroupChannelListFragment extends Fragment {
 
                 Toast.makeText(getActivity(), toast, Toast.LENGTH_SHORT)
                         .show();
+
+                refreshChannelList(15);
             }
         });
     }
@@ -324,11 +327,17 @@ public class GroupChannelListFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();*/
 
+        ((MainActivity)getActivity()).tabIndex = 2;
+
+        CommonFunction.updateNotificationBadge();
+
         GroupChannel.getChannel(channelUrl, new GroupChannel.GroupChannelGetHandler() {
             @Override
             public void onResult(GroupChannel groupChannel, SendBirdException e) {
                 if (e != null) {
                     // Error!
+                    Crashlytics.logException(e);
+
                     e.printStackTrace();
                     return;
                 }
@@ -349,8 +358,6 @@ public class GroupChannelListFragment extends Fragment {
                 startActivity(intent);
 
                 getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-
-                ((MainActivity)getActivity()).tabIndex = 1;
             }
         });
     }
@@ -370,6 +377,7 @@ public class GroupChannelListFragment extends Fragment {
             public void onResult(List<GroupChannel> list, SendBirdException e) {
                 if (e != null) {
                     // Error!
+                    Crashlytics.logException(e);
                     e.printStackTrace();
                     return;
                 }
@@ -377,6 +385,16 @@ public class GroupChannelListFragment extends Fragment {
                 if(list.size() > 0) {
                     mSwipeRefresh.setVisibility(View.VISIBLE);
                     noChat.setVisibility(View.GONE);
+
+                    /*int unReadCnt = 0;
+                    for(GroupChannel channel : list) {
+                        unReadCnt += channel.getUnreadMessageCount();
+                    }
+
+                    final NavigationTabBar.Model model = MainActivity.navigationTabBar.getModels().get(2);
+                    model.updateBadgeTitle(String.valueOf(unReadCnt));
+                    model.showBadge();*/
+
                 } else {
                     mSwipeRefresh.setVisibility(View.GONE);
                     noChat.setVisibility(View.VISIBLE);
@@ -401,6 +419,7 @@ public class GroupChannelListFragment extends Fragment {
             public void onResult(List<GroupChannel> list, SendBirdException e) {
                 if (e != null) {
                     // Error!
+                    Crashlytics.logException(e);
                     e.printStackTrace();
                     return;
                 }
@@ -423,6 +442,7 @@ public class GroupChannelListFragment extends Fragment {
             public void onResult(SendBirdException e) {
                 if (e != null) {
                     // Error!
+                    Crashlytics.logException(e);
                     return;
                 }
 

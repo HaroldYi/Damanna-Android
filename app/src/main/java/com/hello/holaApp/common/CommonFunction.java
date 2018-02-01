@@ -23,18 +23,25 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.hello.holaApp.R;
 import com.hello.holaApp.activity.ChatRoomActivity;
+import com.hello.holaApp.activity.MainActivity;
 import com.sendbird.android.AdminMessage;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
 import com.sendbird.android.FileMessage;
+import com.sendbird.android.GroupChannel;
+import com.sendbird.android.GroupChannelListQuery;
 import com.sendbird.android.SendBird;
+import com.sendbird.android.SendBirdException;
 import com.sendbird.android.UserMessage;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import devlight.io.library.ntb.NavigationTabBar;
 
 /**
  * Created by lji5317 on 20/12/2017.
@@ -116,9 +123,13 @@ public class CommonFunction {
     }
 
     public static void sendMsg(Context context) {
+
+        updateNotificationBadge();
+
         SendBird.addChannelHandler(Constant.CHANNEL_HANDLER_ID, new SendBird.ChannelHandler() {
             @Override
             public void onMessageReceived(BaseChannel baseChannel, BaseMessage baseMessage) {
+
                 if (baseMessage instanceof UserMessage) {
 
                     UserMessage userMessage = (UserMessage)baseMessage;
@@ -151,7 +162,7 @@ public class CommonFunction {
                     notificationManager.notify(0 *//* ID of notification *//*, notificationBuilder.build());
                     */
 
-                    sendNotification(context, userMessage.getMessage(), userMessage.getChannelUrl(), userMessage.getSender().getNickname());
+                    sendNotification(context, userMessage.getMessage(), userMessage.getChannelUrl(), userMessage.getSender().getNickname(), false);
                 } else if (baseMessage instanceof FileMessage) {
                     // message is a FileMessage
                 } else if (baseMessage instanceof AdminMessage) {
@@ -161,7 +172,10 @@ public class CommonFunction {
         });
     }
 
-    public static void sendNotification(Context context, String messageBody, String channelUrl, String senderName) {
+    public static void sendNotification(Context context, String messageBody, String channelUrl, String senderName, boolean offYn) {
+
+        updateNotificationBadge();
+
         Intent intent = new Intent(context, ChatRoomActivity.class);
         intent.putExtra("channelUrl", channelUrl);
         intent.putExtra("senderName", senderName);
@@ -199,5 +213,40 @@ public class CommonFunction {
 
             notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
         }
+    }
+
+    public static void updateNotificationBadge() {
+        GroupChannelListQuery mChannelListQuery = GroupChannel.createMyGroupChannelListQuery();
+        mChannelListQuery.next(new GroupChannelListQuery.GroupChannelListQueryResultHandler() {
+            @Override
+            public void onResult(List<GroupChannel> list, SendBirdException e) {
+                if (e != null) {
+                    // Error!
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                    return;
+                }
+
+                final NavigationTabBar.Model model = MainActivity.navigationTabBar.getModels().get(2);
+                if(list.size() > 0) {
+
+                    int unReadCnt = 0;
+                    for(GroupChannel channel : list) {
+                        unReadCnt += channel.getUnreadMessageCount();
+                    }
+
+                    if(unReadCnt > 0) {
+                        model.hideBadge();
+                        model.setBadgeTitle(String.valueOf(unReadCnt));
+                        model.showBadge();
+                    } else {
+                        model.hideBadge();
+                    }
+
+                } else {
+                    model.hideBadge();
+                }
+            }
+        });
     }
 }

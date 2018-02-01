@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff"
-    android:gravity="bottom"
     android:orientation="vertical"
-    tools:context="com.hello.holaApp.activity.MainActivity">
+    android:background="@color/white"
+    >
 
     <FrameLayout
         android:id="@+id/contentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/ntb_horizontal"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:layout_alignParentStart="true"></FrameLayout>
 
     <View
@@ -30,14 +30,16 @@
         app:ntb_animation_duration="0"
         app:ntb_badge_gravity="top"
         app:ntb_badge_position="right"
-        app:ntb_bg_color="#fff"
+        app:ntb_bg_color="#ffffffff"
         app:ntb_active_color="#03c4c9"
         app:ntb_inactive_color="#a0a0a0"
-        app:ntb_badged="false"
+        app:ntb_badge_bg_color="#ffff0000"
+        app:ntb_badge_title_color="#ffffffff"
+        app:ntb_badged="true"
         app:ntb_scaled="false"
         app:ntb_swiped="true"
         app:ntb_tinted="true"
         app:ntb_title_mode="all"
         app:ntb_titled="true" />
 
-</RelativeLayout>
+</LinearLayout>
