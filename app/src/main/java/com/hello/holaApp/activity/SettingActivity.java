@@ -124,7 +124,7 @@ public class SettingActivity extends AppCompatActivity {
             Preference signOut = findPreference("signOut");
             /*Preference gender = findPreference("gender");*/
 
-            Preference unregister = findPreference("unregister");
+            /*Preference unregister = findPreference("unregister");*/
 
             notification.setOnPreferenceClickListener(preference -> {
 
@@ -173,7 +173,7 @@ public class SettingActivity extends AppCompatActivity {
                 return false;
             });
 
-            unregister.setOnPreferenceClickListener(preference -> {
+            /*unregister.setOnPreferenceClickListener(preference -> {
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
                 alertDialogBuilder.setTitle("회원탈퇴");
@@ -221,7 +221,7 @@ public class SettingActivity extends AppCompatActivity {
                 alertDialog.show();
 
                 return false;
-            });
+            });*/
 
             DocumentReference docRef = this.db.collection("member").document(this.currentUser.getUid());
             docRef.get().addOnCompleteListener(task -> {

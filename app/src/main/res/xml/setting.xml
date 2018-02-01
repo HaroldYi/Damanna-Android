@@ -91,4 +91,13 @@
         android:title="로그아웃"
         />
 
+    <!--<Preference
+        android:defaultValue="Default value"
+        android:key="unregister"
+        android:enabled="true"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="회원 탈퇴"
+        />-->
+
 </PreferenceScreen>
