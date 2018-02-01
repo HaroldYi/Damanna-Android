@@ -2,8 +2,6 @@ package com.hello.holaApp.adapter;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -24,7 +22,7 @@ import com.google.firebase.storage.StorageReference;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.VolleySingleton;
 import com.hello.holaApp.fragment.Profile;
-import com.hello.holaApp.vo.Photo;
+import com.hello.holaApp.vo.PhotoVo;
 import com.marshalchen.ultimaterecyclerview.UltimateGridLayoutAdapter;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerviewViewHolder;
 
@@ -34,23 +32,23 @@ import java.util.List;
  * Created by lji5317 on 11/12/2017.
  */
 
-public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo, NewRecyclerGridViewAdapter.ViewHolder> {
+public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<PhotoVo, NewRecyclerGridViewAdapter.ViewHolder> {
 
     private Context context;
-    private List<Photo> list;
+    private List<PhotoVo> list;
     private boolean profileYn = true;
     private static ImageLoader imageLoader;
 
     private static String TAG = "cloudFireStore";
 
-    public NewRecyclerGridViewAdapter(Context context, List<Photo> list) {
+    public NewRecyclerGridViewAdapter(Context context, List<PhotoVo> list) {
         super(list);
         this.context = context;
         this.list = list;
         this.imageLoader = VolleySingleton.getInstance(this.context).getImageLoader();
     }
 
-    public NewRecyclerGridViewAdapter(Context context, List<Photo> list, boolean profileYn) {
+    public NewRecyclerGridViewAdapter(Context context, List<PhotoVo> list, boolean profileYn) {
         super(list);
         this.context = context;
         this.list = list;
@@ -93,41 +91,41 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
      * @param position position
      */
     @Override
-    protected void withBindHolder(ViewHolder holder, Photo data, int position) {
+    protected void withBindHolder(ViewHolder holder, PhotoVo data, int position) {
     }
 
     @Override
-    protected void bindNormal(ViewHolder holder, Photo photo, int position) {
+    protected void bindNormal(ViewHolder holder, PhotoVo photoVo, int position) {
         /*b.img.setImageResource(jRitem.photo_id);*/
 
         holder.img.setOnClickListener(v -> {
 
-            String kind = photo.getKind();
+            String kind = photoVo.getKind();
 
             if(kind.equals("photo") || kind.equals("profile")) {
-                Profile.viewPhoto(photo.getOriginalUrl(), "jpg");
+                Profile.viewPhoto(photoVo.getOriginalUrl(), "jpg");
             } else {
                 Profile.chageProfileYn(false);
                 Profile.showCameraDialog();
             }
         });
 
-        if(photo.getBitmap() == null) {
+        if(photoVo.getBitmap() == null) {
 
-            if (photo.getKind().equals("profile")) {
+            if (photoVo.getKind().equals("profile")) {
 
                 /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
-                downloadImageTask.execute(photo.getFileName());*/
+                downloadImageTask.execute(photoVo.getFileName());*/
 
-            } else if (photo.getKind().equals("photo")) {
+            } else if (photoVo.getKind().equals("photo")) {
 
-                holder.img.setImageUrl(photo.getThumbnailUrl(), this.imageLoader);
+                holder.img.setImageUrl(photoVo.getThumbnailUrl(), this.imageLoader);
 
                 if(this.profileYn) {
                     holder.delPhotoBtn.setVisibility(View.VISIBLE);
                 }
 
-                /*StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
+                /*StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photoVo.getFileName() + "_thumbnail.jpg");
 
                 islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
                     //do something with downloadurl
@@ -152,14 +150,14 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
                     // Handle any errors
                     Log.e("bytess", exception.getMessage());
                 });*/
-            } else if (photo.getKind().equals("add_btn")) {
+            } else if (photoVo.getKind().equals("add_btn")) {
                 /*holder.img.setImageUrl("https://pbs.twimg.com/profile_images/839721704163155970/LI_TRk1z_400x400.jpg", this.imageLoader);*/
                 holder.img.setDefaultImageResId(R.drawable.add_btn);
-            } else if (photo.getKind().equals("logo_t")) {
+            } else if (photoVo.getKind().equals("logo_t")) {
                 holder.img.setDefaultImageResId(R.drawable.logo_t);
             }
         } else {
-            holder.img.setBackground(new BitmapDrawable(photo.getBitmap()));
+            holder.img.setBackground(new BitmapDrawable(photoVo.getBitmap()));
             if(profileYn) {
                 holder.delPhotoBtn.setVisibility(View.VISIBLE);
             }
@@ -177,7 +175,7 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
                         StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
                         // Create a reference to the file to delete
-                        StorageReference desertRef = storageRef.child(String.format("original/%s.jpg", photo.getFileName()));
+                        StorageReference desertRef = storageRef.child(String.format("original/%s.jpg", photoVo.getFileName()));
 
                         // Delete the file
                         desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -188,12 +186,12 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<Photo,
                                 StorageReference storageThumRef = FirebaseStorage.getInstance().getReference();
 
                                 // Create a reference to the file to delete
-                                StorageReference desertThumRef = storageThumRef.child(String.format("thumbnail/%s_thumbnail.jpg", photo.getFileName()));
+                                StorageReference desertThumRef = storageThumRef.child(String.format("thumbnail/%s_thumbnail.jpg", photoVo.getFileName()));
                                 desertThumRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         // File deleted successfully
-                                        String photoId = photo.getPhotoId();
+                                        String photoId = photoVo.getPhotoId();
                                         FirebaseFirestore.getInstance().collection("photo").document(photoId)
                                                 .delete()
                                                 .addOnSuccessListener(aVoid1 -> {
