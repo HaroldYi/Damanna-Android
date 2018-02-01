@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
  * Created by lji5317 on 11/12/2017.
  */
 
-public class Photo {
+public class PhotoVo {
     private String photoId = "";
     private String fileName = "";
     private String originalUrl = "";

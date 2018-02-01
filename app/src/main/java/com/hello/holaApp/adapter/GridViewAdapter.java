@@ -13,7 +13,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.VolleySingleton;
-import com.hello.holaApp.vo.Photo;
+import com.hello.holaApp.vo.PhotoVo;
 
 import java.util.List;
 
@@ -24,16 +24,16 @@ import java.util.List;
 public class GridViewAdapter extends BaseAdapter {
 
     private Context context;
-    private List<Photo> list;
+    private List<PhotoVo> list;
     private boolean flag = false;
     private ImageLoader imageLoader;
 
-    public GridViewAdapter(Context context, List<Photo> list) {
+    public GridViewAdapter(Context context, List<PhotoVo> list) {
         this.context = context;
         this.list = list;
     }
 
-    public GridViewAdapter(Context context, List<Photo> list, boolean flag) {
+    public GridViewAdapter(Context context, List<PhotoVo> list, boolean flag) {
         this.context = context;
         this.list = list;
         this.flag = flag;
@@ -43,8 +43,8 @@ public class GridViewAdapter extends BaseAdapter {
         this.list.clear();
     }
 
-    public void addNewValues(List<Photo> photoList){
-        this.list = photoList;
+    public void addNewValues(List<PhotoVo> photoVoList){
+        this.list = photoVoList;
     }
 
     @Override
@@ -73,16 +73,16 @@ public class GridViewAdapter extends BaseAdapter {
         this.imageLoader = VolleySingleton.getInstance(this.context).getImageLoader();
 
         ViewHolder holder = (ViewHolder) view.getTag();
-        Photo photo = list.get(index);
+        PhotoVo photoVo = list.get(index);
 
-        if(photo.getBitmap() == null) {
-            if (photo.getKind().equals("profile")) {
+        if(photoVo.getBitmap() == null) {
+            if (photoVo.getKind().equals("profile")) {
 
                 /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
-                downloadImageTask.execute(photo.getFileName());*/
+                downloadImageTask.execute(photoVo.getFileName());*/
 
-            } else if (photo.getKind().equals("photo")) {
-                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
+            } else if (photoVo.getKind().equals("photoVo")) {
+                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photoVo.getFileName() + "_thumbnail.jpg");
 
                 islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
                     //do something with downloadurl
@@ -101,13 +101,13 @@ public class GridViewAdapter extends BaseAdapter {
                     // Handle any errors
                     Log.e("bytess", exception.getMessage());
                 });*/
-            } else if (photo.getKind().equals("add_btn")) {
+            } else if (photoVo.getKind().equals("add_btn")) {
                 holder.img.setDefaultImageResId(R.drawable.add_btn);
-            } else if (photo.getKind().equals("logo_t")) {
+            } else if (photoVo.getKind().equals("logo_t")) {
                 holder.img.setDefaultImageResId(R.drawable.logo_t);
             }
         } else
-            holder.img.setImageBitmap(photo.getBitmap());
+            holder.img.setImageBitmap(photoVo.getBitmap());
 
         return view;
     }

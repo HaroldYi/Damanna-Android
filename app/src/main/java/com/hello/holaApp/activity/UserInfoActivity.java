@@ -36,7 +36,7 @@ import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.EqualSpacingItemDecoration;
 import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
-import com.hello.holaApp.vo.Photo;
+import com.hello.holaApp.vo.PhotoVo;
 import com.hello.holaApp.vo.SayVo;
 import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
@@ -65,7 +65,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
     private LinearLayoutManager linearLayoutManager;
     private BasicGridLayoutManager basicGridLayoutManager;
     private List<SayVo> sayVoList;
-    private List<Photo> photoList;
+    private List<PhotoVo> photoVoList;
 
     private UltimateRecyclerView gridView;
     private NewSayListViewAdapter userSayListViewAdapter;
@@ -121,7 +121,6 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
         View actionView = getLayoutInflater().inflate(R.layout.new_say_action_bar, null);
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
-        title.setText("Profile");
 
         Typeface typeface = Typeface.createFromAsset(this.getAssets(), "fonts/NotoSans-Medium.ttf");
         title.setTypeface(typeface);
@@ -142,6 +141,8 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         this.userName = intent.getStringExtra("userName");
         String identity = intent.getStringExtra("identity");
         String profileUrl = intent.getStringExtra("profileUrl");
+
+        title.setText(String.format("%s의 프로필", this.userName));
 
         /*Bitmap bitmap = CommonFunction.getBitmapFromURL(profileUrl);*/
 
@@ -196,7 +197,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
             overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         });
 
-        this.photoList = new ArrayList<>();
+        this.photoVoList = new ArrayList<>();
         this.sayVoList = new ArrayList<>();
 
         this.listView = (UltimateRecyclerView) findViewById(R.id.say_list);
@@ -228,17 +229,17 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
             }
         });
 
-        this.listView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
+        /*this.listView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
 
             userSayListViewAdapter.clear();
             sayVoList.clear();
             this.sayQuery = db.collection("say/")
                     .whereEqualTo("member_id", this.uid)
-                /*.orderBy("reg_dt", Query.Direction.DESCENDING)*/
+                *//*.orderBy("reg_dt", Query.Direction.DESCENDING)*//*
                     .limit(this.limit);
 
             loadingSayData(sayQuery);
-        }, 1000));
+        }, 1000));*/
 
         this.photoListView = (CardView) view.findViewById(R.id.photo_list_view);
 
@@ -250,7 +251,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         this.gridView.setSaveEnabled(true);
         this.gridView.setClipToPadding(false);
 
-        this.adapter = new NewRecyclerGridViewAdapter(this, this.photoList, false);
+        this.adapter = new NewRecyclerGridViewAdapter(this, this.photoVoList, false);
         this.adapter.setSpanColumns(2);
         this.gridView.setAdapter(this.adapter);
         this.basicGridLayoutManager = new BasicGridLayoutManager(this, this.columns, this.adapter);
@@ -261,7 +262,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                 new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int index) {
-                        viewPhoto(photoList.get(index).getOriginalUrl(), "jpg");
+                        viewPhoto(photoVoList.get(index).getOriginalUrl(), "jpg");
                     }
                 })
         );
@@ -278,7 +279,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         /*this.gridView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
 
             adapter.clear();
-            photoList.clear();
+            photoVoList.clear();
             this.photoQuery = this.db.collection("photo/")
                     .whereEqualTo("member_id", this.uid)
                     .orderBy("reg_dt", Query.Direction.DESCENDING)
@@ -303,7 +304,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
         /*this.gridView.setOnItemClickListener((parent, v, position, id) -> {
             *//*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
-            viewIntent.putExtra("photoUrl", photoList.get(position).getFileName());
+            viewIntent.putExtra("photoUrl", photoVoList.get(position).getFileName());
             startActivityForResult(viewIntent, 1);*//*
             this.position = position;
             viewPhoto(null);
@@ -350,7 +351,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         if(bitmap != null) {
             intent.putExtra("bitmap", bitmap);
         }
-        intent.putExtra("photoUrl", this.photoList.get(this.position).getFileName());
+        intent.putExtra("photoUrl", this.photoVoList.get(this.position).getFileName());
         intent.putExtra("userName", this.userName);
         startActivityForResult(intent, 1);
         overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
@@ -390,18 +391,18 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
                             for (DocumentSnapshot document : task.getResult()) {
 
-                                Photo photo = new Photo();
-                                photo.setPhotoId(document.getString("id"));
-                                photo.setThumbnailUrl(document.getData().get("thumbnail_img").toString());
-                                photo.setOriginalUrl(document.getData().get("original_img").toString());
-                                photo.setKind("photo");
-                                this.adapter.insertLast(photo);
+                                PhotoVo photoVo = new PhotoVo();
+                                photoVo.setPhotoId(document.getString("id"));
+                                photoVo.setThumbnailUrl(document.getData().get("thumbnail_img").toString());
+                                photoVo.setOriginalUrl(document.getData().get("original_img").toString());
+                                photoVo.setKind("photoVo");
+                                this.adapter.insertLast(photoVo);
 
                                 /*StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getData().get("fileName").toString() + ".jpg");
 
                                 islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
                                     //do something with downloadurl
-                                    photo.setFileUrl(downloadUrl.toString());
+                                    photoVo.setFileUrl(downloadUrl.toString());
                                 }).addOnFailureListener(e -> {
                                     Log.d("에러~", e.getMessage());
                                 });*/

@@ -46,7 +46,7 @@ import com.gun0912.tedpermission.TedPermission;
 import com.hello.holaApp.BuildConfig;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.CommonFunction;
-import com.hello.holaApp.vo.Photo;
+import com.hello.holaApp.vo.PhotoVo;
 import com.sendbird.android.SendBird;
 
 import org.json.JSONObject;
@@ -353,7 +353,7 @@ public class SplashActivity extends AppCompatActivity {
 
         this.fUser = currentUser;
 
-        List<Photo> photoList = new ArrayList<>();
+        List<PhotoVo> photoVoList = new ArrayList<>();
 
         DocumentReference docRef = this.db.collection("member").document(currentUser.getUid());
         docRef.get().addOnCompleteListener(task -> {

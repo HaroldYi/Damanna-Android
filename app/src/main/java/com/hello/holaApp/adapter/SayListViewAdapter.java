@@ -21,6 +21,7 @@ import java.util.List;
  * Created by lji5317 on 13/12/2017.
  */
 
+@Deprecated
 public class SayListViewAdapter extends BaseAdapter {
 
     private Context context;

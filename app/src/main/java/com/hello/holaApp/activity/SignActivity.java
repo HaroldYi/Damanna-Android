@@ -30,7 +30,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.hello.holaApp.BuildConfig;
 import com.hello.holaApp.R;
-import com.hello.holaApp.vo.Photo;
+import com.hello.holaApp.vo.PhotoVo;
 import com.sendbird.android.SendBird;
 
 import org.json.JSONObject;
@@ -204,7 +204,7 @@ public class SignActivity extends BaseActivity {
 
     private void addUserDb(FirebaseUser currentUser) {
 
-        List<Photo> photoList = new ArrayList<>();
+        List<PhotoVo> photoVoList = new ArrayList<>();
 
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         try {
