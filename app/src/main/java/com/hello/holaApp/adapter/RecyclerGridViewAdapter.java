@@ -14,7 +14,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.VolleySingleton;
-import com.hello.holaApp.vo.Photo;
+import com.hello.holaApp.vo.PhotoVo;
 
 import java.util.List;
 
@@ -22,19 +22,20 @@ import java.util.List;
  * Created by lji5317 on 11/12/2017.
  */
 
+@Deprecated
 public class RecyclerGridViewAdapter extends RecyclerView.Adapter<RecyclerGridViewAdapter.ViewHolder> {
 
     private Context context;
-    private List<Photo> list;
+    private List<PhotoVo> list;
     private boolean flag = false;
     private ImageLoader imageLoader;
 
-    public RecyclerGridViewAdapter(Context context, List<Photo> list) {
+    public RecyclerGridViewAdapter(Context context, List<PhotoVo> list) {
         this.context = context;
         this.list = list;
     }
 
-    public RecyclerGridViewAdapter(Context context, List<Photo> list, boolean flag) {
+    public RecyclerGridViewAdapter(Context context, List<PhotoVo> list, boolean flag) {
         this.context = context;
         this.list = list;
         this.flag = flag;
@@ -66,7 +67,7 @@ public class RecyclerGridViewAdapter extends RecyclerView.Adapter<RecyclerGridVi
         this.imageLoader = VolleySingleton.getInstance(this.context).getImageLoader();
 
         ViewHolder holder = (ViewHolder) view.getTag();
-        Photo photo = list.get(index);
+        PhotoVo photo = list.get(index);
 
         if(photo.getBitmap() == null) {
             if (photo.getKind().equals("profile")) {
@@ -119,16 +120,16 @@ public class RecyclerGridViewAdapter extends RecyclerView.Adapter<RecyclerGridVi
     public void onBindViewHolder(ViewHolder holder, int index) {
         this.imageLoader = VolleySingleton.getInstance(this.context).getImageLoader();
 
-        Photo photo = list.get(index);
+        PhotoVo photoVo = list.get(index);
 
-        if(photo.getBitmap() == null) {
-            if (photo.getKind().equals("profile")) {
+        if(photoVo.getBitmap() == null) {
+            if (photoVo.getKind().equals("profile")) {
 
                 /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
-                downloadImageTask.execute(photo.getFileName());*/
+                downloadImageTask.execute(photoVo.getFileName());*/
 
-            } else if (photo.getKind().equals("photo")) {
-                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photo.getFileName() + "_thumbnail.jpg");
+            } else if (photoVo.getKind().equals("photoVo")) {
+                StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photoVo.getFileName() + "_thumbnail.jpg");
 
                 islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
                     //do something with downloadurl
@@ -147,13 +148,13 @@ public class RecyclerGridViewAdapter extends RecyclerView.Adapter<RecyclerGridVi
                     // Handle any errors
                     Log.e("bytess", exception.getMessage());
                 });*/
-            } else if (photo.getKind().equals("add_btn")) {
+            } else if (photoVo.getKind().equals("add_btn")) {
                 holder.img.setDefaultImageResId(R.drawable.add_btn);
-            } else if (photo.getKind().equals("logo_t")) {
+            } else if (photoVo.getKind().equals("logo_t")) {
                 holder.img.setDefaultImageResId(R.drawable.logo_t);
             }
         } else
-            holder.img.setImageBitmap(photo.getBitmap());
+            holder.img.setImageBitmap(photoVo.getBitmap());
     }
 
     // 필수로 Generate 되어야 하는 메소드 3

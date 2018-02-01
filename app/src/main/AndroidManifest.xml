@@ -78,7 +78,8 @@
 
         <activity android:name="com.hello.holaApp.activity.ChatRoomActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName="com.hello.holaApp.activity.MainActivity" >
+            android:parentActivityName="com.hello.holaApp.activity.MainActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.hello.holaApp.activity.MainActivity" />
