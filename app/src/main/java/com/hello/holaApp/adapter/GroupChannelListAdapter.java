@@ -174,6 +174,13 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ((ChannelHolder) holder).bind(mContext, mChannelList.get(position), mItemClickListener, mItemLongClickListener);
 
+        GroupChannel groupChannel = mChannelList.get(position);
+        if(groupChannel.isPushEnabled()) {
+            ((ChannelHolder) holder).offNotification.setVisibility(View.GONE);
+        } else {
+            ((ChannelHolder) holder).offNotification.setVisibility(View.VISIBLE);
+        }
+
         /*List<Member> memberList = mChannelList.get(position).getMembers();
         for(Member member : memberList) {
             GradientDrawable drawable = (GradientDrawable) ((ChannelHolder) holder).connectionStatus.getBackground();
@@ -217,7 +224,6 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
 
         GroupChannel groupChannel = (GroupChannel) channel;
-
         for (int i = 0; i < mChannelList.size(); i++) {
             if (mChannelList.get(i).getUrl().equals(groupChannel.getUrl())) {
                 mChannelList.remove(mChannelList.get(i));
@@ -250,6 +256,7 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
         LinearLayout typingIndicatorContainer;
 
         ImageView connectionStatus;
+        ImageView offNotification;
 
         FirebaseAuth mAuth;
         FirebaseUser fUser;
@@ -268,6 +275,8 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
             this.connectionStatus = (ImageView) itemView.findViewById(R.id.connectionStatus);
             this.connectionStatus.setVisibility(View.GONE);
+
+            this.offNotification = (ImageView) itemView.findViewById(R.id.offNotification);
 
             typingIndicatorContainer = (LinearLayout) itemView.findViewById(R.id.container_group_channel_list_typing_indicator);
 
