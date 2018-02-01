@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -47,6 +48,14 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
         CommonFunction.sendMsg(getApplicationContext());
 
         this.userName = (EditText) findViewById(R.id.userName);
+        this.userName.setOnKeyListener((v, keyCode, event) -> {
+            //Enter key Action
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                //Enter키눌렀을떄 처리
+                return true;
+            }
+            return false;
+        });
 
         ActionBar actionBar = this.getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
@@ -75,6 +84,7 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
         Intent intent = getIntent();
         String name = intent.getStringExtra("name");
         this.userName.setText(name);
+        this.userName.setSelection(this.userName.getText().length());
     }
 
     @Override

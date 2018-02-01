@@ -18,7 +18,8 @@
         android:text="이름"
         android:textColor="#0e9588"
         android:textSize="13sp"
-        android:typeface="sans" />
+        android:typeface="sans"
+        />
 
     <EditText
         android:id="@+id/userName"
