@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true"
+    android:id="@+id/profile_layout_sc"
+    android:background="@color/white"
+    >
+
+    <android.support.v7.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="2.5dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="2.5dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardUseCompatPadding="true"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/profile_layout_rl"
+            >
+
+            <RelativeLayout
+                android:id="@+id/profile_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_below="@+id/header_cover_image"
+                android:background="@color/white"
+                >
+
+                <TextView
+                    android:id="@+id/age"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/user_profile_name"
+                    android:layout_marginTop="30dp"
+                    android:text="age"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="14sp"
+                    android:typeface="sans" />
+
+                <TextView
+                    android:id="@+id/identity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/user_profile_name"
+                    android:layout_marginTop="50dp"
+                    android:text="id"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="14sp"
+                    android:typeface="sans" />
+
+                <FrameLayout
+                    android:id="@+id/profile_photo_area"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <com.hello.holaApp.common.RadiusNetworkImageView
+                        android:id="@+id/user_profile_photo"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginStart="14dp"
+                        android:scaleType="fitXY" />
+
+                </FrameLayout>
+                <TextView
+                    android:id="@+id/user_profile_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="114dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="name"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:typeface="sans" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/people_image_list"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/profile_layout"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"></LinearLayout>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+</RelativeLayout>

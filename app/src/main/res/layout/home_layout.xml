@@ -4,15 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/home_layout"
-    tools:context="com.hello.holaApp.fragment.Chat" >
+    tools:context="com.hello.holaApp.fragment.Chat"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
 
-    <GridView
-        android:layout_weight="1"
-        android:verticalSpacing="10dp"
-        android:horizontalSpacing="10dp"
-        android:numColumns="3"
-        android:id="@+id/home_grid"
+    <com.marshalchen.ultimaterecyclerview.UltimateRecyclerView
+        android:id="@+id/people_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </GridView>
+        android:layout_height="match_parent"
+        app:recyclerviewClipToPadding="true"
+        app:recyclerviewDefaultSwipeColor="@array/google_colors"
+        app:recyclerviewFloatingActionView="@layout/floating_view"
+        app:recyclerviewEmptyView="@layout/empty_view"
+        app:recyclerviewScrollbars="vertical" />
 </RelativeLayout>

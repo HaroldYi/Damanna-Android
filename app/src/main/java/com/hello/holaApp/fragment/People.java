@@ -1,17 +1,14 @@
 package com.hello.holaApp.fragment;
 
-import android.content.Context;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -25,11 +22,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.hello.holaApp.adapter.GridViewAdapter;
 import com.hello.holaApp.R;
-import com.hello.holaApp.vo.Photo;
+import com.hello.holaApp.adapter.PeopleListViewAdapter;
+import com.hello.holaApp.common.CommonFunction;
+import com.hello.holaApp.vo.UserVo;
+import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,12 +39,13 @@ import java.util.List;
 
 public class People extends Fragment implements View.OnClickListener {
 
-    private GridViewAdapter adapter;
+    private PeopleListViewAdapter adapter;
 
     private static String TAG = "fireStoreTag";
 
     private FirebaseAuth mAuth;
     private FirebaseUser user;
+    private FirebaseFirestore db;
 
     // 최소 GPS 정보 업데이트 거리 10미터
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
@@ -56,6 +58,7 @@ public class People extends Fragment implements View.OnClickListener {
     public People() {
         this.mAuth = FirebaseAuth.getInstance();
         this.user = this.mAuth.getCurrentUser();
+        this.db = FirebaseFirestore.getInstance();
     }
 
     @Nullable
@@ -63,71 +66,49 @@ public class People extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.home_layout, container, false);
-        GridView gridView = (GridView) view.findViewById(R.id.home_grid);
+        UltimateRecyclerView listView = (UltimateRecyclerView) view.findViewById(R.id.people_list);
 
-        List<Photo> photoList = new ArrayList<>();
-        Double latitude = 0.0;
-        Double longitude = 0.0;
-
-        LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        try {
-            // GPS를 이용한 위치 요청
-            locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    gpsListener);
-
-            // 네트워크를 이용한 위치 요청
-            locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    gpsListener);
-
-            // 위치요청을 한 상태에서 위치추적되는 동안 먼저 최근 위치를 조회해서 set
-            Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lastLocation != null) {
-                latitude = lastLocation.getLatitude();
-                longitude = lastLocation.getLongitude();
-            }
-        } catch(SecurityException ex) {
-            Log.e("gpsERR", ex.toString());
-            ex.printStackTrace();
-        }
+        List<UserVo> userVoList = new ArrayList<>();
+        Double latitude = CommonFunction.getLatitude();
+        Double longitude = CommonFunction.getLongitude();
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("path/to/geofire");
         this.geoFire = new GeoFire(ref);
         GeoQuery geoQuery = this.geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 1);
-        Double finalLatitude = latitude;
-        Double finalLongitude = longitude;
+
+        this.adapter = new PeopleListViewAdapter(getContext(), userVoList);
+        listView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        listView.setAdapter(this.adapter);
+        listView.setHasFixedSize(true);
+
+        HashMap<String, UserVo> userMap = new HashMap();
 
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                Log.d("enterrrrr", String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
                 if(!key.equals(user.getUid())) {
-                    Photo photo = new Photo();
-                    /*photo.setPhotoUrl("https://yt3.ggpht.com/-v0soe-ievYE/AAAAAAAAAAI/AAAAAAAAAAA/OixOH_h84Po/s288-c-k-no-mo-rj-c0xffffff/photo.jpg");*/
-                    /*photo.setDistance(distance(location.latitude, location.longitude, finalLatitude, finalLongitude, "kilometer"));*/
+                    Log.d("enterrrrr", String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
 
-                    Location loc = new Location("pointA");
-                    Location loc1 = new Location("pointB");
+                    UserVo userVo = userMap.get(key);
+                    if(userVo != null) {
 
-                    loc.setLatitude(location.latitude);
-                    loc.setLongitude(location.longitude);
+                        Location loc = new Location("pointA");
+                        Location loc1 = new Location("pointB");
 
-                    loc1.setLatitude(finalLatitude);
-                    loc1.setLongitude(finalLongitude);
+                        loc.setLatitude(location.latitude);
+                        loc.setLongitude(location.longitude);
 
-                    Log.d("distance", loc.distanceTo(loc1)+"");
+                        loc1.setLatitude(latitude);
+                        loc1.setLongitude(longitude);
 
-                    photo.setDistance(loc.distanceTo(loc1));
-                    photo.setUpdateTime(1);
-                    photoList.add(photo);
+                        Log.d("distance", loc.distanceTo(loc1)+"");
+
+                        userVo.setDistance(loc.distanceTo(loc1)/1000);
+                        /*photoVo.setUpdateTime(1);*/
+
+                        adapter.insertLastInternal(userVoList, userVo);
+                    }
                 }
-
-                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -153,14 +134,47 @@ public class People extends Fragment implements View.OnClickListener {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("member")
-                /*.whereEqualTo("id", user.getUid())*/
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (DocumentSnapshot document : task.getResult()) {
                             String uid = document.get("id").toString();
                             if(user == null || !uid.equals(user.getUid())) {
-                                GeoPoint geoPoint = (GeoPoint) document.get("location");
+
+                                UserVo userVo = new UserVo();
+                                GeoPoint geoPoint = (GeoPoint) document.getData().get("location");
+
+                                userVo.setUid(uid);
+                                userVo.setUserName(document.getData().get("name").toString());
+
+                                String gender = document.getData().get("gender").toString();
+                                gender = (gender.equals("male") ? "남자" : "여자");
+
+                                userVo.setGender(gender);
+
+                                long dateOfBirth = document.getDate("dateOfBirth").getTime();
+                                long now = System.currentTimeMillis();
+
+                                Calendar birthCalendar = Calendar.getInstance();
+                                birthCalendar.setTimeInMillis(dateOfBirth);
+
+                                int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                                Calendar nowCalender = Calendar.getInstance();
+                                nowCalender.setTimeInMillis(now);
+
+                                int nowYear = nowCalender.get(Calendar.YEAR);
+
+                                int koreanAge = nowYear - yearOfBirth + 1;
+
+                                userVo.setAge(koreanAge);
+                                userVo.setIdentity(document.getData().get("identity").toString());
+                                userVo.setNation(document.getData().get("nation").toString());
+                                userVo.setPhotoUrl(document.getData().get("profileUrl").toString());
+                                userVo.setGeoPoint(geoPoint);
+
+                                userMap.put(uid, userVo);
+
                                 geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
                                     if (error != null) {
                                         System.err.println("There was an error saving the location to GeoFire: " + error);
@@ -175,9 +189,6 @@ public class People extends Fragment implements View.OnClickListener {
                         Log.w(TAG, "Error getting documents.", task.getException());
                     }
                 });
-
-        adapter = new GridViewAdapter(getContext(), photoList);
-        gridView.setAdapter(adapter);
 
         return view;
     }
@@ -198,67 +209,4 @@ public class People extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
 
     }
-
-    // LocationListener 정의
-    private LocationListener gpsListener = new LocationListener() {
-
-        // LocationManager 에서 위치정보가 변경되면 호출
-        @Override
-        public void onLocationChanged(Location location) {
-
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
-        }
-    };
-
-    /**
-     * 두 지점간의 거리 계산
-     *
-     * @param lat1 지점 1 위도
-     * @param lon1 지점 1 경도
-     * @param lat2 지점 2 위도
-     * @param lon2 지점 2 경도
-     * @param unit 거리 표출단위
-     * @return
-     */
-    /*private double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
-
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        dist = dist * 60 * 1.1515;
-
-        if (unit.equals("kilometer")) {
-            dist = dist * 1.609344;
-        } else if(unit.equals("meter")) {
-            dist = dist * 1609.344;
-        }
-
-        return (dist);
-    }
-
-    // This function converts decimal degrees to radians
-    private static double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-
-    // This function converts radians to decimal degrees
-    private static double rad2deg(double rad) {
-        return (rad * 180 / Math.PI);
-    }*/
 }
