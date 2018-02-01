@@ -1,6 +1,6 @@
 package com.hello.holaApp.activity;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -10,15 +10,22 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -26,8 +33,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.CommonFunction;
-
-import org.mortbay.jetty.Main;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -39,10 +44,15 @@ import java.util.Date;
 public class SettingActivity extends AppCompatActivity {
 
     static MainActivity mainActivity = (MainActivity)MainActivity.activity;
+    static SettingActivity activity;
+
+    private static String TAG = "cloudFireStore";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        activity = this;
 
         CommonFunction.sendMsg(getApplicationContext());
 
@@ -112,8 +122,9 @@ public class SettingActivity extends AppCompatActivity {
             Preference identity = findPreference("identity");
             Preference question = findPreference("question");
             Preference signOut = findPreference("signOut");
+            /*Preference gender = findPreference("gender");*/
 
-            Preference gender = findPreference("gender");
+            Preference unregister = findPreference("unregister");
 
             notification.setOnPreferenceClickListener(preference -> {
 
@@ -159,6 +170,56 @@ public class SettingActivity extends AppCompatActivity {
                 startActivity(new Intent(getActivity(), SplashActivity.class));
                 mainActivity.finish();
                 getActivity().finish();
+                return false;
+            });
+
+            unregister.setOnPreferenceClickListener(preference -> {
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                alertDialogBuilder.setTitle("회원탈퇴");
+                alertDialogBuilder.setMessage("정말로 탈퇴하시겠습니까?")
+                        .setCancelable(false)
+                        .setPositiveButton("탈퇴", (dialog, id) -> {
+                            String uid = currentUser.getUid();
+
+                            this.db.collection("member").document(uid)
+                                    .delete()
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                            AuthUI.getInstance()
+                                                    .delete(SettingActivity.activity)
+                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            // ...
+                                                            startActivity(new Intent(getActivity(), SplashActivity.class));
+                                                            mainActivity.finish();
+                                                            getActivity().finish();
+                                                        }
+                                                    });
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w(TAG, "Error deleting document", e);
+                                            Crashlytics.logException(e);
+                                        }
+                                    });
+                        })
+                        .setNegativeButton("취소", (dialog, id) -> {
+                            // 다이얼로그를 취소한다
+                            dialog.cancel();
+                        });
+
+                // 다이얼로그 생성
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                // 다이얼로그 보여주기
+                alertDialog.show();
+
                 return false;
             });
 
