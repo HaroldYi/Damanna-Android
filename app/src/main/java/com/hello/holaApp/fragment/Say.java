@@ -1,15 +1,11 @@
 package com.hello.holaApp.fragment;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -23,6 +19,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -167,7 +164,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
             lastYn = true;
 
-            *//*this.listView.reenableLoadmore();*//*
+            this.listView.reenableLoadmore();
             sayListViewAdapter.clear();
             sayVoList.clear();
 
@@ -242,6 +239,9 @@ public class Say extends BaseFragment implements View.OnClickListener {
                 })
         );
 
+        sayListViewAdapter = new NewSayListViewAdapter(getActivity(), sayVoList);
+        listView.setAdapter(sayListViewAdapter);
+
         this.activity = (MainActivity) getActivity();
 
         this.query = this.db.collection("say/")
@@ -273,49 +273,9 @@ public class Say extends BaseFragment implements View.OnClickListener {
                     }
                 })
                 .addOnFailureListener(e -> {
+                    Crashlytics.logException(e);
                     Log.e("FIREERROR", e.getMessage());
                 });
-
-        /*this.listView.setOnItemClickListener((adapterView, view1, index, l) -> {
-
-            if(FirebaseAuth.getInstance().getCurrentUser() != null) {
-
-                String uid = this.sayVoList.get(index).getUid();
-
-                if (uid.equals(this.mAuth.getUid())) {
-                    *//*this.activity.onFragmentChange(2);*//*
-                } else {
-
-                    ((MainActivity)getActivity()).tabIndex = 0;
-
-                    Intent intent = new Intent(getActivity(), UserInfoActivity.class);
-                    intent.putExtra("uid", uid);
-                    intent.putExtra("userName", this.sayVoList.get(index).getUserName());
-                    intent.putExtra("profileUrl", this.sayVoList.get(index).getPhotoUrl());
-                *//*intent.putExtra("bitmapImage", this.sayVoList.get(index).getBitmap());*//*
-
-                    startActivity(intent);
-                }
-            } else {
-                startActivity(new Intent(getActivity(), SignActivity.class));
-            }
-        });*/
-
-        /*this.listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                //현재 화면에 보이는 첫번째 리스트 아이템의 번호(firstVisibleItem) + 현재 화면에 보이는 리스트 아이템의 갯수(visibleItemCount)가 리스트 전체의 갯수(totalItemCount) -1 보다 크거나 같을때
-                lastitemVisibleFlag = (totalItemCount > 0) && (firstVisibleItem + visibleItemCount >= totalItemCount);
-            }
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                //OnScrollListener.SCROLL_STATE_IDLE은 스크롤이 이동하다가 멈추었을때 발생되는 스크롤 상태입니다.
-                //즉 스크롤이 바닦에 닿아 멈춘 상태에 처리를 하겠다는 뜻
-                if(scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE && lastitemVisibleFlag && !lastYn) {
-                    loadingData(query);
-                }
-            }
-        });*/
 
         return view;
     }
@@ -373,15 +333,10 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
     private void loadingData(Query queryParam, boolean initYn) {
 
-        List<SayVo> tempSayVoList = new ArrayList<>();
-
         queryParam
         .get()
         .addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-
-                sayListViewAdapter = new NewSayListViewAdapter(getActivity(), sayVoList);
-                listView.setAdapter(sayListViewAdapter);
 
                 List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
 
@@ -401,46 +356,49 @@ public class Say extends BaseFragment implements View.OnClickListener {
                         String memberId = document.getData().get("member_id").toString();
                         UserVo user = userMap.get(memberId);
 
-                        SayVo sayVo = new SayVo();
+                        if (user != null) {
 
-                        sayVo.setUid(memberId);
-                        sayVo.setMsg(document.getData().get("content").toString());
+                            SayVo sayVo = new SayVo();
 
-                        long regDt = document.getDate("reg_dt").getTime();
-                        long now = System.currentTimeMillis();
+                            sayVo.setUid(memberId);
+                            sayVo.setMsg(document.getData().get("content").toString());
 
-                        long regTime = (now - regDt) / 60000;
+                            long regDt = document.getDate("reg_dt").getTime();
+                            long now = System.currentTimeMillis();
 
-                        String regMin = "";
-                        if(regTime < 60) {
-                            regMin = String.format("%dmin", regTime);
-                        } else if(regTime >= 60 && regTime < 1440) {
-                            regMin = String.format("%dh", (int)(regTime / 60));
-                        } else if(regTime > 1440) {
-                            regMin = String.format("%dd", (int)(regTime / 1440));
+                            long regTime = (now - regDt) / 60000;
+
+                            String regMin = "";
+                            if (regTime < 60) {
+                                regMin = String.format("%dmin", regTime);
+                            } else if (regTime >= 60 && regTime < 1440) {
+                                regMin = String.format("%dh", (int) (regTime / 60));
+                            } else if (regTime > 1440) {
+                                regMin = String.format("%dd", (int) (regTime / 1440));
+                            }
+
+                            sayVo.setRegMin(regMin);
+
+                            sayVo.setUserName(user.getUserName());
+                            sayVo.setNation(user.getNation());
+                            sayVo.setIdentity(user.getIdentity());
+                            sayVo.setPhotoUrl(user.getPhotoUrl());
+
+                            GeoPoint geoPoint = user.getGeoPoint();
+                            Location loc = new Location("pointA");
+                            Location loc1 = new Location("pointB");
+
+                            loc.setLatitude(geoPoint.getLatitude());
+                            loc.setLongitude(geoPoint.getLongitude());
+
+                            loc1.setLatitude(CommonFunction.getLatitude());
+                            loc1.setLongitude(CommonFunction.getLongitude());
+
+                            String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
+                            sayVo.setDistance(String.format("%s / %s", sayVo.getRegMin(), distance));
+
+                            this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
                         }
-
-                        sayVo.setRegMin(regMin);
-
-                        sayVo.setUserName(user.getUserName());
-                        sayVo.setNation(user.getNation());
-                        sayVo.setIdentity(user.getIdentity());
-                        sayVo.setPhotoUrl(user.getPhotoUrl());
-
-                        GeoPoint geoPoint = user.getGeoPoint();
-                        Location loc = new Location("pointA");
-                        Location loc1 = new Location("pointB");
-
-                        loc.setLatitude(geoPoint.getLatitude());
-                        loc.setLongitude(geoPoint.getLongitude());
-
-                        loc1.setLatitude(CommonFunction.getLatitude());
-                        loc1.setLongitude(CommonFunction.getLongitude());
-
-                        String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
-                        sayVo.setDistance(String.format("%s / %s", sayVo.getRegMin(), distance));
-
-                        this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
                     }
 
                     if(size < this.limit) {
@@ -466,6 +424,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                 progressOFF();
 
             } else {
+                Crashlytics.logException(task.getException());
                 Log.w(TAG, "Error getting documents.", task.getException());
             }
         });
