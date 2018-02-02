@@ -166,10 +166,10 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<PhotoV
         holder.delPhotoBtn.setOnClickListener(v -> {
 
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.context);
-            alertDialogBuilder.setTitle("사진삭제");
-            alertDialogBuilder.setMessage("삭제하시겠습니까?")
+            alertDialogBuilder.setTitle(context.getResources().getString(R.string.delete_title));
+            alertDialogBuilder.setMessage(context.getResources().getString(R.string.delete_msg))
                     .setCancelable(false)
-                    .setPositiveButton("삭제", (dialog, id) -> {
+                    .setPositiveButton(context.getResources().getString(R.string.delete), (dialog, id) -> {
 
                         // Create a storage reference from our app
                         StorageReference storageRef = FirebaseStorage.getInstance().getReference();

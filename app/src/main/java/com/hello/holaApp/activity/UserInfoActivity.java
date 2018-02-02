@@ -341,7 +341,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                             String gender = userVo.getGender();
 
                             if (gender != null && !gender.isEmpty()) {
-                                gender = (gender.equals("male") ? "남자" : "여자");
+                                gender = (gender.equals("male") ? getResources().getString(R.string.male) : getResources().getString(R.string.female));
                             } else {
                                 gender = "성별 미입력";
                             }

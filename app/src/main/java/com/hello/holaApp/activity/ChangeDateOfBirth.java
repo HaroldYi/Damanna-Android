@@ -64,7 +64,7 @@ public class ChangeDateOfBirth extends AppCompatActivity {
         parent.setContentInsetsAbsolute(0,0);
 
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
-        title.setText("생년월일 변경");
+        title.setText(getResources().getString(R.string.change_dob));
 
         ImageButton backBtn = (ImageButton) actionView.findViewById(R.id.backBtn);
         backBtn.setOnClickListener(view1 -> {

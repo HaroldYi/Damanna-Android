@@ -91,13 +91,13 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
         parent.setContentInsetsAbsolute(0,0);
 
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
-        title.setText("이름 변경");
+        title.setText(getResources().getString(R.string.change_name));
 
         ImageButton backBtn = (ImageButton) actionView.findViewById(R.id.backBtn);
         backBtn.setOnClickListener(this);
 
         Button saveBtn = (Button) actionView.findViewById(R.id.saveBtn);
-        saveBtn.setText("확인");
+        saveBtn.setText(getResources().getString(R.string.confirm_btn));
         saveBtn.setOnClickListener(this);
 
         Intent intent = getIntent();
@@ -119,7 +119,7 @@ public class ChangeNameActivity extends AppCompatActivity implements View.OnClic
                         .build();
 
                 new Handler().postDelayed(() -> {
-                    BaseApplication.getInstance().progressON(this, "Saving...");
+                    BaseApplication.getInstance().progressON(this, getResources().getString(R.string.saving));
                 }, 500);
 
                 user.updateProfile(profileUpdates)

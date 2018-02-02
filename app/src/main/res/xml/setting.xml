@@ -7,7 +7,7 @@
         android:summary=""
         android:switchTextOff="OFF"
         android:switchTextOn="ON"
-        android:title="알림" />
+        android:title="@string/notification" />
 
     <SwitchPreference
         android:defaultValue="false"
@@ -16,7 +16,7 @@
         android:dependency="notification"
         android:switchTextOff="OFF"
         android:switchTextOn="ON"
-        android:title="소리" />
+        android:title="@string/bell" />
 
     <SwitchPreference
         android:defaultValue="false"
@@ -25,7 +25,7 @@
         android:dependency="notification"
         android:switchTextOff="OFF"
         android:switchTextOn="ON"
-        android:title="진동" />
+        android:title="@string/vibration" />
 
     <Preference
         android:id="@+id/name"
@@ -34,7 +34,7 @@
         android:enabled="true"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="이름"
+        android:title="@string/name"
         android:summary="Harold"/>
 
     <Preference
@@ -43,7 +43,7 @@
         android:enabled="true"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="나이"
+        android:title="string/age"
         android:summary="Harold"/>
 
     <Preference
@@ -52,7 +52,7 @@
         android:enabled="true"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="여행 또는 거주 국가"
+        android:title="@string/nation"
         android:summary="Harold"/>
 
     <Preference
@@ -61,7 +61,7 @@
         android:enabled="true"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="신분"
+        android:title="@string/identity"
         android:summary="Harold"/>
 
     <!--<Preference
@@ -79,7 +79,7 @@
         android:enabled="true"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="문의하기"
+        android:title="@string/question"
         />
 
     <Preference
@@ -88,7 +88,7 @@
         android:enabled="true"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="로그아웃"
+        android:title="@string/signOut"
         />
 
     <!--<Preference

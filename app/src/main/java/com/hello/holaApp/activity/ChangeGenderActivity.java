@@ -103,18 +103,18 @@ public class ChangeGenderActivity extends AppCompatActivity {
             RadioButton genderRadioBtn = (RadioButton) findViewById(genderGroup.getCheckedRadioButtonId());
 
             if(genderRadioBtn == null && (this.dateOfBirth == null || this.dateOfBirth.getText().toString().isEmpty())) {
-                Toast.makeText(this, "생년월일과 성별은 필수로 입력하셔야 합니다", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, String.format(getResources().getString(R.string.require_arg2), "생년월일", "성별"), Toast.LENGTH_SHORT).show();
             } else if(genderRadioBtn != null && (this.dateOfBirth == null || this.dateOfBirth.getText().toString().isEmpty())) {
             /*saveBtn.setBackgroundColor(Color.GRAY);*/
-                Toast.makeText(this, "생년월일이 입력되지 않았습니다", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, String.format(getResources().getString(R.string.require_arg), "생년월일"), Toast.LENGTH_SHORT).show();
             } else if(genderRadioBtn == null && (this.dateOfBirth != null && !this.dateOfBirth.getText().toString().isEmpty())) {
-                Toast.makeText(this, "성별이 선택되지 않았습니다", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, String.format(getResources().getString(R.string.require_arg), "성별"), Toast.LENGTH_SHORT).show();
             } else if(genderRadioBtn != null && this.dateOfBirth != null && !this.dateOfBirth.getText().toString().isEmpty()) {
 
                 this.genderStr = genderRadioBtn.getText().toString();
 
                 Map<String, Object> userInfo = new HashMap<>();
-                userInfo.put("gender", (this.genderStr.equals("남성") ? "male" : "female"));
+                userInfo.put("gender", this.genderStr);
                 userInfo.put("dateOfBirth", new Date(this.calendar.getTimeInMillis()));
 
                 FirebaseFirestore.getInstance().collection("member").document(FirebaseAuth.getInstance().getCurrentUser().getUid())

@@ -48,6 +48,7 @@ import java.util.Map;
  * Created by lji5317 on 05/12/2017.
  */
 
+@Deprecated
 public class SignActivity extends BaseActivity {
 
     private FirebaseAuth mAuth;

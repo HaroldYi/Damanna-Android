@@ -1,5 +1,6 @@
 package com.hello.holaApp.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -34,6 +35,8 @@ import java.util.Map;
 
 public class ChangeIdentityActivity extends AppCompatActivity {
 
+    private static Context context;
+
     public static String identity = "";
     public Button saveBtn;
 
@@ -45,6 +48,8 @@ public class ChangeIdentityActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.context = this;
 
         CommonFunction.sendMsg(getApplicationContext());
 
@@ -66,7 +71,7 @@ public class ChangeIdentityActivity extends AppCompatActivity {
         parent.setContentInsetsAbsolute(0,0);
 
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
-        title.setText("신분 변경");
+        title.setText(getResources().getString(R.string.change_identity));
 
         ImageButton backBtn = (ImageButton) actionView.findViewById(R.id.backBtn);
 
@@ -98,7 +103,7 @@ public class ChangeIdentityActivity extends AppCompatActivity {
                         SendBird.updateCurrentUserInfo(String.format("%s(%s)", this.user.getDisplayName(), identity), this.user.getPhotoUrl().toString(), e12 -> {
                             if (e12 != null) {
                                 // Error.
-                                /*Crashlytics.logException(e12);*/
+                                Crashlytics.logException(e12);
                                 return;
                             }
 
@@ -144,25 +149,25 @@ public class ChangeIdentityActivity extends AppCompatActivity {
             this.resident = (CheckBoxPreference) findPreference("resident");
             this.etc = (CheckBoxPreference) findPreference("etc");
 
-            if(ChangeIdentityActivity.identity.equals("유학생")) {
+            if(ChangeIdentityActivity.identity.equals(getResources().getString(R.string.identity_student))) {
                 this.student.setChecked(true);
                 this.wh.setChecked(false);
                 this.traveler.setChecked(false);
                 this.resident.setChecked(false);
                 this.etc.setChecked(false);
-            } else if(ChangeIdentityActivity.identity.equals("워킹홀리데이")) {
+            } else if(ChangeIdentityActivity.identity.equals(getResources().getString(R.string.identity_wh))) {
                 this.student.setChecked(false);
                 this.wh.setChecked(true);
                 this.traveler.setChecked(false);
                 this.resident.setChecked(false);
                 this.etc.setChecked(false);
-            } else if(ChangeIdentityActivity.identity.equals("여행자")) {
+            } else if(ChangeIdentityActivity.identity.equals(getResources().getString(R.string.identity_traveler))) {
                 this.student.setChecked(false);
                 this.wh.setChecked(false);
                 this.traveler.setChecked(true);
                 this.resident.setChecked(false);
                 this.etc.setChecked(false);
-            } else if(ChangeIdentityActivity.identity.equals("교포")) {
+            } else if(ChangeIdentityActivity.identity.equals(getResources().getString(R.string.identity_resident))) {
                 this.student.setChecked(false);
                 this.wh.setChecked(false);
                 this.traveler.setChecked(false);
@@ -231,15 +236,15 @@ public class ChangeIdentityActivity extends AppCompatActivity {
             String value = "";
 
             if(student.isChecked()) {
-                value = "유학생";
+                value = context.getResources().getString(R.string.identity_student);
             } else if(wh.isChecked()) {
-                value = "워킹홀리데이";
+                value = context.getResources().getString(R.string.identity_wh);
             } else if(traveler.isChecked()) {
-                value = "여행자";
+                value = context.getResources().getString(R.string.identity_traveler);
             } else if(resident.isChecked()) {
-                value = "교포";
+                value = context.getResources().getString(R.string.identity_resident);
             } else {
-                value = "기타";
+                value = context.getResources().getString(R.string.identity_etc);
             }
 
             return value;

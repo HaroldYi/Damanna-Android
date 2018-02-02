@@ -146,7 +146,7 @@ public class SplashActivity extends AppCompatActivity {
         } else {
             /*startActivity(new Intent(SplashActivity.this, SignActivity.class));*/
 
-            Toast.makeText(this, "로그인이 필요합니다", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getResources().getString(R.string.need_signin), Toast.LENGTH_SHORT).show();
 
             AuthUI.IdpConfig.Builder facebookBuilder = new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER);
             facebookBuilder.setPermissions(Arrays.asList("public_profile", "email", "user_birthday"));
@@ -197,7 +197,7 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 } else {
                     // Sign in failed
-                    Toast.makeText(this, "Sign In Failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getResources().getString(R.string.failed_signin), Toast.LENGTH_SHORT).show();
                     /*updateUI(null);*/
                 }
             } else if(requestCode == RC_SIGN_GOOGLE) {
@@ -366,7 +366,7 @@ public class SplashActivity extends AppCompatActivity {
                     Map<String, Object> stringMap = new HashMap<>();
 
                     stringMap.put("member_id", currentUser.getUid());
-                    stringMap.put("content", String.format("%s님이 가입하였습니다!", currentUser.getDisplayName()));
+                    stringMap.put("content", String.format(getResources().getString(R.string.signupped), currentUser.getDisplayName()));
                     stringMap.put("reg_dt", new Date());
 
                     DocumentReference sayReference = this.db.collection("say").document();

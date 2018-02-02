@@ -71,7 +71,7 @@ public class ChangeCountry extends AppCompatActivity {
         parent.setContentInsetsAbsolute(0,0);
 
         TextView title = (TextView) actionView.findViewById(R.id.actionBarTitle);
-        title.setText("국가 변경");
+        title.setText(getResources().getString(R.string.change_nation));
 
         ImageButton backBtn = (ImageButton) actionView.findViewById(R.id.backBtn);
 

@@ -46,7 +46,7 @@
         android:shadowColor="#03c4c9"
         android:shadowDy="1.0"
         android:shadowRadius="1.0"
-        android:text="유학생"
+        android:text="@string/identity_student"
         android:textColor="#f8f9f9"
         android:background="@drawable/round_button" />
 
@@ -61,7 +61,7 @@
         android:shadowColor="#03c4c9"
         android:shadowDy="1.0"
         android:shadowRadius="1.0"
-        android:text="워킹홀리데이"
+        android:text="@string/identity_wh"
         android:textColor="#f8f9f9"
         android:background="@drawable/round_button" />
 
@@ -76,7 +76,7 @@
         android:shadowColor="#03c4c9"
         android:shadowDy="1.0"
         android:shadowRadius="1.0"
-        android:text="여행자"
+        android:text="@string/identity_traveler"
         android:textColor="#f8f9f9"
         android:background="@drawable/round_button" />
 
@@ -91,7 +91,7 @@
         android:shadowColor="#03c4c9"
         android:shadowDy="1.0"
         android:shadowRadius="1.0"
-        android:text="교민"
+        android:text="@string/identity_resident"
         android:textColor="#f8f9f9"
         android:background="@drawable/round_button" />
 
@@ -106,7 +106,7 @@
         android:shadowColor="#03c4c9"
         android:shadowDy="1.0"
         android:shadowRadius="1.0"
-        android:text="기타"
+        android:text="@string/identity_etc"
         android:textColor="#f8f9f9"
         android:background="@drawable/round_button" />
 

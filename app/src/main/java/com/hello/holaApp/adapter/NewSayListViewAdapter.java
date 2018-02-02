@@ -61,10 +61,10 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
             ((ViewHolder) holder).delSayBtn.setVisibility(View.VISIBLE);
             ((ViewHolder) holder).delSayBtn.setOnClickListener(v -> {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.context);
-                alertDialogBuilder.setTitle("Say삭제");
-                alertDialogBuilder.setMessage("삭제하시겠습니까?")
+                alertDialogBuilder.setTitle(String.format(context.getResources().getString(R.string.delete_title), "Say"));
+                alertDialogBuilder.setMessage(context.getResources().getString(R.string.delete))
                         .setCancelable(false)
-                        .setPositiveButton("삭제", (dialog, id) -> {
+                        .setPositiveButton(context.getResources().getString(R.string.delete), (dialog, id) -> {
 
                             String sayId = sayVoList.get(((ViewHolder) holder).getAdapterPosition()).getSayId();
                             FirebaseFirestore.getInstance().collection("say").document(sayId)

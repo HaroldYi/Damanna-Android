@@ -3,7 +3,8 @@
     <string name="app_id">FAA3AB52-6F82-4C6D-B29F-294701179246</string>
     <string name="loading">Loading...</string>
     <string name="uploading">Uploading...</string>
-    <string name="group_channel_list_file_message_text">%1$s has uploaded a file.</string>
+    <string name="group_channel_list_file_message_text_kr">%1$s님이 파일을 업로드 하였습니다.</string>
+    <!--<string name="group_channel_list_file_message_text_kr">%1$s has uploaded a file.</string>-->
     <string name="all_group_channels">Group Channels</string>
     <string name="resend_message">Resend</string>
     <string name="delete_message">Delete</string>
@@ -53,5 +54,140 @@
     </string>
     <string name="require_arg">
         %1$s은(는) 필수항목입니다
+    </string>
+    <string name="require_arg2">
+        %1$s과 %2$s은(는) 필수입니다.
+    </string>
+    <string name="change_nation">
+        국가 변경
+    </string>
+    <string name="change_dob">
+        생년월일 변경
+    </string>
+    <string name="change_name">
+        이름 변경
+    </string>
+    <string name="male">
+        남성
+    </string>
+    <string name="female">
+        여성
+    </string>
+    <string name="change_identity">
+        신분 변경
+    </string>
+    <string name="identity_wh">
+        워킹홀리데이
+    </string>
+    <string name="identity_student">
+        유학생
+    </string>
+    <string name="identity_traveler">
+        여행자
+    </string>
+    <string name="identity_resident">
+        교민
+    </string>
+    <string name="identity_etc">
+        기타
+    </string>
+    <string name="confirm">
+        확인
+    </string>
+    <string name="saving">
+        저장중...
+    </string>
+    <string name="enter_message">
+        메시지를 입력하여 주세요
+    </string>
+    <string name="send_btn">
+        전송
+    </string>
+    <string name="press_backbtn_again">
+        \'뒤로\' 버튼을 한번 더 누르시면 종료됩니다.
+    </string>
+    <string name="require_content">
+        내용을 입력하여 주세요
+    </string>
+    <string name="need_signin">
+        로그인이 필요합니다
+    </string>
+    <string name="failed_signin">
+        다시 로그인하여주세요
+    </string>
+    <string name="signupped">
+        %1$s님이 가입하였습니다!
+    </string>
+    <string name="save_btn">
+        저장
+    </string>
+    <string name="delete">
+        삭제
+    </string>
+    <string name="delete_title">
+        %1$s삭제
+    </string>
+    <string name="delete_msg">
+        삭제하시겠습니까?
+    </string>
+    <string name="quit">
+        나가기
+    </string>
+    <string name="change_status_notification">
+        알람 %1$s
+    </string>
+    <string name="off">
+        끄기
+    </string>
+    <string name="on">
+        켜기
+    </string>
+    <string name="quit_msg">
+        나가시겠습니까?
+    </string>
+    <string name="cancel_btn">
+        취소
+    </string>
+    <string name="change_status_notification_msg">
+        알림이 %1$s
+    </string>
+    <string name="message_dialog">
+        메시지 %1$s
+    </string>
+    <string name="messing_typing">
+        %1$s님이 메시지를 입력 중입니다.
+    </string>
+    <string name="multiple_messing_typing">
+        여러사용자가 메시지를 입력하고 있습니다.
+    </string>
+    <string name="notification">
+        알림
+    </string>
+    <string name="bell">
+        소리
+    </string>
+    <string name="vibration">
+        진동
+    </string>
+    <string name="name">
+        이름
+    </string>
+    <string name="nation">
+        여행 또는 거주 국가
+    </string>
+    <string name="identity">
+        신분
+    </string>
+    <string name="question">
+        질문하기
+    </string>
+    <string name="signOut">
+        로그아웃
+    </string>
+    <string name="unregister">
+        회원탈퇴
+    </string>
+    <string name="new_say_msg">
+        광고 또는 서비스 방향과 다른 게시물 등록은 서비스 이용에 제한될 수 있습니다.
     </string>
 </resources>

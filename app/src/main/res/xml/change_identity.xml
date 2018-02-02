@@ -6,27 +6,27 @@
         <CheckBoxPreference
             android:checked="false"
             android:key="student"
-            android:title="유학생" />
+            android:title="@string/identity_student" />
 
         <CheckBoxPreference
             android:checked="false"
             android:key="wh"
-            android:title="워킹홀리데이" />
+            android:title="@string/identity_wh" />
 
         <CheckBoxPreference
             android:checked="false"
             android:key="traveler"
-            android:title="여행자" />
+            android:title="@string/identity_traveler" />
 
         <CheckBoxPreference
             android:checked="false"
             android:key="resident"
-            android:title="교포" />
+            android:title="@string/identity_resident" />
 
         <CheckBoxPreference
             android:checked="false"
             android:key="etc"
-            android:title="기타" />
+            android:title="@string/identity_etc" />
 
     </PreferenceCategory>
 </PreferenceScreen>

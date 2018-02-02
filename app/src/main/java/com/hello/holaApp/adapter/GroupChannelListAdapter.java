@@ -331,7 +331,7 @@ public class GroupChannelListAdapter extends RecyclerView.Adapter<RecyclerView.V
                     lastMessageText.setText(((AdminMessage) lastMessage).getMessage());
                 } else {
                     String lastMessageString = String.format(
-                            context.getString(R.string.group_channel_list_file_message_text),
+                            context.getString(R.string.group_channel_list_file_message_text_kr),
                             ((FileMessage) lastMessage).getSender().getNickname());
                     lastMessageText.setText(lastMessageString);
                 }

@@ -99,7 +99,7 @@ public class PopupActivity extends AppCompatActivity {
                             Log.w(TAG, "Error adding document", e);
                         });
             } else {
-                Toast toast = Toast.makeText(this, "내용을 입력하여 주세요", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(this, getResources().getString(R.string.require_content), Toast.LENGTH_SHORT);
                 toast.show();
             }
         });

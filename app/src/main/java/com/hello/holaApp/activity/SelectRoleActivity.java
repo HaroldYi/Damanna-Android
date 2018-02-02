@@ -67,19 +67,19 @@ public class SelectRoleActivity extends BaseActivity implements View.OnClickList
 
         switch (view.getId()) {
             case R.id.student:
-                identity = "유학생";
+                identity = getResources().getString(R.string.identity_student);
                 break;
 
             case R.id.wh:
-                identity = "워킹홀리데이";
+                identity = getResources().getString(R.string.identity_wh);
                 break;
 
             case R.id.traveler:
-                identity = "여행자";
+                identity = getResources().getString(R.string.identity_traveler);
                 break;
 
             case R.id.resident:
-                identity = "교민";
+                identity = getResources().getString(R.string.identity_resident);
                 break;
 
             default:

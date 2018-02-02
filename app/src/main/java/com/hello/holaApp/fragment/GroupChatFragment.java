@@ -519,7 +519,7 @@ public class GroupChatFragment extends Fragment {
     }
 
     private void showMessageOptionsDialog(final BaseMessage message, final int position) {
-        String[] options = new String[] { "Edit message", "Delete message" };
+        String[] options = new String[] { String.format(getResources().getString(R.string.message_dialog), "수정"), String.format(getResources().getString(R.string.message_dialog), "삭제") };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -542,7 +542,7 @@ public class GroupChatFragment extends Fragment {
                 mEditingMessage = null;
 
                 mUploadFileButton.setVisibility(View.VISIBLE);
-                mMessageSendButton.setText("SEND");
+                mMessageSendButton.setText(getResources().getString(R.string.send_btn));
                 mMessageEditText.setText("");
 
 //                mIMM.hideSoftInputFromWindow(mMessageEditText.getWindowToken(), 0);
@@ -553,7 +553,7 @@ public class GroupChatFragment extends Fragment {
                 mEditingMessage = editingMessage;
 
                 mUploadFileButton.setVisibility(View.GONE);
-                mMessageSendButton.setText("SAVE");
+                mMessageSendButton.setText(getResources().getString(R.string.save_btn));
                 String messageString = ((UserMessage)editingMessage).getMessage();
                 if (messageString == null) {
                     messageString = "";
@@ -632,11 +632,14 @@ public class GroupChatFragment extends Fragment {
             String string;
 
             if (typingUsers.size() == 1) {
-                string = typingUsers.get(0).getNickname() + " is typing";
+                string = String.format(getResources().getString(R.string.messing_typing), typingUsers.get(0).getNickname());
+                /*string =  + " is typing";*/
             } else if (typingUsers.size() == 2) {
-                string = typingUsers.get(0).getNickname() + " " + typingUsers.get(1).getNickname() + " is typing";
+                string = String.format(getResources().getString(R.string.messing_typing), typingUsers.get(0).getNickname() + " " + typingUsers.get(1).getNickname());
+                /*string = typingUsers.get(0).getNickname() + " " + typingUsers.get(1).getNickname() + " is typing";*/
             } else {
-                string = "Multiple users are typing";
+                /*string = "Multiple users are typing";*/
+                string = getResources().getString(R.string.multiple_messing_typing);
             }
             mCurrentEventText.setText(string);
         } else {

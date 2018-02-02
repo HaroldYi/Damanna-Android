@@ -245,11 +245,11 @@ public class GroupChannelListFragment extends BaseFragment {
         final boolean pushCurrentlyEnabled = channel.isPushEnabled();
 
         options = pushCurrentlyEnabled
-                ? new String[]{"나가기", "알림 끄기"}
-                : new String[]{"나가기", "알림 켜기"};
+                ? new String[]{getResources().getString(R.string.quit), String.format(getResources().getString(R.string.change_status_notification), getResources().getString(R.string.off))}
+                : new String[]{getResources().getString(R.string.quit), String.format(getResources().getString(R.string.change_status_notification), getResources().getString(R.string.on))};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Channel options")
+        builder.setTitle("")
                 .setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -257,14 +257,14 @@ public class GroupChannelListFragment extends BaseFragment {
                             // Show a dialog to confirm that the user wants to leave the channel.
                             new AlertDialog.Builder(getActivity())
                                     /*.setTitle("나가기 " + channel.getName() + "?")*/
-                                    .setTitle("나가시겠습니까?")
-                                    .setPositiveButton("나가기", new DialogInterface.OnClickListener() {
+                                    .setTitle(getResources().getString(R.string.quit_msg))
+                                    .setPositiveButton(getResources().getString(R.string.quit), new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             leaveChannel(channel);
                                         }
                                     })
-                                    .setNegativeButton("취소", null)
+                                    .setNegativeButton(getResources().getString(R.string.cancel_btn), null)
                                     .create().show();
                         } else if (which == 1) {
                             setChannelPushPreferences(channel, !pushCurrentlyEnabled);
@@ -294,8 +294,8 @@ public class GroupChannelListFragment extends BaseFragment {
                 }
 
                 String toast = on
-                        ? "알림이 켜졌습니다"
-                        : "알림이 꺼졌습니다";
+                        ? String.format(getResources().getString(R.string.change_status_notification_msg), "꺼졌습니다")
+                        : String.format(getResources().getString(R.string.change_status_notification_msg), "켜졌습니다");
 
                 Toast.makeText(getActivity(), toast, Toast.LENGTH_SHORT)
                         .show();
