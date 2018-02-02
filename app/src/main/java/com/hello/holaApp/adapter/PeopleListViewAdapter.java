@@ -2,18 +2,23 @@ package com.hello.holaApp.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
+import com.hello.holaApp.vo.PhotoVo;
 import com.hello.holaApp.vo.UserVo;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerviewViewHolder;
 import com.marshalchen.ultimaterecyclerview.UltimateViewAdapter;
@@ -54,40 +59,50 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
         ((ViewHolder) holder).age.setText(age);
         ((ViewHolder) holder).identity.setText(identity);
 
+        //peopleImageScrollList = (ScrollView)
+        HorizontalScrollView peopleImageScrollList = ((ViewHolder) holder).peopleImageScrollList;
         LinearLayout layout = ((ViewHolder) holder).peopleImageList;
-        /*if(userVoList.get(index).getPhotoVoList().size() > 0) {*/
 
+        List<PhotoVo> photoVoList = userVoList.get(index).getPhotoVoList();
+        if(photoVoList != null && photoVoList.size() > 0) {
+
+            peopleImageScrollList.setVisibility(View.VISIBLE);
             layout.setVisibility(View.VISIBLE);
 
-            /*for (PhotoVo photoVo : userVoList.get(index).getPhotoVoList()) {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    (float) 65, this.context.getResources().getDisplayMetrics());
+
+            int listSize = photoVoList.size();
+            for(int i = 0 ; i < listSize ; i++) {
+
+                params.setMargins(10, 0, 0, 0);
+                params.width = value;
+                params.height = value;
+
                 RadiusNetworkImageView imageView = new RadiusNetworkImageView(this.context);
                 imageView.setRadius(10f);
 
-                imageView.setImageUrl("https://pbs.twimg.com/profile_images/839721704163155970/LI_TRk1z_400x400.jpg", this.imageLoader);
+                imageView.setImageUrl(photoVoList.get(i).getThumbnailUrl(), this.imageLoader);
+                imageView.setLayoutParams(params);
                 layout.addView(imageView);
-            }*/
+            }
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(10, 0, 0, 0);
+            if(listSize == 5) {
+                RadiusNetworkImageView imageView = new RadiusNetworkImageView(this.context);
+                params.setMargins(5, 0, 0, 0);
 
-        int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                (float) 65, this.context.getResources().getDisplayMetrics());
-
-        for(int i = 0 ; i < 4; i++) {
-
-            params.width = value;
-            params.height = value;
-
-            RadiusNetworkImageView imageView = new RadiusNetworkImageView(this.context);
-            imageView.setRadius(10f);
-
-            imageView.setImageUrl("https://scontent.xx.fbcdn.net/v/t1.0-1/c29.0.100.100/p100x100/10354686_10150004552801856_220367501106153455_n.jpg?oh=abb02c803534c00048bc66ee3119bfbf&oe=5AF01677", this.imageLoader);
-            imageView.setLayoutParams(params);
-            layout.addView(imageView);
-        }
-        /*} else {
+                imageView.setRadius(10f);
+                imageView.setDefaultImageResId(R.drawable.show_more);
+                imageView.setScaleType(ImageView.ScaleType.CENTER);
+                imageView.setLayoutParams(params);
+                layout.addView(imageView);
+            }
+        } else {
+            peopleImageScrollList.setVisibility(View.GONE);
             layout.setVisibility(View.GONE);
-        }*/
+        }
     }
 
     @Override
@@ -198,17 +213,21 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
         TextView age;
         TextView identity;
 
+        HorizontalScrollView peopleImageScrollList;
         LinearLayout peopleImageList;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSans-Medium.ttf");
             userProfileName = (TextView) itemView.findViewById(R.id.user_profile_name);
+            userProfileName.setTypeface(typeface);
             img = (RadiusNetworkImageView) itemView.findViewById(R.id.user_profile_photo);
             img.setRadius(100f);
 
             age = (TextView) itemView.findViewById(R.id.age);
             identity = (TextView) itemView.findViewById(R.id.identity);
 
+            peopleImageScrollList = (HorizontalScrollView) itemView.findViewById(R.id.people_image_scroll_list);
             peopleImageList = (LinearLayout) itemView.findViewById(R.id.people_image_list);
         }
 
