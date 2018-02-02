@@ -38,6 +38,7 @@ import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
 import com.hello.holaApp.vo.PhotoVo;
 import com.hello.holaApp.vo.SayVo;
+import com.hello.holaApp.vo.UserVo;
 import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 import com.marshalchen.ultimaterecyclerview.grid.BasicGridLayoutManager;
@@ -74,6 +75,8 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
     private ImageLoader imageLoader;
 
     private FirebaseAuth mAuth;
+
+    private UserVo userVo;
 
     private View view;
 
@@ -295,12 +298,84 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
         loadingPhotoData(this.photoQuery, false);
 
-        this.sayQuery = db.collection("say/")
-                .whereEqualTo("member_id", this.uid)
-                .orderBy("reg_dt", Query.Direction.DESCENDING)
-                .limit(this.limit);
+        userVo = new UserVo();
 
-        loadingSayData(this.sayQuery);
+        db.collection("member/")
+                .document(this.uid)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document != null) {
+                            Log.d(TAG, "DocumentSnapshot data: " + task.getResult().getData());
+
+                            userVo.setUserName(task.getResult().getData().get("name").toString());
+                            userVo.setNation(task.getResult().getData().get("nation").toString());
+                            userVo.setGender(task.getResult().getData().get("gender").toString());
+                            userVo.setPhotoUrl(task.getResult().getData().get("profileUrl").toString());
+                            userVo.setIdentity(task.getResult().getData().get("identity").toString());
+
+                            if (task.getResult().getData().get("dateOfBirth") != null) {
+                                long dateOfBirth = ((Date) task.getResult().getData().get("dateOfBirth")).getTime();
+                                long now = System.currentTimeMillis();
+
+                                Calendar birthCalendar = Calendar.getInstance();
+                                birthCalendar.setTimeInMillis(dateOfBirth);
+
+                                int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                                Calendar nowCalender = Calendar.getInstance();
+                                nowCalender.setTimeInMillis(now);
+
+                                int nowYear = nowCalender.get(Calendar.YEAR);
+
+                                int koreanAge = nowYear - yearOfBirth + 1;
+
+                                userVo.setAge(koreanAge);
+                            } else if (task.getResult().getData().get("dateOfBirth") == null) {
+                                userVo.setAge(1);
+                            }
+
+                            String age = (userVo.getAge() != 1 ? String.format("%d세", userVo.getAge()) : "나이미입력");
+
+                            String gender = userVo.getGender();
+
+                            if (gender != null && !gender.isEmpty()) {
+                                gender = (gender.equals("male") ? "남자" : "여자");
+                            } else {
+                                gender = "성별 미입력";
+                            }
+
+                            TextView ageView = (TextView) findViewById(R.id.age);
+                            ageView.setText(String.format("%s, %s", age, gender));
+
+                            String identity1 = userVo.getIdentity();
+                            String nation = userVo.getNation();
+                            if (identity1 != null && nation != null) {
+
+                                nation = String.format("%s, %s", nation, identity1);
+                                TextView identityView = (TextView) findViewById(R.id.identity);
+                                identityView.setText(nation);
+
+                            }
+
+                            GeoPoint geoPoint = (GeoPoint)task.getResult().getData().get("location");
+                            userVo.setGeoPoint(geoPoint);
+
+                            this.sayQuery = db.collection("say/")
+                                    .whereEqualTo("member_id", this.uid)
+                                    .orderBy("reg_dt", Query.Direction.DESCENDING)
+                                    .limit(this.limit);
+
+                            loadingSayData(this.sayQuery);
+                        } else {
+                            Log.d(TAG, "No such document");
+                        }
+                    } else {
+                        Crashlytics.logException(task.getException());
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                    }
+                });
 
         /*this.gridView.setOnItemClickListener((parent, v, position, id) -> {
             *//*Intent viewIntent = new Intent(getActivity(), ViewPhotoActivity.class);
@@ -395,7 +470,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                                 photoVo.setPhotoId(document.getString("id"));
                                 photoVo.setThumbnailUrl(document.getData().get("thumbnail_img").toString());
                                 photoVo.setOriginalUrl(document.getData().get("original_img").toString());
-                                photoVo.setKind("photoVo");
+                                photoVo.setKind("photo");
                                 this.adapter.insertLast(photoVo);
 
                                 /*StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getData().get("fileName").toString() + ".jpg");
@@ -434,138 +509,64 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                                     .startAfter(last)
                                     .limit(limit);
 
-                            Log.d("sizzzz", size + "");
-
                             if (size < limit) {
                                 this.listView.disableLoadmore();
                             }
 
                             for (DocumentSnapshot document : task.getResult()) {
 
-                                db.collection("member/")
-                                        .whereEqualTo("id", this.uid)
-                                        .get()
-                                        .addOnCompleteListener(task1 -> {
-                                            if (task1.isSuccessful()) {
-                                                if (task1.getResult().size() > 0) {
-                                                    for (DocumentSnapshot document1 : task1.getResult()) {
+                                SayVo sayVo = new SayVo();
 
-                                                        DateTime dateTime = new DateTime();
+                                sayVo.setUserName(userVo.getUserName());
+                                sayVo.setPhotoUrl(userVo.getPhotoUrl());
+                                sayVo.setMsg(document.getData().get("content").toString());
+                                sayVo.setIdentity(userVo.getIdentity());
+                                sayVo.setNation(userVo.getNation());
+                                sayVo.setNoMsg(false);
 
-                                                        String gender = "";
+                                long regDt = document.getDate("reg_dt").getTime();
+                                long now = System.currentTimeMillis();
 
-                                                        if (document1.getData().get("gender") != null) {
-                                                            gender = (gender.equals("male") ? "남자" : "여자");
-                                                        } else {
-                                                            gender = "성별 미입력";
-                                                        }
+                                long regTime = (now - regDt) / 60000;
 
-                                                        SayVo sayVo = new SayVo();
+                                String regMin = "";
+                                if(regTime < 60) {
+                                    regMin = String.format("%dmin", regTime);
+                                } else if(regTime >= 60 && regTime < 1440) {
+                                    regMin = String.format("%dh", (int)(regTime / 60));
+                                } else if(regTime > 1440) {
+                                    regMin = String.format("%dd", (int)(regTime / 1440));
+                                }
 
-                                                        sayVo.setUserName(document1.getData().get("name").toString());
-                                                        sayVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
-                                                        sayVo.setMsg(document.getData().get("content").toString());
-                                                        sayVo.setNoMsg(false);
+                                GeoPoint geoPoint = userVo.getGeoPoint();
+                                GeoPoint myGeoPoint = new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude());
 
-                                                        TextView ageView = (TextView) findViewById(R.id.age);
+                                Location loc = new Location("pointA");
+                                Location loc1 = new Location("pointB");
 
-                                                        if (document1.getData().get("dateOfBirth") != null) {
-                                                            long dateOfBirth = ((Date) document1.getData().get("dateOfBirth")).getTime();
-                                                            long now = System.currentTimeMillis();
+                                loc.setLatitude(geoPoint.getLatitude());
+                                loc.setLongitude(geoPoint.getLongitude());
 
-                                                            Calendar birthCalendar = Calendar.getInstance();
-                                                            birthCalendar.setTimeInMillis(dateOfBirth);
+                                loc1.setLatitude(myGeoPoint.getLatitude());
+                                loc1.setLongitude(myGeoPoint.getLongitude());
 
-                                                            int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+                                String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
+                                sayVo.setDistance(String.format("%s / %s", regMin, distance));
 
-                                                            Calendar nowCalender = Calendar.getInstance();
-                                                            nowCalender.setTimeInMillis(now);
-
-                                                            int nowYear = nowCalender.get(Calendar.YEAR);
-
-                                                            int koreanAge = nowYear - yearOfBirth + 1;
-
-                                                            String age = String.format("%d세, %s", koreanAge, gender);
-                                                            ageView.setText(age);
-                                                        } else if (document1.getData().get("dateOfBirth") == null) {
-                                                            String age = String.format("%s, %s", "나이 미입력", gender);
-                                                            ageView.setText(age);
-                                                        }
-
-                                                        if (document1.getData().get("identity") != null
-                                                                && document1.getData().get("nation") != null) {
-                                                            String identity = document1.getData().get("identity").toString();
-                                                            String nation = document1.getData().get("nation").toString();
-
-                                                            nation = String.format("%s, %s", nation, identity);
-                                                            TextView identityView = (TextView) findViewById(R.id.identity);
-                                                            identityView.setText(nation);
-
-                                                            sayVo.setIdentity(document1.getData().get("identity").toString());
-                                                            sayVo.setNation(document1.getData().get("nation").toString());
-                                                        }
-
-                                                        long regDt = document.getDate("reg_dt").getTime();
-                                                        long now = System.currentTimeMillis();
-
-                                                        long regTime = (now - regDt) / 60000;
-
-                                                        String regMin = "";
-                                                        if(regTime < 60) {
-                                                            regMin = String.format("%dmin", regTime);
-                                                        } else if(regTime >= 60 && regTime < 1440) {
-                                                            regMin = String.format("%dh", (int)(regTime / 60));
-                                                        } else if(regTime > 1440) {
-                                                            regMin = String.format("%dd", (int)(regTime / 1440));
-                                                        }
-
-                                                        GeoPoint geoPoint = (GeoPoint)document1.getData().get("location");
-                                                        GeoPoint myGeoPoint = new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude());
-
-                                                        Location loc = new Location("pointA");
-                                                        Location loc1 = new Location("pointB");
-
-                                                        loc.setLatitude(geoPoint.getLatitude());
-                                                        loc.setLongitude(geoPoint.getLongitude());
-
-                                                        loc1.setLatitude(myGeoPoint.getLatitude());
-                                                        loc1.setLongitude(myGeoPoint.getLongitude());
-
-                                                        String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
-                                                        sayVo.setDistance(String.format("%s / %s", regMin, distance));
-
-                                                        this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
-
-                                                        new Handler().postDelayed(() -> {
-                                                            BaseApplication.getInstance().progressOFF();
-                                                            view.setVisibility(View.VISIBLE);
-                                                            this.gridView.setVisibility(View.VISIBLE);
-                                                            this.listView.setVisibility(View.VISIBLE);
-                                                        }, 100);
-                                                    }
-                                                } else {
-                                                    SayVo sayVo = new SayVo();
-                                                    sayVo.setMsg("등록된 내용이 없습니다.");
-                                                    sayVo.setNoMsg(true);
-                                                    this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
-
-                                                    this.listView.disableLoadmore();
-                                                }
-
-                                                BaseApplication.getInstance().progressOFF();
-                                                this.view.setVisibility(View.VISIBLE);
-                                                this.gridView.setVisibility(View.VISIBLE);
-                                                this.listView.setVisibility(View.VISIBLE);
-                                            } else {
-                                                Crashlytics.logException(task1.getException());
-                                                Log.w(TAG, "Error getting documents.", task1.getException());
-                                            }
-                                        });
+                                this.userSayListViewAdapter.insert(sayVo, this.userSayListViewAdapter.getAdapterItemCount());
                             }
                         } else {
-                            Crashlytics.logException(task.getException());
-                            Log.w(TAG, "Error getting documents.", task.getException());
+                            /*Crashlytics.logException(task.getException());
+                            Log.w(TAG, "Error getting documents.", task.getException());*/
+                            this.listView.disableLoadmore();
                         }
+
+                        new Handler().postDelayed(() -> {
+                            BaseApplication.getInstance().progressOFF();
+                            view.setVisibility(View.VISIBLE);
+                            this.gridView.setVisibility(View.VISIBLE);
+                            this.listView.setVisibility(View.VISIBLE);
+                        }, 100);
                     }
                 });
 
