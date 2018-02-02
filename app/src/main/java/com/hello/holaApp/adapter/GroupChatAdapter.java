@@ -1,6 +1,7 @@
 package com.hello.holaApp.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
@@ -11,7 +12,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dinuscxj.progressbar.CircleProgressBar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.hello.holaApp.R;
+import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.common.DateUtils;
 import com.hello.holaApp.common.FileUtils;
 import com.hello.holaApp.common.ImageUtils;
@@ -22,6 +25,7 @@ import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
 import com.sendbird.android.FileMessage;
 import com.sendbird.android.GroupChannel;
+import com.sendbird.android.Member;
 import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
 import com.sendbird.android.User;
@@ -783,6 +787,22 @@ public class GroupChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 nicknameText.setVisibility(View.VISIBLE);
                 nicknameText.setText(message.getSender().getNickname());
             }
+
+            profileImage.setOnClickListener(v -> {
+                List<Member> memberList = channel.getMembers();
+                for (Member member : memberList) {
+                    if(!member.getUserId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                        Intent intent = new Intent(context, UserInfoActivity.class);
+                        intent.putExtra("uid", member.getUserId());
+                        intent.putExtra("userName", member.getNickname());
+                        intent.putExtra("identity", "");
+                        intent.putExtra("profileUrl", member.getProfileUrl());
+                        /*intent.putExtra("bitmapImage", userVoList.get(index).getBitmap());*/
+
+                        context.startActivity(intent);
+                    }
+                }
+            });
 
             messageText.setText(message.getMessage());
             timeText.setText(DateUtils.formatTime(message.getCreatedAt()));

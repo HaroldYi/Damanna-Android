@@ -24,15 +24,12 @@ import com.hello.holaApp.R;
 import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.fragment.GroupChatFragment;
 import com.sendbird.android.GroupChannel;
-import com.sendbird.android.GroupChannelListQuery;
 import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
 import com.sendbird.android.User;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import devlight.io.library.ntb.NavigationTabBar;
 
 /**
  * Created by lji5317 on 11/12/2017.

@@ -44,7 +44,7 @@ import devlight.io.library.ntb.NavigationTabBar;
 
 import static android.app.Activity.RESULT_OK;
 
-public class GroupChannelListFragment extends Fragment {
+public class GroupChannelListFragment extends BaseFragment {
 
     private static final String CHANNEL_HANDLER_ID = "CHANNEL_HANDLER_GROUP_CHANNEL_LIST";
     public static final String EXTRA_GROUP_CHANNEL_URL = "GROUP_CHANNEL_URL";
@@ -108,6 +108,8 @@ public class GroupChannelListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         Log.d("LIFECYCLE", "GroupChannelListFragment onCreateView()");
+
+        progressON(getResources().getString(R.string.loading));
 
         View rootView = inflater.inflate(R.layout.fragment_group_channel_list, container, false);
 
@@ -402,6 +404,8 @@ public class GroupChannelListFragment extends Fragment {
 
                 mChannelListAdapter.clearMap();
                 mChannelListAdapter.setGroupChannelList(list);
+
+                progressOFF();
             }
         });
 

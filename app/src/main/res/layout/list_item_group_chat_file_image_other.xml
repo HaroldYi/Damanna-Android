@@ -8,21 +8,22 @@
 
     <TextView
         android:id="@+id/text_group_chat_date"
-        android:text="February 22"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:textColor="@color/groupChatDateText"
+        android:layout_marginBottom="0dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/group_chat_date_background"
+        android:gravity="center"
+        android:paddingBottom="4dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="0dp"
-        android:gravity="center"
-        android:textSize="14sp" />
+        android:text="February 22"
+        android:textColor="@color/groupChatDateText"
+        android:textSize="14sp"
+        android:typeface="sans" />
 
     <ImageView
         android:id="@+id/image_group_chat_profile"
@@ -36,13 +37,14 @@
         android:layout_marginTop="8dp"/>
 
     <TextView
-        android:text="Daniel Silberschatz"
         android:id="@+id/text_group_chat_nickname"
-        android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignTop="@id/image_group_chat_profile"
         android:layout_toRightOf="@id/image_group_chat_profile"
-        android:layout_alignTop="@id/image_group_chat_profile"/>
+        android:text="Daniel Silberschatz"
+        android:textSize="16sp"
+        android:typeface="sans" />
 
     <android.support.v7.widget.CardView
         android:id="@+id/card_group_chat_message"
