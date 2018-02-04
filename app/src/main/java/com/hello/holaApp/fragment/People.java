@@ -178,10 +178,14 @@ public class People extends BaseFragment implements View.OnClickListener {
 
                                 int koreanAge = nowYear - yearOfBirth + 1;
 
+                                String identity = (document.getData().get("identity") != null ? document.getData().get("identity").toString() : "");
+                                String nation = (document.getData().get("nation") != null ? document.getData().get("nation").toString() : "");
+                                String profileUrl = (document.getData().get("profileUrl") != null ? document.getData().get("profileUrl").toString() : "");
+
                                 userVo.setAge(koreanAge);
-                                userVo.setIdentity(document.getData().get("identity").toString());
-                                userVo.setNation(document.getData().get("nation").toString());
-                                userVo.setPhotoUrl(document.getData().get("profileUrl").toString());
+                                userVo.setIdentity(identity);
+                                userVo.setNation(nation);
+                                userVo.setPhotoUrl(profileUrl);
                                 userVo.setGeoPoint(geoPoint);
 
                                 this.db.collection("photo/")

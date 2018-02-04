@@ -43,7 +43,7 @@
         android:enabled="true"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="string/age"
+        android:title="@string/age"
         android:summary="Harold"/>
 
     <Preference

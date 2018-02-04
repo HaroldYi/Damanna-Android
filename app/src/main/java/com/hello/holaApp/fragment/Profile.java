@@ -15,7 +15,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
@@ -51,7 +50,7 @@ import com.hello.holaApp.activity.PopupActivity;
 import com.hello.holaApp.activity.SettingActivity;
 import com.hello.holaApp.activity.ViewPhotoActivity;
 import com.hello.holaApp.adapter.NewRecyclerGridViewAdapter;
-import com.hello.holaApp.adapter.NewSayListViewAdapter;
+import com.hello.holaApp.adapter.UserInfoSayListViewAdapter;
 import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.Constant;
 import com.hello.holaApp.common.EqualSpacingItemDecoration;
@@ -103,7 +102,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     private UltimateRecyclerView listView;
     private List<SayVo> sayVoList;
-    private NewSayListViewAdapter userSayListViewAdapter;
+    private UserInfoSayListViewAdapter userSayListViewAdapter;
 
     private Button button;
     private int lastIndex;
@@ -265,6 +264,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         /*this.listView.setVisibility(View.INVISIBLE);*/
         this.linearLayoutManager = new LinearLayoutManager(getActivity());
         this.listView.setLayoutManager(this.linearLayoutManager);
+        this.listView.setEmptyView(R.layout.empty_view, UltimateRecyclerView.EMPTY_SHOW_LOADMORE_ONLY);
 
         /*this.listView.setLoadMoreView(LayoutInflater.from(getActivity())
                 .inflate(R.layout.custom_bottom_progressbar, null));*/
@@ -272,7 +272,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.photoVoList = new ArrayList<>();
         this.sayVoList = new ArrayList<>();
 
-        this.userSayListViewAdapter = new NewSayListViewAdapter(getActivity(), this.sayVoList, true);
+        this.userSayListViewAdapter = new UserInfoSayListViewAdapter(getActivity(), this.sayVoList, true);
         this.listView.setAdapter(this.userSayListViewAdapter);
         this.listView.setHasFixedSize(false);
 
@@ -714,12 +714,15 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                             lastYn = true;
                         }
 
+                        progressOFF();
+                        this.view.setVisibility(View.VISIBLE);
+                        this.listView.setVisibility(View.VISIBLE);
 
-                        new Handler().postDelayed(() -> {
+                        /*new Handler().postDelayed(() -> {
                             progressOFF();
                             this.view.setVisibility(View.VISIBLE);
                             this.listView.setVisibility(View.VISIBLE);
-                        }, 150);
+                        }, 150);*/
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
                     }

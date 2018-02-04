@@ -44,7 +44,6 @@
                     android:layout_marginLeft="10dp"
                     android:layout_toEndOf="@+id/user_profile_photo_layout"
                     android:layout_weight="1"
-                    android:text="TextView"
                     android:textAlignment="textEnd"
                     android:textColor="@color/black"
                     android:textSize="16sp"
@@ -57,7 +56,6 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="2.5dp"
                     android:layout_weight="1"
-                    android:text="TextView"
                     android:textColor="@color/dark_gray"
                     android:typeface="sans" />
             </LinearLayout>
@@ -92,7 +90,6 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
-                android:text="TextView"
                 android:textColor="@color/dark_gray"
                 android:typeface="sans" />
 

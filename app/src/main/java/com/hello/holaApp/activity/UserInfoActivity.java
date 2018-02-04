@@ -30,7 +30,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.hello.holaApp.R;
 import com.hello.holaApp.adapter.NewRecyclerGridViewAdapter;
-import com.hello.holaApp.adapter.NewSayListViewAdapter;
+import com.hello.holaApp.adapter.UserInfoSayListViewAdapter;
 import com.hello.holaApp.common.BaseApplication;
 import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.EqualSpacingItemDecoration;
@@ -42,8 +42,6 @@ import com.hello.holaApp.vo.UserVo;
 import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 import com.marshalchen.ultimaterecyclerview.grid.BasicGridLayoutManager;
-
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -69,7 +67,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
     private List<PhotoVo> photoVoList;
 
     private UltimateRecyclerView gridView;
-    private NewSayListViewAdapter userSayListViewAdapter;
+    private UserInfoSayListViewAdapter userSayListViewAdapter;
     private NewRecyclerGridViewAdapter adapter;
 
     private ImageLoader imageLoader;
@@ -206,7 +204,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         this.listView = (UltimateRecyclerView) findViewById(R.id.say_list);
         this.linearLayoutManager = new LinearLayoutManager(this);
         this.listView.setLayoutManager(this.linearLayoutManager);
-        this.userSayListViewAdapter = new NewSayListViewAdapter(this, this.sayVoList);
+        this.userSayListViewAdapter = new UserInfoSayListViewAdapter(this, this.sayVoList);
         this.listView.setAdapter(this.userSayListViewAdapter);
         this.listView.setHasFixedSize(false);
 
