@@ -155,7 +155,7 @@ public class SplashActivity extends AppCompatActivity {
             googleBuilder.setPermissions(Arrays.asList(Scopes.EMAIL, Scopes.PROFILE, Scopes.PLUS_ME, "https://www.googleapis.com/auth/user.birthday.read"));
 
             Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
-                    .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                    .setIsSmartLockEnabled(false)
                     .setAvailableProviders(Arrays.asList(
                             facebookBuilder.build(),
                             googleBuilder.build()
@@ -317,8 +317,12 @@ public class SplashActivity extends AppCompatActivity {
                 DocumentSnapshot document = task.getResult();
                 if (document != null && document.exists()) {
 
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("location", new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude()));
+                    map.put("last_signIn", new Date());
+
                     docRef
-                        .update("location", new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude()))
+                        .update(map)
                         .addOnSuccessListener(aVoid -> {
                             locationManager.removeUpdates(gpsListener);
                         })
