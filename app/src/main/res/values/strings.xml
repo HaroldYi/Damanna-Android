@@ -31,6 +31,9 @@
     <string name="googleSecret">
         wJm0I2pfh7lU8VInxn4S19b1
     </string>
+    <string name="fabric_api_key">
+        7dfb4412dd58c836e9fca472661da9f2f38df8c9
+    </string>
     <string name="no_data">
         등록된 내용이 없습니다
     </string>
@@ -86,7 +89,7 @@
         여행자
     </string>
     <string name="identity_resident">
-        교민
+        교포
     </string>
     <string name="identity_etc">
         기타
@@ -129,6 +132,9 @@
     </string>
     <string name="delete_msg">
         삭제하시겠습니까?
+    </string>
+    <string name="cencel">
+        취소
     </string>
     <string name="quit">
         나가기
