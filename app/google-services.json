@@ -8,48 +8,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:629394807535:android:1c218b44f8f35e95",
+        "mobilesdk_app_id": "1:629394807535:android:9a7375c3065e656f",
         "android_client_info": {
-          "package_name": "com.hello.TrevelMeetUp"
+          "package_name": "com.hello.holaApp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDPancg8F6b8oLuyt8pAJoZmwFAMY6G5HM"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:629394807535:android:cc8410374032c52f",
-        "android_client_info": {
-          "package_name": "com.hello.Damanna"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "629394807535-sahrmt9eoocereeq38vbpui9ndbbaba0.apps.googleusercontent.com",
+          "client_id": "629394807535-5nerdcrhnjf0jmnjd3pd8dc19b5dlvr7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.hello.Damanna",
+            "package_name": "com.hello.holaApp",
+            "certificate_hash": "7ce2465d332e61904d4e3f68d2158e49913ed658"
+          }
+        },
+        {
+          "client_id": "629394807535-f3449b0bupkhqo17k5blhl1gjkvc5qil.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hello.holaApp",
             "certificate_hash": "a5a47165361a36642aa6b2bbe8eb7975387cb2d3"
           }
         },
@@ -71,48 +48,17 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "629394807535-8ojcmufitv8716p70jroe50nvdr6q9jg.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.hello.Damanna"
-              }
-            },
-            {
               "client_id": "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "629394807535-84vdgct29o9jq71kigck3lr0fge1div7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hello.holaApp"
+              }
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:629394807535:android:9a7375c3065e656f",
-        "android_client_info": {
-          "package_name": "com.hello.holaApp"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "629394807535-53bv3fvsg0kd53oa0qoc8k59kd9j9qt1.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDPancg8F6b8oLuyt8pAJoZmwFAMY6G5HM"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2
