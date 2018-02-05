@@ -51,7 +51,6 @@ import com.hello.holaApp.activity.SettingActivity;
 import com.hello.holaApp.activity.ViewPhotoActivity;
 import com.hello.holaApp.adapter.NewRecyclerGridViewAdapter;
 import com.hello.holaApp.adapter.UserInfoSayListViewAdapter;
-import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.Constant;
 import com.hello.holaApp.common.EqualSpacingItemDecoration;
 import com.hello.holaApp.common.RadiusImageButton;
@@ -113,7 +112,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     private String regMin = "";
 
-    private final int limit = 5;
+    private static final int limit = 10;
     private Query sayQuery;
     private Query photoQuery;
 
@@ -228,7 +227,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
             String profileUrl = this.user.getPhotoUrl().toString();
 
-            if(profileUrl.indexOf("scontent.xx.fbcdn.net") == -1)
+            if(profileUrl.indexOf("10354686_10150004552801856_220367501106153455_n") == -1)
                 viewPhoto(profileUrl, "jpg");
         });
 
@@ -626,7 +625,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                                 if(document.getData().get("file_name") != null) {
                                     photoVo.setFileName(document.getData().get("file_name").toString());
                                 }
-                                photoVo.setKind("photoVo");
+                                photoVo.setKind("photo");
                                 this.adapter.insertLast(photoVo);
 
                                 /*StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("original/" + document.getData().get("fileName").toString() + ".jpg");
