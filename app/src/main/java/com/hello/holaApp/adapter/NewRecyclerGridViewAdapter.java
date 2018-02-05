@@ -4,10 +4,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -166,9 +169,9 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<PhotoV
         holder.delPhotoBtn.setOnClickListener(v -> {
 
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.context);
-            alertDialogBuilder.setTitle(context.getResources().getString(R.string.delete_title));
+            alertDialogBuilder.setTitle(String.format(context.getResources().getString(R.string.delete_title), "사진"));
             alertDialogBuilder.setMessage(context.getResources().getString(R.string.delete_msg))
-                    .setCancelable(false)
+                    .setCancelable(true)
                     .setPositiveButton(context.getResources().getString(R.string.delete), (dialog, id) -> {
 
                         // Create a storage reference from our app
@@ -214,7 +217,7 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<PhotoV
                             }
                         });
                     })
-                    .setNegativeButton("취소", (dialog, id) -> {
+                    .setNegativeButton(context.getResources().getString(R.string.cencel), (dialog, id) -> {
                         // 다이얼로그를 취소한다
                         dialog.cancel();
                     });
@@ -298,21 +301,28 @@ public class NewRecyclerGridViewAdapter extends UltimateGridLayoutAdapter<PhotoV
             }
 
             this.img = (NetworkImageView) view.findViewById(R.id.img1);
-            this.delPhotoBtn = (ImageButton) view.findViewById(R.id.del_photo_btn);
-            this.delPhotoBtn.bringToFront();
-            /*DisplayMetrics metrics = new DisplayMetrics();
-            WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            /*int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    (float) 190, context.getResources().getDisplayMetrics());
+
+            ViewGroup.LayoutParams params = img.getLayoutParams();
+            params.width = value;
+            params.height = value;
+
+            this.img.setLayoutParams(params);*/
+
+            DisplayMetrics metrics = new DisplayMetrics();
+            WindowManager windowManager = (WindowManager) context
+                    .getSystemService(Context.WINDOW_SERVICE);
             windowManager.getDefaultDisplay().getMetrics(metrics);
 
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) img.getLayoutParams();
-            params.width = metrics.widthPixels / 4;
+            ViewGroup.LayoutParams params = img.getLayoutParams();
+            params.width = metrics.widthPixels / 2;
             params.height = metrics.heightPixels / 4;
 
-            img.setLayoutParams(params);*/
+            this.img.setLayoutParams(params);
 
-
-
-            /*view.setTag(this);*/
+            this.delPhotoBtn = (ImageButton) view.findViewById(R.id.del_photo_btn);
+            this.delPhotoBtn.bringToFront();
         }
     }
 }
