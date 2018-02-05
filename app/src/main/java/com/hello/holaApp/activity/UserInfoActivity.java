@@ -98,6 +98,8 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
 
     private Activity activity;
 
+    public static int index = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -183,7 +185,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
             this.tabHost.addTab(tab);
         }
 
-        this.tabHost.setSelectedNavigationItem(0);
+        this.tabHost.setSelectedNavigationItem(this.index);
         this.tabHost.getCurrentTab().setTextColor(this.selectedColour);
 
         Button chatBtn = (Button) findViewById(R.id.chat_btn);
@@ -276,6 +278,21 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
                 loadingPhotoData(photoQuery, true);
             }
         });
+
+        switch (this.index) {
+            case 0 :
+                this.listView.setVisibility(View.VISIBLE);
+                this.photoListView.setVisibility(View.GONE);
+                break;
+
+            case 1 :
+                this.listView.setVisibility(View.GONE);
+                this.photoListView.setVisibility(View.VISIBLE);
+                break;
+
+            default:
+                break;
+        }
 
         /*this.gridView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
 

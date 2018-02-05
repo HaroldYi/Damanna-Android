@@ -1,6 +1,7 @@
 package com.hello.holaApp.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -20,6 +22,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.hello.holaApp.R;
+import com.hello.holaApp.activity.MainActivity;
+import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
 import com.hello.holaApp.vo.PhotoVo;
@@ -99,7 +103,7 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
                                 }
 
                                 photoVoMap.put(uid, photoList);
-                                setPhotoList(photoList, holder);
+                                setPhotoList(photoList, holder, index);
                             } else {
 
                             }
@@ -110,7 +114,7 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
                     /*Log.d(TAG, document.getId() + " => " + document.getData());*/
                     });
         } else {
-            this.setPhotoList(photoVoList, holder);
+            this.setPhotoList(photoVoList, holder, index);
         }
 
         /*List<PhotoVo> photoVoList = userVoList.get(index).getPhotoVoList();*/
@@ -140,10 +144,14 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
         return vh;
     }
 
-    private void setPhotoList(List<PhotoVo> photoVoList, RecyclerView.ViewHolder holder) {
+    private void setPhotoList(List<PhotoVo> photoVoList, RecyclerView.ViewHolder holder, int index) {
 
         HorizontalScrollView peopleImageScrollList = ((ViewHolder) holder).peopleImageScrollList;
         LinearLayout layout = ((ViewHolder) holder).peopleImageList;
+
+        ((ViewHolder) holder).profileLayout.setOnClickListener(v -> {
+            this.openUserInfoActivity(index, 0);
+        });
 
         if(photoVoList != null && photoVoList.size() > 0) {
 
@@ -158,6 +166,9 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
             int listSize = photoVoList.size();
 
+            layout.setOnClickListener(v -> {
+                this.openUserInfoActivity(index, 1);
+            });
             for(int i = 0 ; i < listSize ; i++) {
 
                 params.setMargins(10, 0, 0, 0);
@@ -180,12 +191,31 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
                 imageView.setDefaultImageResId(R.drawable.show_more);
                 imageView.setScaleType(ImageView.ScaleType.CENTER);
                 imageView.setLayoutParams(params);
+
+                imageView.setOnClickListener(v -> {
+                    this.openUserInfoActivity(index, 1);
+                });
+
                 layout.addView(imageView);
             }
         } else {
             peopleImageScrollList.setVisibility(View.GONE);
             layout.setVisibility(View.GONE);
         }
+    }
+
+    private void openUserInfoActivity(int index, int tabIndex) {
+        MainActivity.tabIndex = 1;
+
+        Intent intent = new Intent(context, UserInfoActivity.class);
+        intent.putExtra("uid", userVoList.get(index).getUid());
+        intent.putExtra("userName", userVoList.get(index).getUserName());
+        intent.putExtra("identity", userVoList.get(index).getIdentity());
+        intent.putExtra("profileUrl", userVoList.get(index).getPhotoUrl());
+
+        UserInfoActivity.index = tabIndex;
+
+        context.startActivity(intent);
     }
 
     public void insert(UserVo userVo, int position) {
@@ -266,6 +296,7 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
     class ViewHolder extends UltimateRecyclerviewViewHolder {
 
+        RelativeLayout profileLayout;
         TextView userProfileName;
         RadiusNetworkImageView img;
         TextView age;
@@ -276,6 +307,7 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
         public ViewHolder(View itemView) {
             super(itemView);
+            profileLayout = (RelativeLayout) itemView.findViewById(R.id.profile_layout);
             userProfileName = (TextView) itemView.findViewById(R.id.user_profile_name);
             Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSans-Medium.ttf");
             userProfileName.setTypeface(typeface);

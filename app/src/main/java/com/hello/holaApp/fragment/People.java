@@ -119,14 +119,14 @@ public class People extends BaseFragment implements View.OnClickListener {
         this.geoFire = new GeoFire(ref);
 
         // creates a new query around [latitude, longitude] with a radius of 1.0 kilometers
-        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 1);
+        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 100);
 
         this.adapter = new PeopleListViewAdapter(getContext(), userVoList);
         listView.setLayoutManager(new LinearLayoutManager(getActivity()));
         listView.setAdapter(this.adapter);
         listView.setHasFixedSize(true);
 
-        listView.addOnItemTouchListener(
+        /*listView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int index) {
@@ -138,12 +138,12 @@ public class People extends BaseFragment implements View.OnClickListener {
                         intent.putExtra("userName", userVoList.get(index).getUserName());
                         intent.putExtra("identity", userVoList.get(index).getIdentity());
                         intent.putExtra("profileUrl", userVoList.get(index).getPhotoUrl());
-                        /*intent.putExtra("bitmapImage", userVoList.get(index).getBitmap());*/
+                        *//*intent.putExtra("bitmapImage", userVoList.get(index).getBitmap());*//*
 
                         startActivity(intent);
                     }
                 })
-        );
+        );*/
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("member")
@@ -151,57 +151,65 @@ public class People extends BaseFragment implements View.OnClickListener {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        for (DocumentSnapshot document : task.getResult()) {
-                            String uid = document.get("id").toString();
-                            if(user == null || !uid.equals(user.getUid())) {
 
-                                UserVo userVo = new UserVo();
-                                GeoPoint geoPoint = (GeoPoint) document.getData().get("location");
+                        List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
 
-                                userVo.setUid(uid);
-                                userVo.setUserName(document.getData().get("name").toString());
+                        if(documentSnapshotList.size() > 0) {
+                            for (DocumentSnapshot document : documentSnapshotList) {
+                                String uid = document.get("id").toString();
+                                if(user == null || !uid.equals(user.getUid())) {
 
-                                String gender = document.getData().get("gender").toString();
-                                gender = (gender.equals("male") ? "남자" : "여자");
+                                    UserVo userVo = new UserVo();
+                                    GeoPoint geoPoint = (GeoPoint) document.getData().get("location");
 
-                                userVo.setGender(gender);
+                                    userVo.setUid(uid);
+                                    userVo.setUserName(document.getData().get("name").toString());
 
-                                long dateOfBirth = document.getDate("dateOfBirth").getTime();
-                                long now = System.currentTimeMillis();
+                                    String gender = document.getData().get("gender").toString();
+                                    gender = (gender.equals("male") ? "남자" : "여자");
 
-                                Calendar birthCalendar = Calendar.getInstance();
-                                birthCalendar.setTimeInMillis(dateOfBirth);
+                                    userVo.setGender(gender);
 
-                                int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+                                    long dateOfBirth = document.getDate("dateOfBirth").getTime();
+                                    long now = System.currentTimeMillis();
 
-                                Calendar nowCalender = Calendar.getInstance();
-                                nowCalender.setTimeInMillis(now);
+                                    Calendar birthCalendar = Calendar.getInstance();
+                                    birthCalendar.setTimeInMillis(dateOfBirth);
 
-                                int nowYear = nowCalender.get(Calendar.YEAR);
+                                    int yearOfBirth = birthCalendar.get(Calendar.YEAR);
 
-                                int koreanAge = nowYear - yearOfBirth + 1;
+                                    Calendar nowCalender = Calendar.getInstance();
+                                    nowCalender.setTimeInMillis(now);
 
-                                String identity = (document.getData().get("identity") != null ? document.getData().get("identity").toString() : "");
-                                String nation = (document.getData().get("nation") != null ? document.getData().get("nation").toString() : "");
-                                String profileUrl = (document.getData().get("profileUrl") != null ? document.getData().get("profileUrl").toString() : "");
+                                    int nowYear = nowCalender.get(Calendar.YEAR);
 
-                                userVo.setAge(koreanAge);
-                                userVo.setIdentity(identity);
-                                userVo.setNation(nation);
-                                userVo.setPhotoUrl(profileUrl);
-                                userVo.setGeoPoint(geoPoint);
+                                    int koreanAge = nowYear - yearOfBirth + 1;
 
-                                this.userVoList.add(userVo);
-                                this.userMap.put(uid, userVo);
+                                    String identity = (document.getData().get("identity") != null ? document.getData().get("identity").toString() : "");
+                                    String nation = (document.getData().get("nation") != null ? document.getData().get("nation").toString() : "");
+                                    String profileUrl = (document.getData().get("profileUrl") != null ? document.getData().get("profileUrl").toString() : "");
 
-                                geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
-                                    if (error != null) {
-                                        System.err.println("There was an error saving the location to GeoFire: " + error);
-                                    } else {
-                                        System.out.println("Location saved on server successfully!");
-                                    }
-                                });
+                                    userVo.setAge(koreanAge);
+                                    userVo.setIdentity(identity);
+                                    userVo.setNation(nation);
+                                    userVo.setPhotoUrl(profileUrl);
+                                    userVo.setGeoPoint(geoPoint);
+
+                                    this.userVoList.add(userVo);
+                                    this.userMap.put(uid, userVo);
+
+                                    geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
+                                        if (error != null) {
+                                            System.err.println("There was an error saving the location to GeoFire: " + error);
+                                        } else {
+                                            System.out.println("Location saved on server successfully!");
+                                        }
+                                    });
+                                }
                             }
+                        } else {
+                            progressOFF();
+                            view.setVisibility(View.VISIBLE);
                         }
                     } else {
                         Log.w(TAG, "Error getting documents.", task.getException());
