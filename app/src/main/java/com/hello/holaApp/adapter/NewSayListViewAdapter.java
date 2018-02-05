@@ -34,10 +34,13 @@ import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
 import com.hello.holaApp.vo.SayVo;
+import com.hello.holaApp.vo.UserVo;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerviewViewHolder;
 import com.marshalchen.ultimaterecyclerview.UltimateViewAdapter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lji5317 on 13/12/2017.
@@ -48,6 +51,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
     private Context context;
     private List<SayVo> sayVoList;
     private ImageLoader imageLoader;
+    private static Map<String, UserVo> userMap;
 
     private boolean profileYn = false;
 
@@ -57,11 +61,15 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         this.context = context;
         this.sayVoList = sayVoList;
         this.profileYn = profileYn;
+        this.userMap = new HashMap();
+        this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
     }
 
     public NewSayListViewAdapter(Context context, List<SayVo> sayVoList) {
         this.context = context;
         this.sayVoList = sayVoList;
+        this.userMap = new HashMap();
+        this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
     }
 
     @Override
@@ -120,84 +128,50 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
             });
         }
 
-        try {
+        if(this.getAdapterItemCount() > index) {
             if (!this.sayVoList.get(index).isNoMsg()) {
 
-                DocumentReference docRef = FirebaseFirestore.getInstance().collection("member").document(this.sayVoList.get(index).getUid());
-                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document != null) {
-                                Log.d(TAG, "DocumentSnapshot data: " + task.getResult().getData());
+                String uid = sayVoList.get(index).getUid();
+                UserVo userVo = userMap.get(uid);
 
-                                String userInfo = "";
+                if(userVo == null) {
+                    DocumentReference docRef = FirebaseFirestore.getInstance().collection("member").document(uid);
+                    docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document != null) {
+                                    Log.d(TAG, "DocumentSnapshot data: " + task.getResult().getData());
 
-                                String userName = document.get("name").toString();
-                                String nation = document.get("nation").toString();
-                                String identity = document.get("identity").toString();
-                                String profileUrl = document.get("profileUrl").toString();
+                                    String userName = document.get("name").toString();
+                                    String nation = document.get("nation").toString();
+                                    String identity = document.get("identity").toString();
+                                    String profileUrl = document.get("profileUrl").toString();
+                                    GeoPoint geoPoint = document.getGeoPoint("location");
 
-                                if (nation != null && !nation.isEmpty()
-                                        && identity != null && !identity.isEmpty()) {
-                                    userInfo = String.format("%s (%s, %s)", userName, nation, identity);
-                                } else if ((nation == null || nation.isEmpty())
-                                        && (identity != null && !identity.isEmpty())) {
-                                    userInfo = String.format("%s (%s)", userName, identity);
-                                } else if ((nation != null && !nation.isEmpty())
-                                        && (identity == null || identity.isEmpty())) {
-                                    userInfo = String.format("%s (%s)", userName, nation);
+                                    UserVo userVo = new UserVo();
+
+                                    userVo.setUid(uid);
+                                    userVo.setUserName(userName);
+                                    userVo.setIdentity(identity);
+                                    userVo.setNation(nation);
+                                    userVo.setPhotoUrl(profileUrl);
+                                    userVo.setGeoPoint(geoPoint);
+
+                                    userMap.put(uid, userVo);
+                                    setData(userVo, sayVoList.get(index), holder);
                                 } else {
-                                    userInfo = userName;
+                                    Log.d(TAG, "No such document");
                                 }
-
-                                GeoPoint geoPoint = (GeoPoint) document.get("location");
-                                Location loc = new Location("pointA");
-                                Location loc1 = new Location("pointB");
-
-                                loc.setLatitude(geoPoint.getLatitude());
-                                loc.setLongitude(geoPoint.getLongitude());
-
-                                loc1.setLatitude(CommonFunction.getLatitude());
-                                loc1.setLongitude(CommonFunction.getLongitude());
-
-                                String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
-
-                                distance = String.format("%s / %s", sayVoList.get(index).getRegMin(), distance);
-
-                                ((ViewHolder) holder).userName.setText(userInfo);
-                                ((ViewHolder) holder).distance.setText(distance);
-                                ((ViewHolder) holder).content.setText(sayVoList.get(index).getMsg());
-
-                                ((ViewHolder) holder).img.setImageUrl(profileUrl, imageLoader);
-                                ((ViewHolder) holder).sayLayout.setVisibility(View.VISIBLE);
-
-                                ((ViewHolder) holder).sayLayout.setOnClickListener(v -> {
-                                    MainActivity.tabIndex = 0;
-
-                                    if(!sayVoList.get(index).getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                                        Intent intent = new Intent(context, UserInfoActivity.class);
-                                        intent.putExtra("uid", sayVoList.get(index).getUid());
-                                        intent.putExtra("userName", userName);
-                                        intent.putExtra("identity", sayVoList.get(index).getIdentity());
-                                        intent.putExtra("profileUrl", profileUrl);
-                                        /*intent.putExtra("bitmapImage", sayVoList.get(index).getBitmap());*/
-
-                                        context.startActivity(intent);
-                                    } else {
-                                        Toast.makeText(context, "본인의 정보는 Profile메뉴를 이용하여 주십시오", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-
                             } else {
-                                Log.d(TAG, "No such document");
+                                Log.d(TAG, "get failed with ", task.getException());
                             }
-                        } else {
-                            Log.d(TAG, "get failed with ", task.getException());
                         }
-                    }
-                });
+                    });
+                } else {
+                    this.setData(userVo, this.sayVoList.get(index), holder);
+                }
             } else {
                 /*((ViewHolder) holder).noSayList.setVisibility(View.VISIBLE);
                 ((ViewHolder) holder).noSayMsg.setText(this.sayVoList.get(index).getMsg());*/
@@ -208,25 +182,21 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
                 ((ViewHolder) holder).delSayBtn.setVisibility(View.GONE);*/
             }
 
-        /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
-        downloadImageTask.execute(this.sayVoList.get(index).getPhotoUrl());*/
-
-            this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
+            /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
+            downloadImageTask.execute(this.sayVoList.get(index).getPhotoUrl());*/
 
             Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSans-Medium.ttf");
             ((ViewHolder) holder).userName.setTypeface(typeface);
 
-            ((ViewHolder) holder).img.setImageUrl(this.sayVoList.get(index).getPhotoUrl(), this.imageLoader);
+            /*((ViewHolder) holder).img.setImageUrl(this.sayVoList.get(index).getPhotoUrl(), this.imageLoader);*/
 
-        /*((ViewHolder) holder).sayLayout.setOnClickListener(v -> {
-            Intent intent = new Intent(this.context, UserInfoActivity.class);
-            intent.putExtra("uid", this.sayVoList.get(index).getUid());
-            intent.putExtra("userName", this.sayVoList.get(index).getUserName());
-            intent.putExtra("profileUrl", this.sayVoList.get(index).getPhotoUrl());
-            *//*intent.putExtra("bitmapImage", this.sayVoList.get(index).getBitmap());*//*
-        });*/
-        } catch (Exception e) {
-
+            /*((ViewHolder) holder).sayLayout.setOnClickListener(v -> {
+                Intent intent = new Intent(this.context, UserInfoActivity.class);
+                intent.putExtra("uid", this.sayVoList.get(index).getUid());
+                intent.putExtra("userName", this.sayVoList.get(index).getUserName());
+                intent.putExtra("profileUrl", this.sayVoList.get(index).getPhotoUrl());
+                *//*intent.putExtra("bitmapImage", this.sayVoList.get(index).getBitmap());*//*
+            });*/
         }
     }
 
@@ -254,6 +224,68 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         return vh;
     }
 
+    private void setData(UserVo userVo, SayVo sayVo, RecyclerView.ViewHolder holder) {
+        String userInfo = "";
+
+        String userName = userVo.getUserName();
+        String nation = userVo.getNation();
+        String identity = userVo.getIdentity();
+        GeoPoint geoPoint = userVo.getGeoPoint();
+
+        Location loc = new Location("pointA");
+        Location loc1 = new Location("pointB");
+
+        loc.setLatitude(geoPoint.getLatitude());
+        loc.setLongitude(geoPoint.getLongitude());
+
+        loc1.setLatitude(CommonFunction.getLatitude());
+        loc1.setLongitude(CommonFunction.getLongitude());
+
+        String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
+
+        distance = String.format("%s / %s", sayVo.getRegMin(), distance);
+
+        if(identity.indexOf("워킹") != -1) {
+            identity = "워홀";
+        }
+
+        if (nation != null && !nation.isEmpty()
+                && identity != null && !identity.isEmpty()) {
+            userInfo = String.format("%s (%s, %s)", userName, nation, identity);
+        } else if ((nation == null || nation.isEmpty())
+                && (identity != null && !identity.isEmpty())) {
+            userInfo = String.format("%s (%s)", userName, identity);
+        } else if ((nation != null && !nation.isEmpty())
+                && (identity == null || identity.isEmpty())) {
+            userInfo = String.format("%s (%s)", userName, nation);
+        } else {
+            userInfo = userName;
+        }
+
+        ((ViewHolder) holder).userName.setText(userInfo);
+        ((ViewHolder) holder).distance.setText(distance);
+        ((ViewHolder) holder).content.setText(sayVo.getMsg());
+
+        ((ViewHolder) holder).img.setImageUrl(userVo.getPhotoUrl(), this.imageLoader);
+        ((ViewHolder) holder).sayLayout.setVisibility(View.VISIBLE);
+
+        ((ViewHolder) holder).sayLayout.setOnClickListener(v -> {
+            MainActivity.tabIndex = 0;
+
+            if(!sayVo.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                Intent intent = new Intent(context, UserInfoActivity.class);
+                intent.putExtra("uid", sayVo.getUid());
+                intent.putExtra("userName", userName);
+                intent.putExtra("identity", sayVo.getIdentity());
+                intent.putExtra("profileUrl", userVo.getPhotoUrl());
+                /*intent.putExtra("bitmapImage", sayVoList.get(index).getBitmap());*/
+
+                context.startActivity(intent);
+            } else {
+                Toast.makeText(context, "본인의 정보는 Profile메뉴를 이용하여 주십시오", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     public void insert(SayVo sayVo, int position) {
         insertInternal(this.sayVoList, sayVo, position);

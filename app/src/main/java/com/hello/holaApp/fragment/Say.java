@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,11 +26,9 @@ import com.google.firebase.firestore.Query;
 import com.hello.holaApp.R;
 import com.hello.holaApp.activity.MainActivity;
 import com.hello.holaApp.activity.PopupActivity;
-import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.adapter.NewSayListViewAdapter;
 import com.hello.holaApp.vo.SayVo;
 import com.hello.holaApp.vo.UserVo;
-import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 
 import java.util.ArrayList;
@@ -67,7 +64,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
     private boolean lastitemVisibleFlag = false;
     private boolean lastYn = false;
 
-    private final int limit = 5;
+    private final int limit = 10;
 
     private Query query;
 
@@ -338,103 +335,101 @@ public class Say extends BaseFragment implements View.OnClickListener {
     private void loadingData(Query queryParam, boolean initYn) {
 
         queryParam
-        .get()
-        .addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
 
-                List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
+                        List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
 
-                int size = documentSnapshotList.size();
-                DocumentSnapshot last = null;
+                        int size = documentSnapshotList.size();
+                        DocumentSnapshot last = null;
 
-                if(size < this.limit) {
-                    this.lastYn = true;
-                    this.listView.disableLoadmore();
-                }
+                        if(size < this.limit) {
+                            this.lastYn = true;
+                            this.listView.disableLoadmore();
+                        }
 
-                if(size > 0) {
-                    last = documentSnapshotList.get(size - 1);
+                        if(size > 0) {
+                            last = documentSnapshotList.get(size - 1);
 
-                    this.query = this.db.collection("say/")
-                            .orderBy("reg_dt", Query.Direction.DESCENDING)
-                            .startAfter(last)
-                            .limit(this.limit);
+                            this.query = this.db.collection("say/")
+                                    .orderBy("reg_dt", Query.Direction.DESCENDING)
+                                    .startAfter(last)
+                                    .limit(this.limit);
 
-                    for (DocumentSnapshot document : documentSnapshotList) {
+                            for (DocumentSnapshot document : documentSnapshotList) {
 
-                        String memberId = document.getData().get("member_id").toString();
-                        /*UserVo user = userMap.get(memberId);
+                                String memberId = document.getData().get("member_id").toString();
+                                /*UserVo user = userMap.get(memberId);
 
-                        if (user != null) {*/
+                                if (user != null) {*/
 
-                            SayVo sayVo = new SayVo();
+                                SayVo sayVo = new SayVo();
 
-                            sayVo.setUid(memberId);
-                            sayVo.setMsg(document.getData().get("content").toString());
+                                sayVo.setUid(memberId);
+                                sayVo.setMsg(document.getData().get("content").toString());
 
-                            long regDt = document.getDate("reg_dt").getTime();
-                            long now = System.currentTimeMillis();
+                                long regDt = document.getDate("reg_dt").getTime();
+                                long now = System.currentTimeMillis();
 
-                            long regTime = (now - regDt) / 60000;
+                                long regTime = (now - regDt) / 60000;
 
-                            String regMin = "";
-                            if (regTime < 60) {
-                                regMin = String.format("%dmin", regTime);
-                            } else if (regTime >= 60 && regTime < 1440) {
-                                regMin = String.format("%dh", (int) (regTime / 60));
-                            } else if (regTime > 1440) {
-                                regMin = String.format("%dd", (int) (regTime / 1440));
-                            }
+                                String regMin = "";
+                                if (regTime < 60) {
+                                    regMin = String.format("%dmin", regTime);
+                                } else if (regTime >= 60 && regTime < 1440) {
+                                    regMin = String.format("%dh", (int) (regTime / 60));
+                                } else if (regTime > 1440) {
+                                    regMin = String.format("%dd", (int) (regTime / 1440));
+                                }
 
-                            sayVo.setRegMin(regMin);
+                                sayVo.setRegMin(regMin);
 
-                            /*sayVo.setUserName(user.getUserName());
-                            sayVo.setNation(user.getNation());
-                            sayVo.setIdentity(user.getIdentity());
-                            sayVo.setPhotoUrl(user.getPhotoUrl());*/
+                                /*sayVo.setUserName(user.getUserName());
+                                sayVo.setNation(user.getNation());
+                                sayVo.setIdentity(user.getIdentity());
+                                sayVo.setPhotoUrl(user.getPhotoUrl());*/
 
-                            /*GeoPoint geoPoint = user.getGeoPoint();
-                            Location loc = new Location("pointA");
-                            Location loc1 = new Location("pointB");
+                                /*GeoPoint geoPoint = user.getGeoPoint();
+                                Location loc = new Location("pointA");
+                                Location loc1 = new Location("pointB");
 
-                            loc.setLatitude(geoPoint.getLatitude());
-                            loc.setLongitude(geoPoint.getLongitude());
+                                loc.setLatitude(geoPoint.getLatitude());
+                                loc.setLongitude(geoPoint.getLongitude());
 
-                            loc1.setLatitude(CommonFunction.getLatitude());
-                            loc1.setLongitude(CommonFunction.getLongitude());
+                                loc1.setLatitude(CommonFunction.getLatitude());
+                                loc1.setLongitude(CommonFunction.getLongitude());
 
-                            String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
-                            sayVo.setDistance(String.format("%s / %s", sayVo.getRegMin(), distance));*/
+                                String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
+                                sayVo.setDistance(String.format("%s / %s", sayVo.getRegMin(), distance));*/
 
-                            this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
+                                this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
 
                         /*}*/
-                    }
+                            }
 
-                    Log.d("CNTTT", size + "");
-
-                    this.progressOFF();
-                    listView.setVisibility(View.VISIBLE);
+                            this.progressOFF();
+                            listView.setVisibility(View.VISIBLE);
                     /*noDataArea.setVisibility(View.GONE);*/
-                    sayListArea.setVisibility(View.VISIBLE);
+                            sayListArea.setVisibility(View.VISIBLE);
                     /*this.noSayList.setVisibility(View.GONE);*/
-                } else if(size == 0 && initYn) {
-                    lastYn = true;
+                        } else if(size == 0 && initYn) {
+                            lastYn = true;
                     /*listView.setVisibility(View.GONE);
                     noDataArea.setVisibility(View.VISIBLE);
                     sayListArea.setVisibility(View.GONE);
                     this.noSayList.setVisibility(View.VISIBLE);*/
-                } else {
-                    lastYn = true;
+                        } else {
+                            lastYn = true;
                     /*listView.setVisibility(View.GONE);*/
-                }
+                        }
 
-                progressOFF();
+                        progressOFF();
 
-            } else {
-                Crashlytics.logException(task.getException());
-                Log.w(TAG, "Error getting documents.", task.getException());
-            }
-        });
+                    } else {
+                        Crashlytics.logException(task.getException());
+                        Log.w(TAG, "Error getting documents.", task.getException());
+                    }
+                });
     }
 }
