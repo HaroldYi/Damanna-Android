@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -154,11 +153,12 @@ public class Say extends BaseFragment implements View.OnClickListener {
         this.listView.setVisibility(View.INVISIBLE);
         this.listView.setLoadMoreView(LayoutInflater.from(getActivity())
                 .inflate(R.layout.custom_bottom_progressbar, null));
-        this.listView.setDefaultOnRefreshListener(() -> new Handler().postDelayed(() -> {
+
+        this.listView.setDefaultOnRefreshListener(() -> {
 
             lastYn = true;
 
-            this.listView.reenableLoadmore();
+            listView.disableLoadmore();
             sayListViewAdapter.clear();
             sayVoList.clear();
 
@@ -166,8 +166,10 @@ public class Say extends BaseFragment implements View.OnClickListener {
                     .orderBy("reg_dt", Query.Direction.DESCENDING)
                     .limit(limit);
 
+            linearLayoutManager.scrollToPosition(0);
+            progressON(getResources().getString(R.string.loading));
             loadingData(query, false);
-        }, 1000));
+        });
 
         this.listView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
             @Override
@@ -347,6 +349,9 @@ public class Say extends BaseFragment implements View.OnClickListener {
                         if(size < this.limit) {
                             this.lastYn = true;
                             this.listView.disableLoadmore();
+                        } else {
+                            this.lastYn = false;
+                            this.listView.reenableLoadmore();
                         }
 
                         if(size > 0) {
