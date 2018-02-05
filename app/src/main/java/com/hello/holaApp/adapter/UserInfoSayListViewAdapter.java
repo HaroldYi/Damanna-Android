@@ -50,62 +50,9 @@ public class UserInfoSayListViewAdapter extends NewSayListViewAdapter {
             ((NewSayListViewAdapter.ViewHolder) holder).delSayBtn.setVisibility(View.VISIBLE);
             ((NewSayListViewAdapter.ViewHolder) holder).delSayBtn.setOnClickListener(v -> {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.context);
-                alertDialogBuilder.setTitle(context.getResources().getString(R.string.delete_msg));
-                alertDialogBuilder.setMessage(context.getResources().getString(R.string.delete))
-                        .setCancelable(false)
-                        .setPositiveButton(context.getResources().getString(R.string.delete), (dialog, id) -> {
-
-                            String sayId = sayVoList.get(((NewSayListViewAdapter.ViewHolder) holder).getAdapterPosition()).getSayId();
-                            FirebaseFirestore.getInstance().collection("say").document(sayId)
-                                    .delete()
-                                    .addOnSuccessListener(aVoid -> {
-                                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                                        remove(((NewSayListViewAdapter.ViewHolder) holder).getAdapterPosition());
-                                            /*if(this.sayVoList.size() == 0) {
-                                                ((ViewHolder) holder).noSayList.setVisibility(View.VISIBLE);
-                                                ((ViewHolder) holder).noSayMsg.setText(context.getResources().getString(R.string.no_data));
-                                                ((ViewHolder) holder).sayCard.setVisibility(View.GONE);
-                                            } else {
-                                                ((ViewHolder) holder).noSayList.setVisibility(View.GONE);
-                                                ((ViewHolder) holder).noSayMsg.setText(this.sayVoList.get(index).getMsg());
-                                                ((ViewHolder) holder).sayCard.setVisibility(View.VISIBLE);
-                                            }*/
-
-                                        if(this.sayVoList.size() == 0) {
-                                            SayVo sayVo = new SayVo();
-                                            sayVo.setMsg(context.getResources().getString(R.string.no_data));
-                                            sayVo.setNoMsg(true);
-
-                                            this.sayVoList.add(sayVo);
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.w(TAG, "Error deleting document", e);
-                                        }
-                                    });
-                        })
-                        .setNegativeButton("취소", (dialog, id) -> {
-                            // 다이얼로그를 취소한다
-                            dialog.cancel();
-                        });
-
-                // 다이얼로그 생성
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                // 다이얼로그 보여주기
-                alertDialog.show();
-            });
-        }
-
-        if(this.profileYn) {
-            ((NewSayListViewAdapter.ViewHolder) holder).delSayBtn.setVisibility(View.VISIBLE);
-            ((NewSayListViewAdapter.ViewHolder) holder).delSayBtn.setOnClickListener(v -> {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.context);
                 alertDialogBuilder.setTitle(String.format(context.getResources().getString(R.string.delete_title), "Say"));
-                alertDialogBuilder.setMessage(context.getResources().getString(R.string.delete))
-                        .setCancelable(false)
+                alertDialogBuilder.setMessage(context.getResources().getString(R.string.delete_msg))
+                        .setCancelable(true)
                         .setPositiveButton(context.getResources().getString(R.string.delete), (dialog, id) -> {
 
                             String sayId = sayVoList.get(((NewSayListViewAdapter.ViewHolder) holder).getAdapterPosition()).getSayId();
@@ -139,7 +86,7 @@ public class UserInfoSayListViewAdapter extends NewSayListViewAdapter {
                                         }
                                     });
                         })
-                        .setNegativeButton("취소", (dialog, id) -> {
+                        .setNegativeButton(context.getResources().getString(R.string.cencel), (dialog, id) -> {
                             // 다이얼로그를 취소한다
                             dialog.cancel();
                         });
@@ -158,6 +105,10 @@ public class UserInfoSayListViewAdapter extends NewSayListViewAdapter {
             String identity = this.sayVoList.get(index).getIdentity();
 
             String userInfo = "";
+
+            if(identity.indexOf("워킹") != -1) {
+                identity = "워홀";
+            }
 
             if (nation != null && !nation.isEmpty()
                     && identity != null && !identity.isEmpty()) {
