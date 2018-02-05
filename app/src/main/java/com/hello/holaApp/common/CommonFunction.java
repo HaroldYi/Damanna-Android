@@ -68,6 +68,7 @@ public class CommonFunction {
         CommonFunction.longitude = longitude;
     }
 
+    @Deprecated
     public static Bitmap getBitmapFromURL(String imageURL) {
         try {
             URL url = new URL(imageURL);
@@ -84,6 +85,7 @@ public class CommonFunction {
         }
     }
 
+    @Deprecated
     public static Bitmap getRoundedCornerBitmapFromUrl(String imageURL) {
 
         Bitmap bitmap;

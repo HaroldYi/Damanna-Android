@@ -87,8 +87,6 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
     private FirebaseAuth mAuth;
     private FirebaseUser user;
 
-    private Bitmap profileBitmap;
-
     private UltimateRecyclerView gridView;
     private String kind;
     private int position;
@@ -244,8 +242,6 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
         TextView textView = (TextView) this.view.findViewById(R.id.user_profile_name);
         textView.setTypeface(typeface);
-
-        this.profileBitmap = CommonFunction.getBitmapFromURL(this.user.getPhotoUrl().toString());
 
         this.imageLoader = VolleySingleton.getInstance(getActivity()).getImageLoader();
 
