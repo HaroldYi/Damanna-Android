@@ -117,6 +117,8 @@ public class People extends BaseFragment implements View.OnClickListener {
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("path/to/geofire");
         this.geoFire = new GeoFire(ref);
+
+        // creates a new query around [latitude, longitude] with a radius of 1.0 kilometers
         this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 1);
 
         this.adapter = new PeopleListViewAdapter(getContext(), userVoList);
@@ -145,6 +147,7 @@ public class People extends BaseFragment implements View.OnClickListener {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("member")
+                /*.orderBy("last_signIn", Query.Direction.DESCENDING)*/
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -188,52 +191,16 @@ public class People extends BaseFragment implements View.OnClickListener {
                                 userVo.setPhotoUrl(profileUrl);
                                 userVo.setGeoPoint(geoPoint);
 
-                                this.db.collection("photo/")
-                                        .whereEqualTo("member_id", uid)
-                                        .orderBy("reg_dt", Query.Direction.DESCENDING)
-                                        .limit(5)
-                                        .get()
-                                        .addOnCompleteListener(task1 -> {
-                                            if (task1.isSuccessful()) {
+                                this.userVoList.add(userVo);
+                                this.userMap.put(uid, userVo);
 
-                                                int size = task1.getResult().size();
-
-                                                if (size > 0) {
-
-                                                    List<PhotoVo> photoVoList = new ArrayList<>();
-                                                    for (DocumentSnapshot document1 : task1.getResult()) {
-
-                                                        PhotoVo photoVo = new PhotoVo();
-                                                        photoVo.setPhotoId(document1.getString("id"));
-                                                        photoVo.setThumbnailUrl(document1.getData().get("thumbnail_img").toString());
-                                                        photoVo.setOriginalUrl(document1.getData().get("original_img").toString());
-                                                        if(document1.getData().get("file_name") != null) {
-                                                            photoVo.setFileName(document1.getData().get("file_name").toString());
-                                                        }
-
-                                                        photoVoList.add(photoVo);
-                                                    }
-
-                                                    userVo.setPhotoVoList(photoVoList);
-                                                } else {
-
-                                                }
-
-                                                this.userVoList.add(userVo);
-                                                this.userMap.put(uid, userVo);
-                                            } else {
-                                                Log.w(TAG, "Error getting documents.", task.getException());
-                                            }
-
-                                            geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
-                                                if (error != null) {
-                                                    System.err.println("There was an error saving the location to GeoFire: " + error);
-                                                } else {
-                                                    System.out.println("Location saved on server successfully!");
-                                                }
-                                            });
-                                            Log.d(TAG, document.getId() + " => " + document.getData());
-                                        });
+                                geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
+                                    if (error != null) {
+                                        System.err.println("There was an error saving the location to GeoFire: " + error);
+                                    } else {
+                                        System.out.println("Location saved on server successfully!");
+                                    }
+                                });
                             }
                         }
                     } else {
