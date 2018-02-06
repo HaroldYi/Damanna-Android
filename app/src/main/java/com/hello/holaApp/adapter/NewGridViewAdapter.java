@@ -94,7 +94,7 @@ public class NewGridViewAdapter extends UltimateGridLayoutAdapter<PhotoVo, NewGr
                 /*DownloadImageTask downloadImageTask = new DownloadImageTask(holder.img);
                 downloadImageTask.execute(photoVo.getFileName());*/
 
-            } else if (photoVo.getKind().equals("photoVo")) {
+            } else if (photoVo.getKind().equals("photo")) {
                 StorageReference islandRef = FirebaseStorage.getInstance().getReference().child("thumbnail/" + photoVo.getFileName() + "_thumbnail.jpg");
 
                 islandRef.getDownloadUrl().addOnSuccessListener(downloadUrl -> {
