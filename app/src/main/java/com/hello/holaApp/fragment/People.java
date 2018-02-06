@@ -115,11 +115,11 @@ public class People extends BaseFragment implements View.OnClickListener {
         Double latitude = CommonFunction.getLatitude();
         Double longitude = CommonFunction.getLongitude();
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("path/to/geofire");
-        this.geoFire = new GeoFire(ref);
+        /*DatabaseReference ref = FirebaseDatabase.getInstance().getReference("path/to/geofire");
+        this.geoFire = new GeoFire(ref);*/
 
         // creates a new query around [latitude, longitude] with a radius of 1.0 kilometers
-        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 100);
+        /*this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 100);*/
 
         this.adapter = new PeopleListViewAdapter(getContext(), userVoList);
         listView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -147,7 +147,7 @@ public class People extends BaseFragment implements View.OnClickListener {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("member")
-                /*.orderBy("last_signIn", Query.Direction.DESCENDING)*/
+                .orderBy("last_signIn", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -185,6 +185,19 @@ public class People extends BaseFragment implements View.OnClickListener {
 
                                     int koreanAge = nowYear - yearOfBirth + 1;
 
+                                    Location loc = new Location("pointA");
+                                    Location loc1 = new Location("pointB");
+
+                                    loc.setLatitude(geoPoint.getLatitude());
+                                    loc.setLongitude(geoPoint.getLongitude());
+
+                                    loc1.setLatitude(latitude);
+                                    loc1.setLongitude(longitude);
+
+                                    float distance = loc.distanceTo(loc1) / 1000;
+
+                                    userVo.setDistance(distance);
+
                                     String identity = (document.getData().get("identity") != null ? document.getData().get("identity").toString() : "");
                                     String nation = (document.getData().get("nation") != null ? document.getData().get("nation").toString() : "");
                                     String profileUrl = (document.getData().get("profileUrl") != null ? document.getData().get("profileUrl").toString() : "");
@@ -195,18 +208,24 @@ public class People extends BaseFragment implements View.OnClickListener {
                                     userVo.setPhotoUrl(profileUrl);
                                     userVo.setGeoPoint(geoPoint);
 
-                                    this.userVoList.add(userVo);
+                                    /*this.userVoList.add(userVo);*/
                                     this.userMap.put(uid, userVo);
 
-                                    geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
+                                    adapter.insertLastInternal(userVoList, userVo);
+
+                                    /*geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
                                         if (error != null) {
                                             System.err.println("There was an error saving the location to GeoFire: " + error);
                                         } else {
                                             System.out.println("Location saved on server successfully!");
                                         }
-                                    });
+                                    });*/
                                 }
                             }
+
+                            progressOFF();
+                            view.setVisibility(View.VISIBLE);
+
                         } else {
                             progressOFF();
                             view.setVisibility(View.VISIBLE);
@@ -216,7 +235,7 @@ public class People extends BaseFragment implements View.OnClickListener {
                     }
                 });
 
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+        /*geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
                 if(!key.equals(user.getUid())) {
@@ -237,7 +256,7 @@ public class People extends BaseFragment implements View.OnClickListener {
                         Log.d("distance", loc.distanceTo(loc1)+"");
 
                         userVo.setDistance(loc.distanceTo(loc1)/1000);
-                        /*photoVo.setUpdateTime(1);*/
+                        *//*photoVo.setUpdateTime(1);*//*
 
                         adapter.insertLastInternal(userVoList, userVo);
 
@@ -266,7 +285,7 @@ public class People extends BaseFragment implements View.OnClickListener {
             public void onGeoQueryError(DatabaseError error) {
                 Log.d("gqerr", "There was an error with this query: " + error);
             }
-        });
+        });*/
 
         return view;
     }
@@ -281,7 +300,7 @@ public class People extends BaseFragment implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
         /*this.geoFire.removeLocation("7XIFHLj0frO0F5fICDStNWA7BJD3");*/
-        this.geoQuery.removeAllListeners();
+        /*this.geoQuery.removeAllListeners();*/
     }
 
     @Override

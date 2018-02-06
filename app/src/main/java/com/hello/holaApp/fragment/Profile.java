@@ -129,6 +129,9 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     private int moreNum = 2, columns = 2;
 
+    private String profileFile = "";
+    private String profileUrlOrg = "";
+
     private static Profile.ProfileCamera cameraProfile;
 
     private static String TAG = "cloudFireStore";
@@ -225,7 +228,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         this.profileImageView.setRadius(25f);
         this.profileImageView.setOnClickListener(view1 -> {
 
-            String profileUrl = this.user.getPhotoUrl().toString();
+            String profileUrl = (this.profileUrlOrg != null && !this.profileUrlOrg.isEmpty() ? this.profileUrlOrg : this.user.getPhotoUrl().toString());
 
             if(profileUrl.indexOf("10354686_10150004552801856_220367501106153455_n") == -1)
                 viewPhoto(profileUrl, "jpg");
@@ -243,12 +246,6 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         textView.setTypeface(typeface);
 
         this.imageLoader = VolleySingleton.getInstance(getActivity()).getImageLoader();
-
-        /*this.profileImageView.bringToFront();*/
-        this.profileImageView.setImageUrl(this.user.getPhotoUrl().toString(), this.imageLoader);
-        textView.setText(this.user.getDisplayName());
-
-        /*view.setVisibility(View.INVISIBLE);*/
 
         this.gridView = (UltimateRecyclerView) view.findViewById(R.id.photo_list);
         this.gridView.addItemDecoration(new EqualSpacingItemDecoration(6, EqualSpacingItemDecoration.GRID));
@@ -347,51 +344,60 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             }
         });*/
 
-        this.db.collection("member/")
+        this.db.collection("member/").document(this.user.getUid())
                 .get()
-                .addOnCompleteListener(task1 -> {
-                    if (task1.isSuccessful()) {
-                        for (DocumentSnapshot document1 : task1.getResult()) {
-                            UserVo userVo = new UserVo();
-                            String uid = document1.getData().get("id").toString();
-                            GeoPoint geoPoint = (GeoPoint) document1.getData().get("location");
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
 
-                            userVo.setUid(uid);
-                            userVo.setUserName(document1.getData().get("name").toString());
-                            userVo.setIdentity(document1.getData().get("identity").toString());
-                            userVo.setNation(document1.getData().get("nation").toString());
-                            userVo.setPhotoUrl(document1.getData().get("profileUrl").toString());
-                            userVo.setGeoPoint(geoPoint);
+                        DocumentSnapshot document = task.getResult();
 
-                            String identity = document1.getData().get("identity").toString();
-                            String nation = document1.getData().get("nation").toString();
+                        UserVo userVo = new UserVo();
+                        String uid = document.getData().get("id").toString();
+                        GeoPoint geoPoint = (GeoPoint) document.getData().get("location");
 
-                            String gender = document1.getData().get("gender").toString();
-                            gender = (gender.equals("male") ? "남자" : "여자");
+                        userVo.setUid(uid);
+                        userVo.setUserName(document.getData().get("name").toString());
+                        userVo.setIdentity(document.getData().get("identity").toString());
+                        userVo.setNation(document.getData().get("nation").toString());
+                        userVo.setPhotoUrl(document.getData().get("profileUrl").toString());
+                        userVo.setGeoPoint(geoPoint);
 
-                            long dateOfBirth = document1.getDate("dateOfBirth").getTime();
-                            long now = System.currentTimeMillis();
+                        String identity = document.getData().get("identity").toString();
+                        String nation = document.getData().get("nation").toString();
 
-                            Calendar birthCalendar = Calendar.getInstance();
-                            birthCalendar.setTimeInMillis(dateOfBirth);
+                        String gender = document.getData().get("gender").toString();
+                        gender = (gender.equals("male") ? "남자" : "여자");
 
-                            int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+                        long dateOfBirth = document.getDate("dateOfBirth").getTime();
+                        long now = System.currentTimeMillis();
 
-                            Calendar nowCalender = Calendar.getInstance();
-                            nowCalender.setTimeInMillis(now);
+                        Calendar birthCalendar = Calendar.getInstance();
+                        birthCalendar.setTimeInMillis(dateOfBirth);
 
-                            int nowYear = nowCalender.get(Calendar.YEAR);
+                        int yearOfBirth = birthCalendar.get(Calendar.YEAR);
 
-                            int koreanAge = nowYear - yearOfBirth + 1;
+                        Calendar nowCalender = Calendar.getInstance();
+                        nowCalender.setTimeInMillis(now);
 
-                            String age = String.format("%d세, %s", koreanAge, gender);
-                            TextView ageView = (TextView) view.findViewById(R.id.age);
-                            ageView.setText(age);
+                        int nowYear = nowCalender.get(Calendar.YEAR);
 
-                            nation = String.format("%s, %s", nation, identity);
-                            TextView identityView = (TextView) view.findViewById(R.id.identity);
-                            identityView.setText(nation);
-                        }
+                        int koreanAge = nowYear - yearOfBirth + 1;
+
+                        String age = String.format("%d세, %s", koreanAge, gender);
+                        TextView ageView = (TextView) view.findViewById(R.id.age);
+                        ageView.setText(age);
+
+                        nation = String.format("%s, %s", nation, identity);
+                        TextView identityView = (TextView) view.findViewById(R.id.identity);
+                        identityView.setText(nation);
+
+                        String photoUrl = (document.getString("profileUrl") != null ? document.getString("profileUrl") : this.user.getPhotoUrl().toString());
+
+                        this.profileImageView.setImageUrl(photoUrl, this.imageLoader);
+                        textView.setText(this.user.getDisplayName());
+
+                        profileFile = (document.getString("profile_file") != null ? document.getString("profile_file") : "");
+                        profileUrlOrg = document.getString("profileUrl_org");
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -752,7 +758,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
                     case 2:
                         String profileUrl = "https://scontent.xx.fbcdn.net/v/t1.0-1/c29.0.100.100/p100x100/10354686_10150004552801856_220367501106153455_n.jpg?oh=abb02c803534c00048bc66ee3119bfbf&oe=5AF01677";
-                        cameraProfile.changeProfilePhoto(profileUrl);
+                        Map<String, Object> photoMap = new HashMap<>();
+                        photoMap.put("profileUrl", profileUrl);
+                        photoMap.put("profileUrl_org", "");
+                        photoMap.put("profile_file", "");
+
+                        cameraProfile.changeProfilePhoto(photoMap);
                         break;
 
                     case 3:
@@ -788,9 +799,11 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
         private Uri mImageCaptureUri;
         private String imgPath = "";
 
-        private void changeProfilePhoto(String profileUrl) {
+        private void changeProfilePhoto(Map<String, Object> photoMap) {
 
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+            String profileUrl = (photoMap.get("profileUrl") != null ? photoMap.get("profileUrl").toString() : "");
 
             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                     .setPhotoUri(Uri.parse(profileUrl))
@@ -804,11 +817,35 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
 
-                            Map<String, Object> userInfo = new HashMap<>();
-                            userInfo.put("profileUrl", profileUrl);
+                            if(profileFile != null && !profileFile.isEmpty()) {
+                                // Create a storage reference from our app
+                                StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+
+                                // Create a reference to the file to delete
+                                StorageReference desertRef = storageRef.child(String.format("original/%s.jpg", profileFile));
+
+                                // Delete the file
+                                desertRef.delete().addOnSuccessListener(aVoid -> {
+                                    // File deleted successfully
+                                    // Create a storage reference from our app
+                                    StorageReference storageThumRef = FirebaseStorage.getInstance().getReference();
+
+                                    // Create a reference to the file to delete
+                                    StorageReference desertThumRef = storageThumRef.child(String.format("thumbnail/%s_thumbnail.jpg", profileFile));
+                                    desertThumRef.delete().addOnSuccessListener(aVoid1 -> {
+                                        // File deleted successfully
+                                    }).addOnFailureListener(exception -> {
+                                        // Uh-oh, an error occurred!
+                                        Crashlytics.logException(exception);
+                                    });
+                                }).addOnFailureListener(exception -> {
+                                    // Uh-oh, an error occurred!
+                                    Crashlytics.logException(exception);
+                                });
+                            }
 
                             FirebaseFirestore.getInstance().collection("member").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                    .update(userInfo)
+                                    .update(photoMap)
                                     .addOnSuccessListener(aVoid -> {
                                         Log.d(TAG, "DocumentSnapshot successfully written!");
 
@@ -818,6 +855,9 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                                                 Crashlytics.logException(e12);
                                                 return;
                                             }
+
+                                            profileFile = photoMap.get("profile_file").toString();
+                                            profileUrlOrg = photoMap.get("profileUrl_org").toString();
 
                                             profileImageView.setImageUrl(profileUrl, imageLoader);
                                         });
@@ -849,9 +889,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             StorageReference storageRef = storage.getReference().child("original/" + fileName + ".jpg");
 
             StorageReference storageThumRef = null;
-            if(!profileYn) {
-                storageThumRef = storage.getReference().child("thumbnail/" + fileName + "_thumbnail.jpg");
-            }
+            storageThumRef = storage.getReference().child("thumbnail/" + fileName + "_thumbnail.jpg");
 
             ExifInterface exif = null;
 
@@ -878,14 +916,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             Bitmap thumbnail = null;
             ByteArrayOutputStream bitmapThumOps = null;
             UploadTask uploadThumTask = null;
-            if(!profileYn) {
-                thumbnail = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
-                bitmapThumOps = new ByteArrayOutputStream();
+            thumbnail = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
+            bitmapThumOps = new ByteArrayOutputStream();
 
-                thumbnail.compress(Bitmap.CompressFormat.JPEG, 50, bitmapThumOps);
-                byte[] bitmapThumByte = bitmapThumOps.toByteArray();
-                uploadThumTask = storageThumRef.putBytes(bitmapThumByte);
-            }
+            thumbnail.compress(Bitmap.CompressFormat.JPEG, 50, bitmapThumOps);
+            byte[] bitmapThumByte = bitmapThumOps.toByteArray();
+            uploadThumTask = storageThumRef.putBytes(bitmapThumByte);
 
             final int viewHeight = 1000;
 
@@ -914,14 +950,21 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             uploadTask.addOnFailureListener(exception -> {
                 // Handle unsuccessful uploads
             }).addOnSuccessListener(taskSnapshot -> {
-                if(!profileYn) {
-                    String finalFileName = finalFileName1;
-                    finalUploadThumTask.addOnFailureListener(exception -> {
-                        // Handle unsuccessful uploads
-                    }).addOnSuccessListener(taskThumSnapshot -> {
-                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                String finalFileName = finalFileName1;
+                finalUploadThumTask.addOnFailureListener(exception -> {
+                    // Handle unsuccessful uploads
+                }).addOnSuccessListener(taskThumSnapshot -> {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                    Map<String, Object> photoMap = new HashMap<>();
 
-                        Map<String, Object> photoMap = new HashMap<>();
+                    if(profileYn) {
+                        photoMap.put("profileUrl", taskThumSnapshot.getDownloadUrl().toString());
+                        photoMap.put("profileUrl_org", taskSnapshot.getDownloadUrl().toString());
+                        photoMap.put("profile_file", finalFileName);
+
+                        // 프사 업데이트
+                        changeProfilePhoto(photoMap);
+                    } else {
 
                         photoMap.put("member_id", user.getUid());
                         photoMap.put("original_img", taskSnapshot.getDownloadUrl().toString());
@@ -957,17 +1000,8 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                         adapter = new NewRecyclerGridViewAdapter(getActivity(), photoVoList);
                         gridView.setAdapter(adapter);
                         adapter.notifyDataSetChanged();
-
-                /*new Handler().postDelayed(() -> {
-                    progressOFF();
-                    this.listView.setVisibility(View.VISIBLE);
-                }, 1000);*/
-                    });
-                } else {
-                    // 프사 업데이트
-                    String profileUrl = taskSnapshot.getDownloadUrl().toString();
-                    changeProfilePhoto(profileUrl);
-                }
+                    }
+                });
             });
         }
 

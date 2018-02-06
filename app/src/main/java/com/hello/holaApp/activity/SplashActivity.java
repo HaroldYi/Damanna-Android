@@ -126,11 +126,13 @@ public class SplashActivity extends AppCompatActivity {
                 if (e != null) {
                     // Error.
                     Log.e("sendBirdErr", e.getMessage());
+                    Crashlytics.logException(e);
                     return;
                 } else {
                     String token = FirebaseInstanceId.getInstance().getToken();
                     SendBird.registerPushTokenForCurrentUser(token, (ptrs, e1) -> {
                         if (e1 != null) {
+                            Crashlytics.logException(e1);
                             return;
                         }
 
