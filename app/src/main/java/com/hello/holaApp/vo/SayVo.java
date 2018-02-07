@@ -2,6 +2,8 @@ package com.hello.holaApp.vo;
 
 import android.graphics.Bitmap;
 
+import java.util.List;
+
 /**
  * Created by lji5317 on 13/12/2017.
  */
@@ -25,6 +27,8 @@ public class SayVo {
     private Bitmap bitmap;
 
     private String distance;
+
+    private List<String> likeMembers;
 
     public String getSayId() {
         return sayId;
@@ -112,5 +116,13 @@ public class SayVo {
 
     public void setRegMin(String regMin) {
         this.regMin = regMin;
+    }
+
+    public List<String> getLikeMembers() {
+        return likeMembers;
+    }
+
+    public void setLikeMembers(List<String> likeMembers) {
+        this.likeMembers = likeMembers;
     }
 }

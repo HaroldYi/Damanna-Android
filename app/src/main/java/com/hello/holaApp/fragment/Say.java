@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -17,8 +18,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -145,20 +149,20 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
         this.sayVoList = new ArrayList<>();
         this.sayListViewAdapter = new NewSayListViewAdapter(getActivity(), this.sayVoList);
-        /*this.sayListViewAdapter.setCustomLoadMoreView(
-                LayoutInflater.from(getActivity()).inflate(R.layout.custom_bottom_progressbar, null));*/
+        this.sayListViewAdapter.setCustomLoadMoreView(
+                LayoutInflater.from(getActivity()).inflate(R.layout.custom_bottom_progressbar, null));
 
         this.listView = (UltimateRecyclerView) view.findViewById(R.id.say_list);
         this.listView.setEmptyView(R.layout.empty_view, UltimateRecyclerView.EMPTY_SHOW_LOADMORE_ONLY);
         this.listView.setVisibility(View.INVISIBLE);
-        this.listView.setLoadMoreView(LayoutInflater.from(getActivity())
-                .inflate(R.layout.custom_bottom_progressbar, null));
+       /* this.listView.setLoadMoreView(LayoutInflater.from(getActivity())
+                .inflate(R.layout.custom_bottom_progressbar, null));*/
 
         this.listView.setDefaultOnRefreshListener(() -> {
 
             lastYn = true;
 
-            listView.disableLoadmore();
+            listView.reenableLoadmore();
             sayListViewAdapter.clear();
             sayVoList.clear();
 
@@ -247,38 +251,25 @@ public class Say extends BaseFragment implements View.OnClickListener {
         this.progressON(getResources().getString(R.string.loading));
 
         this.userMap = new HashMap();
-        /*this.db.collection("member/")
-                .get()
-                .addOnCompleteListener(task1 -> {
-                    if (task1.isSuccessful()) {
-                        for (DocumentSnapshot document1 : task1.getResult()) {
-                            UserVo userVo = new UserVo();
-                            String uid = document1.getData().get("id").toString();
-                            GeoPoint geoPoint = (GeoPoint) document1.getData().get("location");
-
-                            String name = (document1.getData().get("name") != null ? document1.getData().get("name").toString() : "");
-                            String identity = (document1.getData().get("identity") != null ? document1.getData().get("identity").toString() : "");
-                            String nation = (document1.getData().get("nation") != null ? document1.getData().get("nation").toString() : "");
-                            String profileUrl = (document1.getData().get("profileUrl") != null ? document1.getData().get("profileUrl").toString() : "");
-
-                            userVo.setUid(uid);
-                            userVo.setUserName(name);
-                            userVo.setIdentity(identity);
-                            userVo.setNation(nation);
-                            userVo.setPhotoUrl(profileUrl);
-                            userVo.setGeoPoint(geoPoint);
-
-                            userMap.put(uid, userVo);
-                        }
-                        this.loadingData(this.query, true);
+        DocumentReference docRef = this.db.collection("member").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null) {
+                        Log.d(TAG, "DocumentSnapshot data: " + task.getResult().getData());
+                        NewSayListViewAdapter.likeSayList = (List<String>) document.get("like_say");
+                        NewSayListViewAdapter.likeSayList = (NewSayListViewAdapter.likeSayList == null ? new ArrayList<>() : NewSayListViewAdapter.likeSayList);
+                        loadingData(query, true);
+                    } else {
+                        Log.d(TAG, "No such document");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Crashlytics.logException(e);
-                    Log.e("FIREERROR", e.getMessage());
-                });*/
-
-        this.loadingData(this.query, true);
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
 
         return view;
     }
@@ -349,9 +340,6 @@ public class Say extends BaseFragment implements View.OnClickListener {
                         if(size < this.limit) {
                             this.lastYn = true;
                             this.listView.disableLoadmore();
-                        } else {
-                            this.lastYn = false;
-                            this.listView.reenableLoadmore();
                         }
 
                         if(size > 0) {
@@ -364,15 +352,18 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
                             for (DocumentSnapshot document : documentSnapshotList) {
 
-                                String memberId = document.getData().get("member_id").toString();
+                                String memberId = document.getString("member_id");
                                 /*UserVo user = userMap.get(memberId);
 
                                 if (user != null) {*/
 
+                                Map<String, Object> map = document.getData();
+
                                 SayVo sayVo = new SayVo();
 
+                                sayVo.setSayId(document.getString("id"));
                                 sayVo.setUid(memberId);
-                                sayVo.setMsg(document.getData().get("content").toString());
+                                sayVo.setMsg(document.getString("content"));
 
                                 long regDt = document.getDate("reg_dt").getTime();
                                 long now = System.currentTimeMillis();
@@ -387,6 +378,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
                                 } else if (regTime > 1440) {
                                     regMin = String.format("%dd", (int) (regTime / 1440));
                                 }
+
+                                sayVo.setLikeMembers((List<String>) document.get("like_members"));
 
                                 sayVo.setRegMin(regMin);
 

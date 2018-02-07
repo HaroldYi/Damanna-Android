@@ -14,7 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +29,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
 import com.hello.holaApp.R;
 import com.hello.holaApp.activity.MainActivity;
 import com.hello.holaApp.activity.UserInfoActivity;
@@ -38,6 +41,7 @@ import com.hello.holaApp.vo.UserVo;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerviewViewHolder;
 import com.marshalchen.ultimaterecyclerview.UltimateViewAdapter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +56,9 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
     private List<SayVo> sayVoList;
     private ImageLoader imageLoader;
     private static Map<String, UserVo> userMap;
+    private FirebaseFirestore db;
+    private String uid;
+    public static List<String> likeSayList;
 
     private boolean profileYn = false;
 
@@ -63,6 +70,8 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         this.profileYn = profileYn;
         this.userMap = new HashMap();
         this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
+        this.db = FirebaseFirestore.getInstance();
+        this.uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
     public NewSayListViewAdapter(Context context, List<SayVo> sayVoList) {
@@ -70,6 +79,8 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         this.sayVoList = sayVoList;
         this.userMap = new HashMap();
         this.imageLoader = VolleySingleton.getInstance(context).getImageLoader();
+        this.db = FirebaseFirestore.getInstance();
+        this.uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
     @Override
@@ -85,7 +96,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
                         .setPositiveButton(context.getResources().getString(R.string.delete), (dialog, id) -> {
 
                             String sayId = sayVoList.get(((ViewHolder) holder).getAdapterPosition()).getSayId();
-                            FirebaseFirestore.getInstance().collection("say").document(sayId)
+                            this.db.collection("say").document(sayId)
                                     .delete()
                                     .addOnSuccessListener(aVoid -> {
                                         Log.d(TAG, "DocumentSnapshot successfully deleted!");
@@ -135,7 +146,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
                 UserVo userVo = userMap.get(uid);
 
                 if(userVo == null) {
-                    DocumentReference docRef = FirebaseFirestore.getInstance().collection("member").document(uid);
+                    DocumentReference docRef = this.db.collection("member").document(uid);
                     docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -225,6 +236,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
     }
 
     private void setData(UserVo userVo, SayVo sayVo, RecyclerView.ViewHolder holder) {
+
         String userInfo = "";
 
         String userName = userVo.getUserName();
@@ -267,9 +279,81 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         ((ViewHolder) holder).content.setText(sayVo.getMsg());
 
         ((ViewHolder) holder).img.setImageUrl(userVo.getPhotoUrl(), this.imageLoader);
+
+        List<String> likeMemberList = (sayVo.getLikeMembers() == null ? new ArrayList<>() : sayVo.getLikeMembers());
+
+        int likeMemberListSize = (likeMemberList != null ? likeMemberList.size() : 0);
+
+        boolean[] isLiked = {false};
+        int i = 0;
+        int j = 0;
+
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        if(likeMemberListSize > 0 && this.likeSayList.size() > 0) {
+            for (; i < likeMemberListSize; i++) {
+                if (likeMemberList.get(i).equals(userId)) {
+                    ((ViewHolder) holder).likeIc.setImageResource(R.drawable.ic_heart_red);
+                    isLiked[0] = true;
+                    break;
+                }
+            }
+
+            for (; j < this.likeSayList.size(); j++) {
+                if (this.likeSayList.get(j).equals(sayVo.getSayId())) {
+                    break;
+                }
+            }
+        } else {
+            ((ViewHolder) holder).likeIc.setImageResource(R.drawable.ic_heart);
+        }
+
         ((ViewHolder) holder).sayLayout.setVisibility(View.VISIBLE);
 
-        ((ViewHolder) holder).sayLayout.setOnClickListener(v -> {
+        int finalI = i;
+        int finalJ = j;
+        ((ViewHolder) holder).likeBtn.setOnClickListener(v -> {
+
+            int length = likeMemberList.size();
+
+            // say -> like_members 업데이트
+            // say_member_like 추가하기
+
+            if(isLiked[0] && length > 0) {
+                likeMemberList.remove(finalI);
+                this.likeSayList.remove(finalJ);
+                length--;
+                isLiked[0] = false;
+                ((ViewHolder) holder).likeIc.setImageResource(R.drawable.ic_heart);
+            } else {
+                likeMemberList.add(userId);
+                this.likeSayList.add(sayVo.getSayId());
+                length++;
+                isLiked[0] = true;
+                ((ViewHolder) holder).likeIc.setImageResource(R.drawable.ic_heart_red);
+            }
+
+            this.db.collection("say").document(sayVo.getSayId())
+                    .update("like_members", likeMemberList)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+
+                        this.db.collection("member").document(uid)
+                                .update("like_say", this.likeSayList)
+                                .addOnSuccessListener(aVoid1 -> {
+                                    Log.d(TAG, "DocumentSnapshot successfully written!");
+
+                                })
+                                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                    })
+                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+
+            ((ViewHolder) holder).likeCnt.setText(String.valueOf(length));
+        });
+
+        ((ViewHolder) holder).likeCnt.setText(String.valueOf(likeMemberListSize));
+
+        ((ViewHolder) holder).sayProfile.setOnClickListener(v -> {
             MainActivity.tabIndex = 0;
 
             if(!sayVo.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
@@ -360,12 +444,12 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
 
     public void setOnDragStartListener(OnStartDragListener dragStartListener) {
         mDragStartListener = dragStartListener;
-
     }
 
     class ViewHolder extends UltimateRecyclerviewViewHolder {
 
         LinearLayout sayLayout;
+        LinearLayout sayProfile;
 
         CardView sayCard;
         RadiusNetworkImageView img;
@@ -377,10 +461,15 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         CardView noSayList;
         TextView noSayMsg;
 
+        RelativeLayout likeBtn;
+        ImageView likeIc;
+        TextView likeCnt;
+
         public ViewHolder(View itemView) {
             super(itemView);
             this.sayLayout = (LinearLayout) itemView.findViewById(R.id.say_layout);
             this.sayLayout.setVisibility(View.INVISIBLE);
+            this.sayProfile = (LinearLayout) itemView.findViewById(R.id.say_profile);
             this.sayCard = (CardView) itemView.findViewById(R.id.say_card);
             this.userName = (TextView) itemView.findViewById(R.id.user_name);
             this.content = (TextView) itemView.findViewById(R.id.content);
@@ -390,6 +479,10 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
             this.delSayBtn = (ImageButton) itemView.findViewById(R.id.del_say_btn);
             this.noSayList = (CardView) itemView.findViewById(R.id.no_say_list);
             this.noSayMsg = (TextView) itemView.findViewById(R.id.no_say_msg);
+
+            this.likeBtn = (RelativeLayout) itemView.findViewById(R.id.like_btn);
+            this.likeIc = (ImageView) itemView.findViewById(R.id.like_ic);
+            this.likeCnt = (TextView) itemView.findViewById(R.id.like_cnt);
         }
 
         @Override

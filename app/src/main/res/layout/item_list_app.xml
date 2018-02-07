@@ -18,6 +18,7 @@
         app:cardUseCompatPadding="true">
 
         <LinearLayout
+            android:id="@+id/say_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
@@ -44,6 +45,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_toEndOf="@+id/user_profile_photo_layout"
                     android:layout_weight="1"
+                    android:text="이름"
                     android:textAlignment="textEnd"
                     android:textColor="@color/black"
                     android:textSize="16sp"
@@ -56,6 +58,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="2.5dp"
                     android:layout_weight="1"
+                    android:text="거리"
                     android:textColor="@color/dark_gray"
                     android:typeface="sans" />
             </LinearLayout>
@@ -90,34 +93,70 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
+                android:text="내용"
                 android:textColor="@color/dark_gray"
                 android:typeface="sans" />
 
         </LinearLayout>
 
-        <!--<LinearLayout
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"
-            android:layout_marginTop="50dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="130dp"
+            android:layout_marginBottom="10dp"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/button3"
+            <RelativeLayout
+                android:id="@+id/like_btn"
                 android:layout_width="108dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Button"
-                android:textAlignment="viewEnd" />
+                android:textAlignment="viewEnd"
+                android:orientation="horizontal"
+                >
+                <ImageView
+                    android:id="@+id/like_ic"
+                    android:layout_width="17dp"
+                    android:layout_height="17dp"
+                    android:layout_centerVertical="true"
+                    app:srcCompat="@drawable/ic_heart" />
+                <TextView
+                    android:id="@+id/like_cnt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="7dp"
+                    android:layout_toEndOf="@+id/like_ic"
+                    android:layout_centerVertical="true"
+                    android:text="0"/>
+            </RelativeLayout>
 
-            <Button
+            <RelativeLayout
                 android:id="@+id/button4"
-                android:layout_width="106dp"
+                android:layout_width="108dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Button"
-                android:textAlignment="viewEnd" />
-        </LinearLayout>-->
+                android:textAlignment="viewEnd"
+                android:orientation="horizontal"
+                >
+                <ImageView
+                    android:id="@+id/comment_ic"
+                    android:layout_width="17dp"
+                    android:layout_height="17dp"
+                    android:layout_centerVertical="true"
+                    app:srcCompat="@drawable/ic_comment" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="7dp"
+                    android:layout_toEndOf="@+id/comment_ic"
+                    android:layout_centerVertical="true"
+                    android:text="0"/>
+            </RelativeLayout>
+        </LinearLayout>
 
     </android.support.v7.widget.CardView>
 

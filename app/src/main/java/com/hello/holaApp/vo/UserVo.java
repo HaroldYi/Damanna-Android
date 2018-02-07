@@ -19,6 +19,7 @@ public class UserVo {
     private String photoUrl;
     private float  distance;
     private List<PhotoVo> photoVoList;
+    private List<String> sayLikeList;
 
     public String getUid() {
         return uid;
@@ -98,5 +99,13 @@ public class UserVo {
 
     public void setPhotoVoList(List<PhotoVo> photoVoList) {
         this.photoVoList = photoVoList;
+    }
+
+    public List<String> getSayLikeList() {
+        return sayLikeList;
+    }
+
+    public void setSayLikeList(List<String> sayLikeList) {
+        this.sayLikeList = sayLikeList;
     }
 }
