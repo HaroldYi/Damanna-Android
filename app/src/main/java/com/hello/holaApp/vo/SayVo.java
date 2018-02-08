@@ -2,13 +2,15 @@ package com.hello.holaApp.vo;
 
 import android.graphics.Bitmap;
 
-import java.util.List;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by lji5317 on 13/12/2017.
  */
 
-public class SayVo {
+public class SayVo implements Serializable {
 
     private String sayId = "";
 
@@ -28,7 +30,9 @@ public class SayVo {
 
     private String distance;
 
-    private List<String> likeMembers;
+    private ArrayList<String> likeMembers;
+
+    private ArrayList<HashMap<String, Object>> commentList;
 
     public String getSayId() {
         return sayId;
@@ -118,11 +122,19 @@ public class SayVo {
         this.regMin = regMin;
     }
 
-    public List<String> getLikeMembers() {
+    public ArrayList<String> getLikeMembers() {
         return likeMembers;
     }
 
-    public void setLikeMembers(List<String> likeMembers) {
+    public void setLikeMembers(ArrayList<String> likeMembers) {
         this.likeMembers = likeMembers;
+    }
+
+    public ArrayList<HashMap<String, Object>> getCommentList() {
+        return commentList;
+    }
+
+    public void setCommentList(ArrayList<HashMap<String, Object>> commentList) {
+        this.commentList = commentList;
     }
 }

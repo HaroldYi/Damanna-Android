@@ -29,9 +29,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.Query;
 import com.hello.holaApp.R;
 import com.hello.holaApp.activity.MainActivity;
+import com.hello.holaApp.activity.SayCommentListActivity;
 import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.RadiusNetworkImageView;
@@ -53,7 +53,7 @@ import java.util.Map;
 public class NewSayListViewAdapter extends UltimateViewAdapter {
 
     private Context context;
-    private List<SayVo> sayVoList;
+    public static List<SayVo> sayVoList;
     private ImageLoader imageLoader;
     private static Map<String, UserVo> userMap;
     private FirebaseFirestore db;
@@ -171,7 +171,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
                                     userVo.setGeoPoint(geoPoint);
 
                                     userMap.put(uid, userVo);
-                                    setData(userVo, sayVoList.get(index), holder);
+                                    setData(userVo, sayVoList.get(index), holder, index);
                                 } else {
                                     Log.d(TAG, "No such document");
                                 }
@@ -181,7 +181,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
                         }
                     });
                 } else {
-                    this.setData(userVo, this.sayVoList.get(index), holder);
+                    this.setData(userVo, this.sayVoList.get(index), holder, index);
                 }
             } else {
                 /*((ViewHolder) holder).noSayList.setVisibility(View.VISIBLE);
@@ -235,7 +235,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         return vh;
     }
 
-    private void setData(UserVo userVo, SayVo sayVo, RecyclerView.ViewHolder holder) {
+    private void setData(UserVo userVo, SayVo sayVo, RecyclerView.ViewHolder holder, int index) {
 
         String userInfo = "";
 
@@ -256,6 +256,8 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         String distance = String.format("%.2fkm", (loc.distanceTo(loc1) / 1000));
 
         distance = String.format("%s / %s", sayVo.getRegMin(), distance);
+
+        sayVo.setDistance(distance);
 
         if(identity.indexOf("워킹") != -1) {
             identity = "워홀";
@@ -280,7 +282,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
 
         ((ViewHolder) holder).img.setImageUrl(userVo.getPhotoUrl(), this.imageLoader);
 
-        List<String> likeMemberList = (sayVo.getLikeMembers() == null ? new ArrayList<>() : sayVo.getLikeMembers());
+        ArrayList<String> likeMemberList = (sayVo.getLikeMembers() == null ? new ArrayList<>() : sayVo.getLikeMembers());
 
         int likeMemberListSize = (likeMemberList != null ? likeMemberList.size() : 0);
 
@@ -351,6 +353,27 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
             ((ViewHolder) holder).likeCnt.setText(String.valueOf(length));
         });
 
+        ((ViewHolder) holder).commentListBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(context, SayCommentListActivity.class);
+            /*intent.putExtra("uid", sayVo.getUid());
+            intent.putExtra("sayId", sayVo.getSayId());*/
+            intent.putExtra("userName", userName);
+            intent.putExtra("identity", userVo.getIdentity());
+            intent.putExtra("profileUrl", userVo.getPhotoUrl());
+            intent.putExtra("nation", userVo.getNation());
+            /*intent.putExtra("distance", sayVo.getDistance());
+            intent.putExtra("content", sayVo.getMsg());*/
+            intent.putExtra("index", index);
+
+            intent.putExtra("sayVo", sayVo);
+
+            intent.putStringArrayListExtra("likeMemberList", likeMemberList);
+            /*intent.putExtra("commentList", sayVo.getCommentList());*/
+            intent.putExtra("isLiked", isLiked[0]);
+
+            context.startActivity(intent);
+        });
+
         ((ViewHolder) holder).likeCnt.setText(String.valueOf(likeMemberListSize));
 
         ((ViewHolder) holder).sayProfile.setOnClickListener(v -> {
@@ -362,6 +385,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
                 intent.putExtra("userName", userName);
                 intent.putExtra("identity", sayVo.getIdentity());
                 intent.putExtra("profileUrl", userVo.getPhotoUrl());
+
                 /*intent.putExtra("bitmapImage", sayVoList.get(index).getBitmap());*/
 
                 context.startActivity(intent);
@@ -465,6 +489,8 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         ImageView likeIc;
         TextView likeCnt;
 
+        RelativeLayout commentListBtn;
+
         public ViewHolder(View itemView) {
             super(itemView);
             this.sayLayout = (LinearLayout) itemView.findViewById(R.id.say_layout);
@@ -483,6 +509,8 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
             this.likeBtn = (RelativeLayout) itemView.findViewById(R.id.like_btn);
             this.likeIc = (ImageView) itemView.findViewById(R.id.like_ic);
             this.likeCnt = (TextView) itemView.findViewById(R.id.like_cnt);
+
+            this.commentListBtn = (RelativeLayout) itemView.findViewById(R.id.comment_list_btn);
         }
 
         @Override

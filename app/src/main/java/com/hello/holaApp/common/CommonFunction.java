@@ -19,6 +19,7 @@ import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.util.Log;
+import android.util.TypedValue;
 
 import com.crashlytics.android.Crashlytics;
 import com.hello.holaApp.R;
@@ -250,5 +251,10 @@ public class CommonFunction {
                 }
             }
         });
+    }
+
+    public static int convertTodp(Context context, int px) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                (float) px, context.getResources().getDisplayMetrics());
     }
 }

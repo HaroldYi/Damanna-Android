@@ -379,7 +379,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
                                     regMin = String.format("%dd", (int) (regTime / 1440));
                                 }
 
-                                sayVo.setLikeMembers((List<String>) document.get("like_members"));
+                                sayVo.setLikeMembers((ArrayList<String>) document.get("like_members"));
+                                sayVo.setCommentList((ArrayList<HashMap<String, Object>>) document.get("comment_list"));
 
                                 sayVo.setRegMin(regMin);
 
@@ -402,7 +403,6 @@ public class Say extends BaseFragment implements View.OnClickListener {
                                 sayVo.setDistance(String.format("%s / %s", sayVo.getRegMin(), distance));*/
 
                                 this.sayListViewAdapter.insert(sayVo, this.sayListViewAdapter.getAdapterItemCount());
-
                         /*}*/
                             }
 

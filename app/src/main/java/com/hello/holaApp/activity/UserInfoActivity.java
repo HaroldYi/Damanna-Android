@@ -165,7 +165,7 @@ public class UserInfoActivity extends AppCompatActivity implements MaterialTabLi
         imageView.bringToFront();
 
         TextView textView = (TextView) findViewById(R.id.user_profile_name);
-        textView.setText(userName);
+        textView.setText(this.userName);
         textView.setTypeface(typeface);
 
         this.tabHost = (MaterialTabHost) findViewById(R.id.tabHost);

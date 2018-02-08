@@ -24,6 +24,7 @@ import com.google.firebase.firestore.Query;
 import com.hello.holaApp.R;
 import com.hello.holaApp.activity.MainActivity;
 import com.hello.holaApp.activity.UserInfoActivity;
+import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
 import com.hello.holaApp.vo.PhotoVo;
@@ -161,8 +162,7 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-            int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                    (float) 65, this.context.getResources().getDisplayMetrics());
+            int value = CommonFunction.convertTodp(this.context, 65);
 
             int listSize = photoVoList.size();
 

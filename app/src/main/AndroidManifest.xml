@@ -56,6 +56,8 @@
 
         <activity android:name="com.hello.holaApp.activity.PhotoViewerActivity" android:screenOrientation="portrait" />
 
+        <activity android:name="com.hello.holaApp.activity.SayCommentListActivity" android:screenOrientation="portrait" />
+
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_application_id"/>
         <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false" />
 
