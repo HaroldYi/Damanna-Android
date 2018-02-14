@@ -45,8 +45,10 @@ import java.util.Map;
 
 public class Say extends BaseFragment implements View.OnClickListener {
 
+    public static boolean resumeYn = false;
+
     private UltimateRecyclerView listView;
-    private List<SayVo> sayVoList;
+    public static List<SayVo> sayVoList;
     private FirebaseFirestore db;
 
     private MainActivity activity;
@@ -239,8 +241,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
                 })
         );*/
 
-        sayListViewAdapter = new NewSayListViewAdapter(getActivity(), sayVoList);
-        listView.setAdapter(sayListViewAdapter);
+        /*this.sayListViewAdapter = new NewSayListViewAdapter(getActivity(), this.sayVoList);
+        this.listView.setAdapter(sayListViewAdapter);*/
 
         this.activity = (MainActivity) getActivity();
 
@@ -259,7 +261,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                     DocumentSnapshot document = task.getResult();
                     if (document != null) {
                         Log.d(TAG, "DocumentSnapshot data: " + task.getResult().getData());
-                        NewSayListViewAdapter.likeSayList = (List<String>) document.get("like_say");
+                        NewSayListViewAdapter.likeSayList = (ArrayList<String>) document.get("like_say");
                         NewSayListViewAdapter.likeSayList = (NewSayListViewAdapter.likeSayList == null ? new ArrayList<>() : NewSayListViewAdapter.likeSayList);
                         loadingData(query, true);
                     } else {
@@ -323,6 +325,8 @@ public class Say extends BaseFragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
+        this.sayListViewAdapter = new NewSayListViewAdapter(getActivity(), this.sayVoList);
+        this.listView.setAdapter(this.sayListViewAdapter);
     }
 
     private void loadingData(Query queryParam, boolean initYn) {
@@ -381,6 +385,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
 
                                 sayVo.setLikeMembers((ArrayList<String>) document.get("like_members"));
                                 sayVo.setCommentList((ArrayList<HashMap<String, Object>>) document.get("comment_list"));
+                                sayVo.setCommentReplyList((ArrayList<HashMap<String, Object>>) document.get("comment_reply_list"));
 
                                 sayVo.setRegMin(regMin);
 

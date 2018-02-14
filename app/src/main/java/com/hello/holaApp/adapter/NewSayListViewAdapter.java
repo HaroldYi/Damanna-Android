@@ -36,6 +36,7 @@ import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
+import com.hello.holaApp.fragment.Say;
 import com.hello.holaApp.vo.SayVo;
 import com.hello.holaApp.vo.UserVo;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerviewViewHolder;
@@ -53,12 +54,12 @@ import java.util.Map;
 public class NewSayListViewAdapter extends UltimateViewAdapter {
 
     private Context context;
-    public static List<SayVo> sayVoList;
+    private List<SayVo> sayVoList;
     private ImageLoader imageLoader;
     private static Map<String, UserVo> userMap;
     private FirebaseFirestore db;
     private String uid;
-    public static List<String> likeSayList;
+    public static ArrayList<String> likeSayList;
 
     private boolean profileYn = false;
 
@@ -283,8 +284,12 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         ((ViewHolder) holder).img.setImageUrl(userVo.getPhotoUrl(), this.imageLoader);
 
         ArrayList<String> likeMemberList = (sayVo.getLikeMembers() == null ? new ArrayList<>() : sayVo.getLikeMembers());
+        ArrayList<HashMap<String, Object>> commentMemberList = (sayVo.getCommentList() == null ? new ArrayList<>() : sayVo.getCommentList());
+        ArrayList<HashMap<String, Object>> reCommentMemberList = (sayVo.getCommentReplyList() == null ? new ArrayList<>() : sayVo.getCommentReplyList());
 
         int likeMemberListSize = (likeMemberList != null ? likeMemberList.size() : 0);
+        int commentMemberListSize = (commentMemberList != null ? commentMemberList.size() : 0);
+        int reCommentMemberListSize = (reCommentMemberList != null ? reCommentMemberList.size() : 0);
 
         boolean[] isLiked = {false};
         int i = 0;
@@ -355,43 +360,57 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
 
         ((ViewHolder) holder).commentListBtn.setOnClickListener(v -> {
             Intent intent = new Intent(context, SayCommentListActivity.class);
-            /*intent.putExtra("uid", sayVo.getUid());
-            intent.putExtra("sayId", sayVo.getSayId());*/
             intent.putExtra("userName", userName);
             intent.putExtra("identity", userVo.getIdentity());
             intent.putExtra("profileUrl", userVo.getPhotoUrl());
             intent.putExtra("nation", userVo.getNation());
-            /*intent.putExtra("distance", sayVo.getDistance());
-            intent.putExtra("content", sayVo.getMsg());*/
             intent.putExtra("index", index);
 
             intent.putExtra("sayVo", sayVo);
+            intent.putStringArrayListExtra("likeSayList", likeSayList);
 
             intent.putStringArrayListExtra("likeMemberList", likeMemberList);
-            /*intent.putExtra("commentList", sayVo.getCommentList());*/
             intent.putExtra("isLiked", isLiked[0]);
+
+            Say.resumeYn = true;
 
             context.startActivity(intent);
         });
 
         ((ViewHolder) holder).likeCnt.setText(String.valueOf(likeMemberListSize));
+        ((ViewHolder) holder).commentCnt.setText(String.valueOf(commentMemberListSize + reCommentMemberListSize));
 
         ((ViewHolder) holder).sayProfile.setOnClickListener(v -> {
             MainActivity.tabIndex = 0;
 
-            if(!sayVo.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                Intent intent = new Intent(context, UserInfoActivity.class);
+            /*if(!sayVo.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {*/
+                /*Intent intent = new Intent(context, UserInfoActivity.class);
                 intent.putExtra("uid", sayVo.getUid());
                 intent.putExtra("userName", userName);
                 intent.putExtra("identity", sayVo.getIdentity());
-                intent.putExtra("profileUrl", userVo.getPhotoUrl());
+                intent.putExtra("profileUrl", userVo.getPhotoUrl());*/
 
                 /*intent.putExtra("bitmapImage", sayVoList.get(index).getBitmap());*/
 
+                Intent intent = new Intent(context, SayCommentListActivity.class);
+                intent.putExtra("userName", userName);
+                intent.putExtra("identity", userVo.getIdentity());
+                intent.putExtra("profileUrl", userVo.getPhotoUrl());
+                intent.putExtra("nation", userVo.getNation());
+                intent.putExtra("index", index);
+
+                intent.putExtra("sayVo", sayVo);
+                intent.putStringArrayListExtra("likeSayList", likeSayList);
+
+                intent.putStringArrayListExtra("likeMemberList", likeMemberList);
+                intent.putExtra("isLiked", isLiked[0]);
+
+                Say.resumeYn = true;
+
                 context.startActivity(intent);
-            } else {
+            /*} else {
                 Toast.makeText(context, "본인의 정보는 Profile메뉴를 이용하여 주십시오", Toast.LENGTH_SHORT).show();
-            }
+            }*/
         });
     }
 
@@ -485,11 +504,13 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         CardView noSayList;
         TextView noSayMsg;
 
-        RelativeLayout likeBtn;
+        LinearLayout likeCommentBlock;
+        LinearLayout likeBtn;
         ImageView likeIc;
         TextView likeCnt;
 
-        RelativeLayout commentListBtn;
+        LinearLayout commentListBtn;
+        TextView commentCnt;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -506,11 +527,19 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
             this.noSayList = (CardView) itemView.findViewById(R.id.no_say_list);
             this.noSayMsg = (TextView) itemView.findViewById(R.id.no_say_msg);
 
-            this.likeBtn = (RelativeLayout) itemView.findViewById(R.id.like_btn);
+            this.likeBtn = (LinearLayout) itemView.findViewById(R.id.like_btn);
             this.likeIc = (ImageView) itemView.findViewById(R.id.like_ic);
             this.likeCnt = (TextView) itemView.findViewById(R.id.like_cnt);
+            this.commentCnt = (TextView) itemView.findViewById(R.id.comment_cnt);
+            this.likeCommentBlock = (LinearLayout) itemView.findViewById(R.id.like_comment_block);
 
-            this.commentListBtn = (RelativeLayout) itemView.findViewById(R.id.comment_list_btn);
+            if(profileYn) {
+                this.likeCommentBlock.setVisibility(View.GONE);
+            } else {
+                this.likeCommentBlock.setVisibility(View.VISIBLE);
+            }
+
+            this.commentListBtn = (LinearLayout) itemView.findViewById(R.id.comment_list_btn);
         }
 
         @Override

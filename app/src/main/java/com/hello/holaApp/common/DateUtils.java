@@ -57,7 +57,13 @@ public class DateUtils {
      */
     public static String formatDate(long timeInMillis) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd", Locale.getDefault());
-        return dateFormat.format(timeInMillis);
+        String dateFormatStr = dateFormat.format(timeInMillis);
+
+        if(Locale.getDefault().toString().equals("ko_KR") || dateFormatStr.indexOf("일") != -1) {
+            dateFormatStr += "일";
+        }
+
+        return dateFormatStr;
     }
 
     /**

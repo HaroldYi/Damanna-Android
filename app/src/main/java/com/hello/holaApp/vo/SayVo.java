@@ -34,6 +34,8 @@ public class SayVo implements Serializable {
 
     private ArrayList<HashMap<String, Object>> commentList;
 
+    private ArrayList<HashMap<String, Object>> commentReplyList;
+
     public String getSayId() {
         return sayId;
     }
@@ -136,5 +138,13 @@ public class SayVo implements Serializable {
 
     public void setCommentList(ArrayList<HashMap<String, Object>> commentList) {
         this.commentList = commentList;
+    }
+
+    public ArrayList<HashMap<String, Object>> getCommentReplyList() {
+        return commentReplyList;
+    }
+
+    public void setCommentReplyList(ArrayList<HashMap<String, Object>> commentReplyList) {
+        this.commentReplyList = commentReplyList;
     }
 }

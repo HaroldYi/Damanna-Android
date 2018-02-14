@@ -108,6 +108,10 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
                             } else {
 
                             }
+
+                            ((ViewHolder) holder).profileLayout.setOnClickListener(v -> {
+                                this.openUserInfoActivity(index, 0);
+                            });
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
@@ -150,10 +154,6 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
         HorizontalScrollView peopleImageScrollList = ((ViewHolder) holder).peopleImageScrollList;
         LinearLayout layout = ((ViewHolder) holder).peopleImageList;
 
-        ((ViewHolder) holder).profileLayout.setOnClickListener(v -> {
-            this.openUserInfoActivity(index, 0);
-        });
-
         if(photoVoList != null && photoVoList.size() > 0) {
 
             peopleImageScrollList.setVisibility(View.VISIBLE);
@@ -169,6 +169,7 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
             layout.setOnClickListener(v -> {
                 this.openUserInfoActivity(index, 1);
             });
+
             for(int i = 0 ; i < listSize ; i++) {
 
                 params.setMargins(10, 0, 0, 0);

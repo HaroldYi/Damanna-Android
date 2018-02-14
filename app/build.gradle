@@ -23,7 +23,7 @@ android {
         applicationId "com.hello.holaApp"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 3
+        versionCode 4
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -136,6 +136,13 @@ dependencies {
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
     compile 'com.google.apis:google-api-services-people:v1-rev208-1.23.0'
+
+    /*compile 'com.github.pchmn:MaterialChipsInput:1.0.8'*/
+
+    /*compile "com.hootsuite.android:nachos:1.1.1"*/
+
+    // https://github.com/mabbas007/TagsEditText
+    compile 'com.github.mabbas007:TagsEditText:1.0.5'
 }
 
 apply plugin: 'com.google.gms.google-services'

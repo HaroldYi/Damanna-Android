@@ -105,7 +105,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         String channelUrl = getIntent().getStringExtra("channelUrl");
         String uid = getIntent().getStringExtra("uid");
 
-        SendBird.connect(fUser.getUid(), new SendBird.ConnectHandler() {
+        SendBird.connect(this.fUser.getUid(), new SendBird.ConnectHandler() {
             @Override
             public void onConnected(User user, SendBirdException e) {
                 if (e != null) {

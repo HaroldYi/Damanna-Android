@@ -59,12 +59,6 @@ public class People extends BaseFragment implements View.OnClickListener {
     private FirebaseUser user;
     private FirebaseFirestore db;
 
-    // 최소 GPS 정보 업데이트 거리 10미터
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
-
-    // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1분
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
-
     private GeoFire geoFire;
     private GeoQuery geoQuery;
     private static HashMap<String, UserVo> userMap;

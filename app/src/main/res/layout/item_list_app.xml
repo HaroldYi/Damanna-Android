@@ -59,7 +59,7 @@
                     android:layout_marginTop="2.5dp"
                     android:layout_weight="1"
                     android:text="거리"
-                    android:textColor="@color/dark_gray"
+                    android:textColor="#9B9B9B"
                     android:typeface="sans" />
             </LinearLayout>
 
@@ -100,6 +100,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/like_comment_block"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"
@@ -109,7 +110,6 @@
             android:orientation="horizontal">
 
             <RelativeLayout
-                android:id="@+id/like_btn"
                 android:layout_width="108dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -117,24 +117,30 @@
                 android:textAlignment="viewEnd"
                 android:orientation="horizontal"
                 >
-                <ImageView
-                    android:id="@+id/like_ic"
-                    android:layout_width="17dp"
-                    android:layout_height="17dp"
-                    android:layout_centerVertical="true"
-                    app:srcCompat="@drawable/ic_heart" />
-                <TextView
-                    android:id="@+id/like_cnt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="7dp"
-                    android:layout_toEndOf="@+id/like_ic"
-                    android:layout_centerVertical="true"
-                    android:text="0"/>
+                    <LinearLayout
+                        android:id="@+id/like_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        >
+                    <ImageView
+                        android:id="@+id/like_ic"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:layout_centerVertical="true"
+                        app:srcCompat="@drawable/ic_heart" />
+                    <TextView
+                        android:id="@+id/like_cnt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="7dp"
+                        android:layout_toEndOf="@+id/like_ic"
+                        android:layout_centerVertical="true"
+                        android:text="0"/>
+                </LinearLayout>
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/comment_list_btn"
                 android:layout_width="108dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -142,19 +148,27 @@
                 android:textAlignment="viewEnd"
                 android:orientation="horizontal"
                 >
-                <ImageView
-                    android:id="@+id/comment_ic"
-                    android:layout_width="17dp"
-                    android:layout_height="17dp"
-                    android:layout_centerVertical="true"
-                    app:srcCompat="@drawable/ic_comment" />
-                <TextView
+                <LinearLayout
+                    android:id="@+id/comment_list_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="7dp"
-                    android:layout_toEndOf="@+id/comment_ic"
-                    android:layout_centerVertical="true"
-                    android:text="0"/>
+                    android:orientation="horizontal"
+                    >
+                    <ImageView
+                        android:id="@+id/comment_ic"
+                        android:layout_width="17dp"
+                        android:layout_height="17dp"
+                        android:layout_centerVertical="true"
+                        app:srcCompat="@drawable/ic_comment" />
+                    <TextView
+                        android:id="@+id/comment_cnt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="7dp"
+                        android:layout_toEndOf="@+id/comment_ic"
+                        android:layout_centerVertical="true"
+                        android:text="0"/>
+                </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
 
