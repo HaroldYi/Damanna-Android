@@ -2,6 +2,7 @@ package com.hello.holaApp.vo;
 
 import com.google.firebase.firestore.GeoPoint;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ public class UserVo {
     }
 
     public void setGeoPoint(GeoPoint geoPoint) {
-        this.geoPoint = geoPoint;
+        this.geoPoint = (geoPoint != null ? geoPoint : new GeoPoint(0, 0));
     }
 
     public int getAge() {
@@ -58,7 +59,7 @@ public class UserVo {
     }
 
     public void setGender(String gender) {
-        this.gender = gender;
+        this.gender = (gender != null ? gender : "");
     }
 
     public String getNation() {
@@ -66,7 +67,7 @@ public class UserVo {
     }
 
     public void setNation(String nation) {
-        this.nation = nation;
+        this.nation = (nation != null ? nation : "");
     }
 
     public String getIdentity() {
@@ -74,7 +75,7 @@ public class UserVo {
     }
 
     public void setIdentity(String identity) {
-        this.identity = identity;
+        this.identity = (identity != null ? identity : "");
     }
 
     public String getPhotoUrl() {
@@ -82,7 +83,7 @@ public class UserVo {
     }
 
     public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
+        this.photoUrl = (photoUrl != null ? photoUrl : "");
     }
 
     public float getDistance() {
@@ -98,7 +99,7 @@ public class UserVo {
     }
 
     public void setPhotoVoList(List<PhotoVo> photoVoList) {
-        this.photoVoList = photoVoList;
+        this.photoVoList = (photoVoList != null ? photoVoList : new ArrayList<>());
     }
 
     public List<String> getSayLikeList() {
@@ -106,6 +107,6 @@ public class UserVo {
     }
 
     public void setSayLikeList(List<String> sayLikeList) {
-        this.sayLikeList = sayLikeList;
+        this.sayLikeList = (sayLikeList != null ? sayLikeList : new ArrayList<>());
     }
 }
