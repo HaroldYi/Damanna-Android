@@ -230,24 +230,26 @@ public class CommonFunction {
                     return;
                 }
 
-                final NavigationTabBar.Model model = MainActivity.navigationTabBar.getModels().get(2);
-                if(list.size() > 0) {
+                if(MainActivity.navigationTabBar != null) {
+                    final NavigationTabBar.Model model = MainActivity.navigationTabBar.getModels().get(2);
+                    if (list.size() > 0) {
 
-                    int unReadCnt = 0;
-                    for(GroupChannel channel : list) {
-                        unReadCnt += channel.getUnreadMessageCount();
-                    }
+                        int unReadCnt = 0;
+                        for (GroupChannel channel : list) {
+                            unReadCnt += channel.getUnreadMessageCount();
+                        }
 
-                    if(unReadCnt > 0) {
-                        model.hideBadge();
-                        model.setBadgeTitle(String.valueOf(unReadCnt));
-                        model.showBadge();
+                        if (unReadCnt > 0) {
+                            model.hideBadge();
+                            model.setBadgeTitle(String.valueOf(unReadCnt));
+                            model.showBadge();
+                        } else {
+                            model.hideBadge();
+                        }
+
                     } else {
                         model.hideBadge();
                     }
-
-                } else {
-                    model.hideBadge();
                 }
             }
         });
