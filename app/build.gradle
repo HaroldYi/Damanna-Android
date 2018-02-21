@@ -23,7 +23,7 @@ android {
         applicationId "com.hello.holaApp"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 5
+        versionCode 6
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -143,6 +143,9 @@ dependencies {
 
     // https://github.com/mabbas007/TagsEditText
     compile 'com.github.mabbas007:TagsEditText:1.0.5'
+
+    // https://github.com/chrisbanes/PhotoView
+    implementation 'com.github.chrisbanes:PhotoView:1.0.4'
 }
 
 apply plugin: 'com.google.gms.google-services'

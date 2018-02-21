@@ -19,6 +19,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.hello.holaApp.R;
 import com.hello.holaApp.common.CommonFunction;
 
@@ -78,6 +79,7 @@ public class PopupActivity extends AppCompatActivity {
 
                 stringMap.put("member_id", FirebaseAuth.getInstance().getCurrentUser().getUid());
                 stringMap.put("content", contentStr);
+                stringMap.put("location", new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude()));
                 stringMap.put("reg_dt", new Date());
 
                 /*DocumentReference memberReference = this.db.collection("member").document(this.user.getUid());

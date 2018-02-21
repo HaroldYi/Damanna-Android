@@ -2,6 +2,10 @@ package com.hello.holaApp.vo;
 
 import android.graphics.Bitmap;
 
+import com.facebook.common.Common;
+import com.google.firebase.firestore.GeoPoint;
+import com.hello.holaApp.common.CommonFunction;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +25,7 @@ public class SayVo implements Serializable {
 
     private String photoUrl = "";
     private String msg = "";
+    private GeoPoint location;
 
     private String regMin = "";
 
@@ -146,5 +151,16 @@ public class SayVo implements Serializable {
 
     public void setCommentReplyList(ArrayList<HashMap<String, Object>> commentReplyList) {
         this.commentReplyList = commentReplyList;
+    }
+
+    public GeoPoint getLocation() {
+        return location;
+    }
+
+    public void setLocation(GeoPoint location) {
+        if(location == null) {
+            location = new GeoPoint(0, 0);
+        }
+        this.location = location;
     }
 }
