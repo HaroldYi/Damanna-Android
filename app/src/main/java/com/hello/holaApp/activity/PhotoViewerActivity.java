@@ -21,6 +21,8 @@ import com.hello.holaApp.R;
 import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.ImageUtils;
 
+import uk.co.senab.photoview.PhotoView;
+
 public class PhotoViewerActivity extends AppCompatActivity {
 
     @Override
@@ -55,7 +57,7 @@ public class PhotoViewerActivity extends AppCompatActivity {
         String url = getIntent().getStringExtra("url");
         String type = getIntent().getStringExtra("type");
 
-        ImageView imageView = (ImageView) findViewById(R.id.main_image_view);
+        PhotoView imageView = (PhotoView) findViewById(R.id.main_image_view);
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         /*PhotoViewAttacher attacher = new PhotoViewAttacher(imageView);
