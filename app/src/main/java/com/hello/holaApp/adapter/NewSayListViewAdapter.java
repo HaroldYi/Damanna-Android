@@ -16,9 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,7 +30,6 @@ import com.google.firebase.firestore.GeoPoint;
 import com.hello.holaApp.R;
 import com.hello.holaApp.activity.MainActivity;
 import com.hello.holaApp.activity.SayCommentListActivity;
-import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.common.CommonFunction;
 import com.hello.holaApp.common.RadiusNetworkImageView;
 import com.hello.holaApp.common.VolleySingleton;
@@ -143,6 +140,8 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         if(this.getAdapterItemCount() > index) {
             if (!this.sayVoList.get(index).isNoMsg()) {
 
+                ((ViewHolder) holder).sayLayout.setVisibility(View.GONE);
+
                 String uid = sayVoList.get(index).getUid();
                 UserVo userVo = userMap.get(uid);
 
@@ -243,7 +242,7 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         String userName = userVo.getUserName();
         String nation = userVo.getNation();
         String identity = userVo.getIdentity();
-        GeoPoint geoPoint = userVo.getGeoPoint();
+        GeoPoint geoPoint = sayVo.getLocation();
 
         Location loc = new Location("pointA");
         Location loc1 = new Location("pointB");
@@ -280,6 +279,12 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         ((ViewHolder) holder).userName.setText(userInfo);
         ((ViewHolder) holder).distance.setText(distance);
         ((ViewHolder) holder).content.setText(sayVo.getMsg());
+
+        /*if(userVo.getPhotoUrl().indexOf("10354686_10150004552801856_220367501106153455_n") != -1) {
+            ((ViewHolder) holder).img.setDefaultImageResId(R.drawable.default_profile);
+        } else {
+            ((ViewHolder) holder).img.setImageUrl(userVo.getPhotoUrl(), this.imageLoader);
+        }*/
 
         ((ViewHolder) holder).img.setImageUrl(userVo.getPhotoUrl(), this.imageLoader);
 
@@ -412,6 +417,8 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
                 Toast.makeText(context, "본인의 정보는 Profile메뉴를 이용하여 주십시오", Toast.LENGTH_SHORT).show();
             }*/
         });
+
+        ((ViewHolder) holder).sayLayout.setVisibility(View.VISIBLE);
     }
 
     public void insert(SayVo sayVo, int position) {
