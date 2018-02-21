@@ -50,6 +50,7 @@ import com.hello.holaApp.activity.PopupActivity;
 import com.hello.holaApp.activity.SettingActivity;
 import com.hello.holaApp.activity.ViewPhotoActivity;
 import com.hello.holaApp.adapter.NewRecyclerGridViewAdapter;
+import com.hello.holaApp.adapter.PeopleListViewAdapter;
 import com.hello.holaApp.adapter.UserInfoSayListViewAdapter;
 import com.hello.holaApp.common.Constant;
 import com.hello.holaApp.common.EqualSpacingItemDecoration;
@@ -393,7 +394,14 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
                         String photoUrl = (document.getString("profileUrl") != null ? document.getString("profileUrl") : this.user.getPhotoUrl().toString());
 
+                        /*if(photoUrl.indexOf("10354686_10150004552801856_220367501106153455_n") != -1) {
+                            this.profileImageView.setDefaultImageResId(R.drawable.default_profile);
+                        } else {
+                            this.profileImageView.setImageUrl(photoUrl, this.imageLoader);
+                        }*/
+
                         this.profileImageView.setImageUrl(photoUrl, this.imageLoader);
+
                         textView.setText(this.user.getDisplayName());
 
                         profileFile = (document.getString("profile_file") != null ? document.getString("profile_file") : "");
@@ -732,14 +740,14 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
 
     public static void showCameraDialog() {
         final List<String> listItems = new ArrayList<>();
-        listItems.add("사진 촬영하여 등록");
-        listItems.add("사진 앨범에서 등록");
+        listItems.add(activity.getResources().getString(R.string.using_camera));
+        listItems.add(activity.getResources().getString(R.string.choose_from_gallery));
 
         if(profileYn) {
-            listItems.add("삭제");
+            listItems.add(activity.getResources().getString(R.string.delete));
         }
 
-        listItems.add("취소");
+        listItems.add(activity.getResources().getString(R.string.cancel));
         final CharSequence[] items =  listItems.toArray(new String[ listItems.size()]);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
@@ -834,40 +842,74 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                                     StorageReference desertThumRef = storageThumRef.child(String.format("thumbnail/%s_thumbnail.jpg", profileFile));
                                     desertThumRef.delete().addOnSuccessListener(aVoid1 -> {
                                         // File deleted successfully
+                                        FirebaseFirestore.getInstance().collection("member").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                                .update(photoMap)
+                                                .addOnSuccessListener(aVoid2 -> {
+                                                    Log.d(TAG, "DocumentSnapshot successfully written!");
+
+                                                    SendBird.updateCurrentUserInfo(FirebaseAuth.getInstance().getCurrentUser().getDisplayName(), profileUrl, e12 -> {
+                                                        if (e12 != null) {
+                                                            // Error.
+                                                            Crashlytics.logException(e12);
+                                                            return;
+                                                        }
+
+                                                        profileFile = photoMap.get("profile_file").toString();
+                                                        profileUrlOrg = photoMap.get("profileUrl_org").toString();
+
+                                                        profileImageView.setImageUrl(profileUrl, imageLoader);
+                                                        progressOFF();
+                                                    });
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Log.w(TAG, "Error writing document", e);
+                                                    progressOFF();
+                                                });
                                     }).addOnFailureListener(exception -> {
                                         // Uh-oh, an error occurred!
                                         Crashlytics.logException(exception);
+                                        progressOFF();
                                     });
                                 }).addOnFailureListener(exception -> {
                                     // Uh-oh, an error occurred!
                                     Crashlytics.logException(exception);
+                                    progressOFF();
                                 });
-                            }
+                            } else {
+                                FirebaseFirestore.getInstance().collection("member").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                        .update(photoMap)
+                                        .addOnSuccessListener(aVoid2 -> {
+                                            Log.d(TAG, "DocumentSnapshot successfully written!");
 
-                            FirebaseFirestore.getInstance().collection("member").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                    .update(photoMap)
-                                    .addOnSuccessListener(aVoid -> {
-                                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                                            SendBird.updateCurrentUserInfo(FirebaseAuth.getInstance().getCurrentUser().getDisplayName(), profileUrl, e12 -> {
+                                                if (e12 != null) {
+                                                    // Error.
+                                                    Crashlytics.logException(e12);
+                                                    return;
+                                                }
 
-                                        SendBird.updateCurrentUserInfo(FirebaseAuth.getInstance().getCurrentUser().getDisplayName(), profileUrl, e12 -> {
-                                            if (e12 != null) {
-                                                // Error.
-                                                Crashlytics.logException(e12);
-                                                return;
-                                            }
+                                                profileFile = photoMap.get("profile_file").toString();
+                                                profileUrlOrg = photoMap.get("profileUrl_org").toString();
 
-                                            profileFile = photoMap.get("profile_file").toString();
-                                            profileUrlOrg = photoMap.get("profileUrl_org").toString();
-
-                                            profileImageView.setImageUrl(profileUrl, imageLoader);
+                                                profileImageView.setImageUrl(profileUrl, imageLoader);
+                                                progressOFF();
+                                            });
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.w(TAG, "Error writing document", e);
+                                            progressOFF();
                                         });
-                                    })
-                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                            }
+                        } else {
+                            Crashlytics.logException(task.getException());
+                            progressOFF();
                         }
                     });
         }
 
         private void sendPicture(Intent data, int cameraCode) {
+
+            progressON(getActivity().getResources().getString(R.string.saving));
 
             String fileName = "";
 
@@ -949,6 +991,8 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
             String finalFileName1 = fileName;
             uploadTask.addOnFailureListener(exception -> {
                 // Handle unsuccessful uploads
+                progressOFF();
+                Crashlytics.logException(exception);
             }).addOnSuccessListener(taskSnapshot -> {
                 String finalFileName = finalFileName1;
                 finalUploadThumTask.addOnFailureListener(exception -> {
@@ -958,6 +1002,7 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                     Map<String, Object> photoMap = new HashMap<>();
 
                     if(profileYn) {
+
                         photoMap.put("profileUrl", taskThumSnapshot.getDownloadUrl().toString());
                         photoMap.put("profileUrl_org", taskSnapshot.getDownloadUrl().toString());
                         photoMap.put("profile_file", finalFileName);
@@ -991,10 +1036,12 @@ public class Profile extends BaseFragment implements View.OnClickListener, Mater
                                 .addOnSuccessListener(documentReference -> {
                                     //
                                     Log.d(TAG, "DocumentSnapshot written with ID: " + photoReference.getId());
+                                    progressOFF();
                                 })
                                 .addOnFailureListener(e -> {
                                     //
                                     Log.w(TAG, "Error adding document", e);
+                                    progressOFF();
                                 });
 
                         adapter = new NewRecyclerGridViewAdapter(getActivity(), photoVoList);
