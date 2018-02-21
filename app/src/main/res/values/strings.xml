@@ -9,7 +9,7 @@
     <string name="resend_message">Resend</string>
     <string name="delete_message">Delete</string>
     <string name="download">Download</string>
-    <string name="cancel">Cancel</string>
+    <string name="cancel">취소</string>
 
     <!-- Message Status -->
     <string name="message_sending">Sending</string>
@@ -23,6 +23,13 @@
     <string-array name="tab_list">
         <item>Say</item>
         <item>Photo</item>
+    </string-array>
+
+    <string-array name="distance_filter">
+        <item>전체</item>
+        <item>10km</item>
+        <item>50km</item>
+        <item>100km</item>
     </string-array>
 
     <string name="googleClientId">
@@ -44,7 +51,7 @@
         거주 또는 여행할\n국가를 선택해주세요
     </string>
     <string name="using_camera">
-        사진 앨범에서 등록
+        사진촬영 후 등록
     </string>
     <string name="choose_from_gallery">
         사진 앨범에서 등록

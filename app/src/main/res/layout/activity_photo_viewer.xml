@@ -9,8 +9,7 @@
     android:background="@android:color/white"
     tools:context=".activity.PhotoViewerActivity">
 
-
-    <ImageView
+    <uk.co.senab.photoview.PhotoView
         android:id="@+id/main_image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
