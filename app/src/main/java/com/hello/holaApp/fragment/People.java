@@ -1,13 +1,11 @@
 package com.hello.holaApp.fragment;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
@@ -15,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -32,17 +29,13 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.hello.holaApp.R;
 import com.hello.holaApp.activity.MainActivity;
-import com.hello.holaApp.activity.UserInfoActivity;
 import com.hello.holaApp.adapter.PeopleListViewAdapter;
 import com.hello.holaApp.common.CommonFunction;
-import com.hello.holaApp.vo.PhotoVo;
 import com.hello.holaApp.vo.UserVo;
-import com.marshalchen.ultimaterecyclerview.RecyclerItemClickListener;
 import com.marshalchen.ultimaterecyclerview.UltimateRecyclerView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -50,6 +43,8 @@ import java.util.List;
  */
 
 public class People extends BaseFragment implements View.OnClickListener {
+
+    private int radius = 10;
 
     private PeopleListViewAdapter adapter;
 
@@ -59,10 +54,19 @@ public class People extends BaseFragment implements View.OnClickListener {
     private FirebaseUser user;
     private FirebaseFirestore db;
 
+    private View view;
+
     private GeoFire geoFire;
     private GeoQuery geoQuery;
-    private static HashMap<String, UserVo> userMap;
-    private static List<UserVo> userVoList;
+    private List<UserVo> userVoList;
+
+    private Query query;
+    private UltimateRecyclerView listView;
+
+    private static int limit = 10;
+
+    Double latitude;
+    Double longitude;
 
     public People() {
         this.mAuth = FirebaseAuth.getInstance();
@@ -74,13 +78,12 @@ public class People extends BaseFragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        if(this.userMap == null) {
-            this.userMap = new HashMap();
-        }
-
         if(this.userVoList == null) {
             this.userVoList = new ArrayList<>();
         }
+
+        this.latitude = CommonFunction.getLatitude();
+        this.longitude = CommonFunction.getLongitude();
 
         ActionBar actionBar = ((MainActivity) getActivity()).getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true); //true설정을 해주셔야 합니다.
@@ -97,29 +100,74 @@ public class People extends BaseFragment implements View.OnClickListener {
         Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/NotoSans-Medium.ttf");
         title.setTypeface(typeface);
 
+        /*Spinner spinner = (Spinner) actionView.findViewById(R.id.distance_filter);
+        spinner.setVisibility(View.VISIBLE);
+        spinner.setSelection(0);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
+                switch (index) {
+                    case 1:
+                        radius = 10;
+                        break;
+
+                    case 2:
+                        radius = 50;
+
+                    case 3:
+                        radius = 100;
+                        break;
+
+                    default:
+                        radius = 1000000000;
+                        break;
+                }
+
+                adapter.clear();
+                geoQuery.setRadius(radius);
+                geoQuery.removeAllListeners();
+                setListener();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });*/
+
         actionBar.setCustomView(actionView);
 
         progressON(getResources().getString(R.string.loading));
 
-        View view = inflater.inflate(R.layout.home_layout, container, false);
+        this.view = inflater.inflate(R.layout.home_layout, container, false);
         view.setVisibility(View.INVISIBLE);
-        UltimateRecyclerView listView = (UltimateRecyclerView) view.findViewById(R.id.people_list);
-
-        List<UserVo> userVoList = new ArrayList<>();
-        Double latitude = CommonFunction.getLatitude();
-        Double longitude = CommonFunction.getLongitude();
-
-        /*DatabaseReference ref = FirebaseDatabase.getInstance().getReference("path/to/geofire");
-        this.geoFire = new GeoFire(ref);*/
-
-        // creates a new query around [latitude, longitude] with a radius of 1.0 kilometers
-        /*this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 100);*/
+        this.listView = (UltimateRecyclerView) view.findViewById(R.id.people_list);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
 
         this.adapter = new PeopleListViewAdapter(getContext(), userVoList);
         listView.setLayoutManager(new LinearLayoutManager(getActivity()));
         listView.setAdapter(this.adapter);
         listView.setHasFixedSize(true);
+        listView.reenableLoadmore();
 
+        listView.setOnLoadMoreListener(new UltimateRecyclerView.OnLoadMoreListener() {
+            @Override
+            public void loadMore(int itemsCount, final int maxLastVisiblePosition) {
+
+                Log.d("itemsCount", itemsCount+"");
+
+                linearLayoutManager.scrollToPositionWithOffset(maxLastVisiblePosition,-1);
+                linearLayoutManager.scrollToPosition(maxLastVisiblePosition);
+                loadingPeople(query);
+                progressON(getResources().getString(R.string.loading));
+            }
+        });
+
+        List<UserVo> userVoList = new ArrayList<>();
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userlocation");
+        this.geoFire = new GeoFire(ref);
+
+        // creates a new query around [latitude, longitude] with a radius of 1.0 kilometers
+        this.geoQuery = this.geoFire.queryAtLocation(new GeoLocation(this.latitude, this.longitude), this.radius);
+        /*this.setListener();*/
         /*listView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
@@ -139,101 +187,48 @@ public class People extends BaseFragment implements View.OnClickListener {
                 })
         );*/
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("member")
-                .orderBy("last_signIn", Query.Direction.DESCENDING)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
+        this.query = this.db.collection("member").orderBy("last_signIn", Query.Direction.DESCENDING).limit(this.limit);
+        this.loadingPeople(this.query);
 
-                        List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
+        return this.view;
+    }
 
-                        if(documentSnapshotList.size() > 0) {
-                            for (DocumentSnapshot document : documentSnapshotList) {
-                                String uid = document.get("id").toString();
-                                if(user == null || !uid.equals(user.getUid())) {
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
 
-                                    UserVo userVo = new UserVo();
-                                    GeoPoint geoPoint = (GeoPoint) document.getData().get("location");
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        /*this.geoFire.removeLocation("7XIFHLj0frO0F5fICDStNWA7BJD3");*/
+        /*this.geoQuery.removeAllListeners();*/
+    }
 
-                                    userVo.setUid(uid);
-                                    userVo.setUserName(document.getData().get("name").toString());
+    @Override
+    public void onClick(View view) {
 
-                                    String gender = document.getData().get("gender").toString();
-                                    gender = (gender.equals("male") ? "남자" : "여자");
+    }
 
-                                    userVo.setGender(gender);
-
-                                    long dateOfBirth = document.getDate("dateOfBirth").getTime();
-                                    long now = System.currentTimeMillis();
-
-                                    Calendar birthCalendar = Calendar.getInstance();
-                                    birthCalendar.setTimeInMillis(dateOfBirth);
-
-                                    int yearOfBirth = birthCalendar.get(Calendar.YEAR);
-
-                                    Calendar nowCalender = Calendar.getInstance();
-                                    nowCalender.setTimeInMillis(now);
-
-                                    int nowYear = nowCalender.get(Calendar.YEAR);
-
-                                    int koreanAge = nowYear - yearOfBirth + 1;
-
-                                    Location loc = new Location("pointA");
-                                    Location loc1 = new Location("pointB");
-
-                                    loc.setLatitude(geoPoint.getLatitude());
-                                    loc.setLongitude(geoPoint.getLongitude());
-
-                                    loc1.setLatitude(latitude);
-                                    loc1.setLongitude(longitude);
-
-                                    float distance = loc.distanceTo(loc1) / 1000;
-
-                                    userVo.setDistance(distance);
-
-                                    String identity = (document.getData().get("identity") != null ? document.getData().get("identity").toString() : "");
-                                    String nation = (document.getData().get("nation") != null ? document.getData().get("nation").toString() : "");
-                                    String profileUrl = (document.getData().get("profileUrl") != null ? document.getData().get("profileUrl").toString() : "");
-
-                                    userVo.setAge(koreanAge);
-                                    userVo.setIdentity(identity);
-                                    userVo.setNation(nation);
-                                    userVo.setPhotoUrl(profileUrl);
-                                    userVo.setGeoPoint(geoPoint);
-
-                                    /*this.userVoList.add(userVo);*/
-                                    this.userMap.put(uid, userVo);
-
-                                    adapter.insertLastInternal(userVoList, userVo);
-
-                                    /*geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
-                                        if (error != null) {
-                                            System.err.println("There was an error saving the location to GeoFire: " + error);
-                                        } else {
-                                            System.out.println("Location saved on server successfully!");
-                                        }
-                                    });*/
-                                }
-                            }
-
-                            progressOFF();
-                            view.setVisibility(View.VISIBLE);
-
-                        } else {
-                            progressOFF();
-                            view.setVisibility(View.VISIBLE);
-                        }
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
-                    }
-                });
-
-        /*geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+    private void setListener() {
+        this.geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                if(!key.equals(user.getUid())) {
-                    Log.d("enterrrrr", String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+                Log.d("enterrrrr", String.format("Key %s entered the search area at [%f, %f]", key, location.latitude, location.longitude));
+                loadingPeople(key);
+
+                Location loc = new Location("pointA");
+                Location loc1 = new Location("pointB");
+
+                loc.setLatitude(location.latitude);
+                loc.setLongitude(location.longitude);
+
+                loc1.setLatitude(latitude);
+                loc1.setLongitude(longitude);
+
+                Log.d("distance", loc.distanceTo(loc1)/1000+"");
+
+                /*if(!key.equals(user.getUid())) {
 
                     UserVo userVo = userMap.get(key);
                     if(userVo != null) {
@@ -247,7 +242,7 @@ public class People extends BaseFragment implements View.OnClickListener {
                         loc1.setLatitude(latitude);
                         loc1.setLongitude(longitude);
 
-                        Log.d("distance", loc.distanceTo(loc1)+"");
+                        *//*Log.d("distance", loc.distanceTo(loc1)/1000+"");*//*
 
                         userVo.setDistance(loc.distanceTo(loc1)/1000);
                         *//*photoVo.setUpdateTime(1);*//*
@@ -257,7 +252,7 @@ public class People extends BaseFragment implements View.OnClickListener {
                         progressOFF();
                         view.setVisibility(View.VISIBLE);
                     }
-                }
+                }*/
             }
 
             @Override
@@ -279,26 +274,208 @@ public class People extends BaseFragment implements View.OnClickListener {
             public void onGeoQueryError(DatabaseError error) {
                 Log.d("gqerr", "There was an error with this query: " + error);
             }
-        });*/
-
-        return view;
+        });
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
+    private void loadingPeople(String key) {
 
+        Query query;
+
+        if(key != null) {
+            query = this.db.collection("member").whereEqualTo("id", key)
+                            .orderBy("last_signIn", Query.Direction.DESCENDING);
+        } else {
+            query = this.db.collection("member").orderBy("last_signIn", Query.Direction.DESCENDING);
+        }
+
+        query
+            .get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+
+                    List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
+
+                    if(documentSnapshotList.size() > 0) {
+                        for (DocumentSnapshot document : documentSnapshotList) {
+                            String uid = document.get("id").toString();
+                            if(user == null || !uid.equals(user.getUid())) {
+
+                                UserVo userVo = new UserVo();
+                                GeoPoint geoPoint = (GeoPoint) document.getData().get("location");
+
+                                userVo.setUid(uid);
+                                userVo.setUserName(document.getData().get("name").toString());
+
+                                String gender = document.getData().get("gender").toString();
+                                gender = (gender.equals("male") ? "남자" : "여자");
+
+                                userVo.setGender(gender);
+
+                                long dateOfBirth = document.getDate("dateOfBirth").getTime();
+                                long now = System.currentTimeMillis();
+
+                                Calendar birthCalendar = Calendar.getInstance();
+                                birthCalendar.setTimeInMillis(dateOfBirth);
+
+                                int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                                Calendar nowCalender = Calendar.getInstance();
+                                nowCalender.setTimeInMillis(now);
+
+                                int nowYear = nowCalender.get(Calendar.YEAR);
+
+                                int koreanAge = nowYear - yearOfBirth + 1;
+
+                                Location loc = new Location("pointA");
+                                Location loc1 = new Location("pointB");
+
+                                loc.setLatitude(geoPoint.getLatitude());
+                                loc.setLongitude(geoPoint.getLongitude());
+
+                                loc1.setLatitude(latitude);
+                                loc1.setLongitude(longitude);
+
+                                float distance = loc.distanceTo(loc1) / 1000;
+
+                                userVo.setDistance(distance);
+
+                                String identity = (document.getData().get("identity") != null ? document.getData().get("identity").toString() : "");
+                                String nation = (document.getData().get("nation") != null ? document.getData().get("nation").toString() : "");
+                                String profileUrl = (document.getData().get("profileUrl") != null ? document.getData().get("profileUrl").toString() : "");
+
+                                userVo.setAge(koreanAge);
+                                userVo.setIdentity(identity);
+                                userVo.setNation(nation);
+                                userVo.setPhotoUrl(profileUrl);
+                                userVo.setGeoPoint(geoPoint);
+
+                                /*this.userVoList.add(userVo);*/
+                                /*this.userMap.put(uid, userVo);*/
+
+                                adapter.insertLastInternal(userVoList, userVo);
+                                /*geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
+                                    if (error != null) {
+                                        Log.e("geoFireLog", "There was an error saving the location to GeoFire: " + error);
+                                    } else {
+                                        Log.d("geoFireLog", String.format("userId : %s Location saved on server successfully!", uid));
+                                    }
+                                });*/
+                            }
+                        }
+
+                        progressOFF();
+                        view.setVisibility(View.VISIBLE);
+
+                    } else {
+                        progressOFF();
+                        view.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    Log.w(TAG, "Error getting documents.", task.getException());
+                }
+            });
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        /*this.geoFire.removeLocation("7XIFHLj0frO0F5fICDStNWA7BJD3");*/
-        /*this.geoQuery.removeAllListeners();*/
-    }
+    private void loadingPeople(Query query) {
 
-    @Override
-    public void onClick(View view) {
+        query
+            .get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
 
+                    List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
+                    int size = documentSnapshotList.size();
+                    DocumentSnapshot last = null;
+
+                    if(documentSnapshotList.size() > 0) {
+
+                        if(size < this.limit) {
+                            this.listView.disableLoadmore();
+                        }
+
+                        last = documentSnapshotList.get(size - 1);
+                        this.query = this.db.collection("member/")
+                                .orderBy("last_signIn", Query.Direction.DESCENDING)
+                                .startAfter(last)
+                                .limit(this.limit);
+
+                        for (DocumentSnapshot document : documentSnapshotList) {
+                            String uid = document.get("id").toString();
+                            if(user == null || !uid.equals(user.getUid())) {
+
+                                UserVo userVo = new UserVo();
+                                GeoPoint geoPoint = (GeoPoint) document.getData().get("location");
+
+                                userVo.setUid(uid);
+                                userVo.setUserName(document.getData().get("name").toString());
+
+                                String gender = document.getData().get("gender").toString();
+                                gender = (gender.equals("male") ? "남자" : "여자");
+
+                                userVo.setGender(gender);
+
+                                long dateOfBirth = document.getDate("dateOfBirth").getTime();
+                                long now = System.currentTimeMillis();
+
+                                Calendar birthCalendar = Calendar.getInstance();
+                                birthCalendar.setTimeInMillis(dateOfBirth);
+
+                                int yearOfBirth = birthCalendar.get(Calendar.YEAR);
+
+                                Calendar nowCalender = Calendar.getInstance();
+                                nowCalender.setTimeInMillis(now);
+
+                                int nowYear = nowCalender.get(Calendar.YEAR);
+
+                                int koreanAge = nowYear - yearOfBirth + 1;
+
+                                Location loc = new Location("pointA");
+                                Location loc1 = new Location("pointB");
+
+                                loc.setLatitude(geoPoint.getLatitude());
+                                loc.setLongitude(geoPoint.getLongitude());
+
+                                loc1.setLatitude(latitude);
+                                loc1.setLongitude(longitude);
+
+                                float distance = loc.distanceTo(loc1) / 1000;
+
+                                userVo.setDistance(distance);
+
+                                String identity = (document.getData().get("identity") != null ? document.getData().get("identity").toString() : "");
+                                String nation = (document.getData().get("nation") != null ? document.getData().get("nation").toString() : "");
+                                String profileUrl = (document.getData().get("profileUrl") != null ? document.getData().get("profileUrl").toString() : "");
+
+                                userVo.setAge(koreanAge);
+                                userVo.setIdentity(identity);
+                                userVo.setNation(nation);
+                                userVo.setPhotoUrl(profileUrl);
+                                userVo.setGeoPoint(geoPoint);
+
+                            /*this.userVoList.add(userVo);*/
+                            /*this.userMap.put(uid, userVo);*/
+
+                                adapter.insertLastInternal(userVoList, userVo);
+                            /*geoFire.setLocation(uid, new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude()), (key, error) -> {
+                                if (error != null) {
+                                    Log.e("geoFireLog", "There was an error saving the location to GeoFire: " + error);
+                                } else {
+                                    Log.d("geoFireLog", String.format("userId : %s Location saved on server successfully!", uid));
+                                }
+                            });*/
+                            }
+                        }
+
+                        progressOFF();
+                        view.setVisibility(View.VISIBLE);
+                    } else {
+                        progressOFF();
+                        view.setVisibility(View.VISIBLE);
+                        this.listView.disableLoadmore();
+                    }
+                } else {
+                    Log.w(TAG, "Error getting documents.", task.getException());
+                }
+            });
     }
 }
