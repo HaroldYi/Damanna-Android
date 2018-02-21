@@ -37,6 +37,7 @@ import com.sendbird.android.GroupChannelListQuery;
 import com.sendbird.android.Member;
 import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
+import com.sendbird.android.User;
 
 import java.util.List;
 
@@ -71,6 +72,21 @@ public class GroupChannelListFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.mAuth = FirebaseAuth.getInstance();
+        this.fUser = mAuth.getCurrentUser();
+
+        SendBird.connect(this.fUser.getUid(), new SendBird.ConnectHandler() {
+            @Override
+            public void onConnected(User user, SendBirdException e) {
+                if (e != null) {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        });
+
         mChannelListAdapter = new GroupChannelListAdapter(getActivity());
         mChannelListAdapter.load();
 
@@ -92,9 +108,6 @@ public class GroupChannelListFragment extends BaseFragment {
 
         actionBar.setCustomView(actionView);
         actionBar.show();
-
-        this.mAuth = FirebaseAuth.getInstance();
-        this.fUser = mAuth.getCurrentUser();
     }
 
     @Override
