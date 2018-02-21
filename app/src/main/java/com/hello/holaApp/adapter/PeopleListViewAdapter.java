@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
@@ -61,11 +62,21 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int index) {
 
+        ((ViewHolder) holder).profileCard.setVisibility(View.GONE);
+        ((ViewHolder) holder).profileLayout.setVisibility(View.VISIBLE);
+
         String uid = this.userVoList.get(index).getUid();
         String userName = String.format("%s (%.2fkm)", userVoList.get(index).getUserName(), userVoList.get(index).getDistance());
 
         ((ViewHolder) holder).userProfileName.setText(userName);
-        ((ViewHolder) holder).img.setImageUrl(userVoList.get(index).getPhotoUrl(), this.imageLoader);
+
+        String profileUrl = userVoList.get(index).getPhotoUrl();
+
+        if(profileUrl.indexOf("10354686_10150004552801856_220367501106153455_n") != -1) {
+            ((ViewHolder) holder).img.setDefaultImageResId(R.drawable.default_profile);
+        } else {
+            ((ViewHolder) holder).img.setImageUrl(userVoList.get(index).getPhotoUrl(), this.imageLoader);
+        }
 
         String age = String.format("%s세, %s", userVoList.get(index).getAge(), userVoList.get(index).getGender());
         String identity = String.format("%s, %s", userVoList.get(index).getNation(), userVoList.get(index).getIdentity());
@@ -74,6 +85,8 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
         ((ViewHolder) holder).identity.setText(identity);
 
         //peopleImageScrollList = (ScrollView)
+
+        ((ViewHolder) holder).peopleImageScrollList.setVisibility(View.GONE);
 
         List<PhotoVo> photoVoList = photoVoMap.get(uid);
         if(photoVoList == null) {
@@ -102,12 +115,10 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
                                     photoList.add(photoVo);
                                 }
-
-                                photoVoMap.put(uid, photoList);
-                                setPhotoList(photoList, holder, index);
-                            } else {
-
                             }
+
+                            photoVoMap.put(uid, photoList);
+                            setPhotoList(photoList, holder, index);
 
                             ((ViewHolder) holder).profileLayout.setOnClickListener(v -> {
                                 this.openUserInfoActivity(index, 0);
@@ -121,8 +132,6 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
         } else {
             this.setPhotoList(photoVoList, holder, index);
         }
-
-        /*List<PhotoVo> photoVoList = userVoList.get(index).getPhotoVoList();*/
     }
 
     @Override
@@ -156,7 +165,6 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
         if(photoVoList != null && photoVoList.size() > 0) {
 
-            peopleImageScrollList.setVisibility(View.VISIBLE);
             layout.removeAllViews();
             layout.setVisibility(View.VISIBLE);
 
@@ -199,10 +207,15 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
                 layout.addView(imageView);
             }
+
+            peopleImageScrollList.setVisibility(View.VISIBLE);
+            layout.setVisibility(View.VISIBLE);
         } else {
             peopleImageScrollList.setVisibility(View.GONE);
             layout.setVisibility(View.GONE);
         }
+
+        ((ViewHolder) holder).profileCard.setVisibility(View.VISIBLE);
     }
 
     private void openUserInfoActivity(int index, int tabIndex) {
@@ -297,6 +310,8 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
     class ViewHolder extends UltimateRecyclerviewViewHolder {
 
+        CardView profileCard;
+
         RelativeLayout profileLayout;
         TextView userProfileName;
         RadiusNetworkImageView img;
@@ -308,12 +323,14 @@ public class PeopleListViewAdapter extends UltimateViewAdapter {
 
         public ViewHolder(View itemView) {
             super(itemView);
+
+            profileCard = (CardView) itemView.findViewById(R.id.profile_card);
             profileLayout = (RelativeLayout) itemView.findViewById(R.id.profile_layout);
             userProfileName = (TextView) itemView.findViewById(R.id.user_profile_name);
             Typeface typeface = Typeface.createFromAsset(context.getAssets(), "fonts/NotoSans-Medium.ttf");
             userProfileName.setTypeface(typeface);
             img = (RadiusNetworkImageView) itemView.findViewById(R.id.user_profile_photo);
-            img.setRadius(100f);
+            img.setRadius(CommonFunction.convertTodp(context, 100));
 
             age = (TextView) itemView.findViewById(R.id.age);
             identity = (TextView) itemView.findViewById(R.id.identity);

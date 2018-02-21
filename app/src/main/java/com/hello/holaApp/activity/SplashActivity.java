@@ -17,6 +17,9 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
+import com.facebook.common.Common;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -36,6 +39,8 @@ import com.google.api.services.people.v1.PeopleService;
 import com.google.api.services.people.v1.model.Person;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -90,6 +95,8 @@ public class SplashActivity extends AppCompatActivity {
 
     // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1분
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
+
+    private static GeoFire geoFire;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -332,6 +339,17 @@ public class SplashActivity extends AppCompatActivity {
                             Log.d("ERRRR", command.getMessage());
                         });
 
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userlocation");
+
+                    geoFire = new GeoFire(ref);
+                    geoFire.setLocation(fUser.getUid(), new GeoLocation(CommonFunction.getLatitude(), CommonFunction.getLongitude()), (key, error) -> {
+                        if (error != null) {
+                            Log.e("geoFireLog", "There was an error saving the location to GeoFire: " + error);
+                        } else {
+                            Log.d("geoFireLog", String.format("userId : %s Location saved on server successfully!", fUser.getUid()));
+                        }
+                    });
+
                     Object nation = document.getData().get("nation");
                     Object identity = document.getData().get("identity");
 
@@ -373,6 +391,7 @@ public class SplashActivity extends AppCompatActivity {
 
                     stringMap.put("member_id", currentUser.getUid());
                     stringMap.put("content", String.format(getResources().getString(R.string.signupped), currentUser.getDisplayName()));
+                    stringMap.put("location", new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude()));
                     stringMap.put("reg_dt", new Date());
 
                     DocumentReference sayReference = this.db.collection("say").document();
@@ -456,6 +475,8 @@ public class SplashActivity extends AppCompatActivity {
         userMap.put("name", fUser.getDisplayName());
         userMap.put("profileUrl", fUser.getPhotoUrl().toString());
         userMap.put("location", new GeoPoint(CommonFunction.getLatitude(), CommonFunction.getLongitude()));
+        userMap.put("last_signIn", new Date());
+
         FirebaseFirestore.getInstance().collection("member").document(fUser.getUid())
                 .set(userMap)
                 .addOnSuccessListener(aVoid -> {
@@ -470,6 +491,7 @@ public class SplashActivity extends AppCompatActivity {
                     try {
                         FirebaseInstanceId.getInstance().deleteInstanceId();
                     } catch (IOException e) {
+                        Crashlytics.logException(e);
                         e.printStackTrace();
                     }
                     String pushToken = FirebaseInstanceId.getInstance().getToken();
@@ -513,6 +535,17 @@ public class SplashActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Crashlytics.logException(e);
                 });
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userlocation");
+
+        geoFire = new GeoFire(ref);
+        geoFire.setLocation(fUser.getUid(), new GeoLocation(CommonFunction.getLatitude(), CommonFunction.getLongitude()), (key, error) -> {
+            if (error != null) {
+                Log.e("geoFireLog", "There was an error saving the location to GeoFire: " + error);
+            } else {
+                Log.d("geoFireLog", String.format("userId : %s Location saved on server successfully!", fUser.getUid()));
+            }
+        });
     }
 }
 
