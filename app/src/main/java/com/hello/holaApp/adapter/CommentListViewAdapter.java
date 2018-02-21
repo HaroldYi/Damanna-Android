@@ -165,7 +165,7 @@ public class CommentListViewAdapter extends UltimateViewAdapter {
                                     intent.putExtra("identity", identity);
                                     intent.putExtra("profileUrl", profileUrl);
 
-                            /*intent.putExtra("bitmapImage", sayVoList.get(index).getBitmap());*/
+                                    /*intent.putExtra("bitmapImage", sayVoList.get(index).getBitmap());*/
 
                                     Say.resumeYn = true;
 

@@ -11,9 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -203,15 +201,18 @@ public class SayCommentListActivity extends AppCompatActivity implements TagsEdi
         LinearLayout commentProfile = findViewById(R.id.profile_area);
         String finalIdentity = identity;
         commentProfile.setOnClickListener(v -> {
-            Intent userIntent = new Intent(getApplicationContext(), UserInfoActivity.class);
-            userIntent.putExtra("uid", uid);
-            userIntent.putExtra("userName", userName);
-            userIntent.putExtra("identity", finalIdentity);
-            userIntent.putExtra("profileUrl", profileUrl);
 
-            Say.resumeYn = true;
+            if(!this.userId.equals(uid)) {
+                Intent userIntent = new Intent(getApplicationContext(), UserInfoActivity.class);
+                userIntent.putExtra("uid", uid);
+                userIntent.putExtra("userName", userName);
+                userIntent.putExtra("identity", finalIdentity);
+                userIntent.putExtra("profileUrl", profileUrl);
 
-            startActivity(userIntent);
+                Say.resumeYn = true;
+
+                startActivity(userIntent);
+            }
         });
 
         LinearLayout layout = findViewById(R.id.like_people_list);
@@ -243,7 +244,7 @@ public class SayCommentListActivity extends AppCompatActivity implements TagsEdi
 
                         imageView1.setRadius(100f);
                         imageView1.setImageUrl(documentSnapshot.getString("profileUrl"), VolleySingleton.getInstance(getApplicationContext()).getImageLoader());
-                        imageView1.setScaleType(ImageView.ScaleType.CENTER);
+                        imageView1.setScaleType(ImageView.ScaleType.FIT_XY);
                         imageView1.setLayoutParams(params);
 
                         imageView1.setOnClickListener(v -> {
@@ -483,7 +484,7 @@ public class SayCommentListActivity extends AppCompatActivity implements TagsEdi
             String comment = writeCommentText.getEditableText().toString();
             if(!tag.isEmpty()) {
                 comment = comment.replace(tag, "");
-                comment = comment.substring(1, comment.length() - 1);
+                comment = comment.substring(1, comment.length());
             }
 
             if(comment != null && !comment.isEmpty()) {
@@ -501,6 +502,8 @@ public class SayCommentListActivity extends AppCompatActivity implements TagsEdi
                     finalCommentReplyList.add(commentMap);
                     sayMap.put("comment_reply_list", finalCommentReplyList);
                     sayVo.setCommentReplyList(finalCommentReplyList);
+                    finalCommentReplyList.clear();
+                    finalCommentReplyList.add(commentMap);
                 } else {
                     commentMap.put("id", String.valueOf(System.currentTimeMillis()));
                     finalCommentList.add(commentMap);
