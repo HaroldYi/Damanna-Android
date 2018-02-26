@@ -484,7 +484,7 @@ public class Say extends BaseFragment implements View.OnClickListener {
                                     regMin = String.format("%dd", (int) (regTime / 1440));
                                 }
 
-                                sayVo.setLocation(document.getGeoPoint("location"));
+                                /*sayVo.setLocation(document.getGeoPoint("location"));*/
                                 sayVo.setLikeMembers((ArrayList<String>) document.get("like_members"));
                                 sayVo.setCommentList((ArrayList<HashMap<String, Object>>) document.get("comment_list"));
                                 sayVo.setCommentReplyList((ArrayList<HashMap<String, Object>>) document.get("comment_reply_list"));

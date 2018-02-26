@@ -242,13 +242,13 @@ public class NewSayListViewAdapter extends UltimateViewAdapter {
         String userName = userVo.getUserName();
         String nation = userVo.getNation();
         String identity = userVo.getIdentity();
-        GeoPoint geoPoint = sayVo.getLocation();
+        /*GeoPoint geoPoint = sayVo.getLocation();*/
 
         Location loc = new Location("pointA");
         Location loc1 = new Location("pointB");
 
-        loc.setLatitude(geoPoint.getLatitude());
-        loc.setLongitude(geoPoint.getLongitude());
+        /*loc.setLatitude(geoPoint.getLatitude());
+        loc.setLongitude(geoPoint.getLongitude());*/
 
         loc1.setLatitude(CommonFunction.getLatitude());
         loc1.setLongitude(CommonFunction.getLongitude());

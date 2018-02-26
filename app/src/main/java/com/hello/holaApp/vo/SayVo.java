@@ -25,7 +25,7 @@ public class SayVo implements Serializable {
 
     private String photoUrl = "";
     private String msg = "";
-    private GeoPoint location;
+    /*private GeoPoint location;*/
 
     private String regMin = "";
 
@@ -153,7 +153,7 @@ public class SayVo implements Serializable {
         this.commentReplyList = commentReplyList;
     }
 
-    public GeoPoint getLocation() {
+    /*public GeoPoint getLocation() {
         return location;
     }
 
@@ -162,5 +162,5 @@ public class SayVo implements Serializable {
             location = new GeoPoint(0, 0);
         }
         this.location = location;
-    }
+    }*/
 }
